@@ -49,7 +49,7 @@ O Psyche AI adota **exclusivamente** o referencial psicanalítico **Freud–Laca
 A arquitetura do sistema respeita a distinção entre:
 
 - os **conceitos fundamentais** desenvolvidos por Freud — organizados em [Ontologia-Freud.md](Ontologia-Freud.md);
-- a **estrutura de leitura** proposta por Lacan.
+- a **estrutura de leitura** proposta por Lacan — organizada em [Ontologia-Lacan.md](Ontologia-Lacan.md).
 
 Este referencial teórico será progressivamente detalhado em sprints futuras. Nesta fase, apenas o posicionamento teórico e seus limites são estabelecidos.
 
@@ -122,4 +122,5 @@ Nesta fase, a arquitetura é apenas conceitual e servirá de base para o detalha
 - [Arquitetura.md](Arquitetura.md)
 - [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md)
 - [Ontologia-Freud.md](Ontologia-Freud.md)
+- [Ontologia-Lacan.md](Ontologia-Lacan.md)
 - [Roadmap.md](Roadmap.md)
