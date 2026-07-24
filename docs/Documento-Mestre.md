@@ -57,7 +57,7 @@ Este referencial teórico será progressivamente detalhado em sprints futuras. N
 
 O Psyche AI nasce da hipótese de que é possível construir um sistema computacional para organizar o discurso humano segundo um modelo inspirado no referencial Freud–Lacan.
 
-O objetivo do projeto **não é** reproduzir o trabalho do psicanalista, nem automatizar a interpretação clínica. Seu propósito é organizar estruturas discursivas, identificar padrões linguísticos, acompanhar cadeias de significantes ao longo do tempo e produzir hipóteses analíticas transparentes que auxiliem o trabalho do analista. **Toda interpretação clínica permanece sob responsabilidade do psicanalista.**
+O objetivo do projeto **não é** reproduzir o trabalho do psicanalista, nem automatizar a interpretação clínica. Seu propósito é organizar estruturas discursivas, identificar padrões linguísticos, acompanhar estruturas discursivas recorrentes ao longo do tempo e produzir hipóteses analíticas transparentes que auxiliem o trabalho do analista. **Toda interpretação clínica permanece sob responsabilidade do psicanalista.**
 
 ### 6.2 Objeto de pesquisa
 
@@ -76,7 +76,7 @@ Essa hipótese orienta toda a arquitetura do sistema.
 Desenvolver um modelo computacional capaz de:
 
 - organizar o discurso em estruturas analisáveis;
-- representar cadeias de significantes;
+- representar estruturas discursivas candidatas a cadeias de significantes;
 - identificar recorrências e deslocamentos;
 - preservar o contexto temporal das sessões;
 - produzir hipóteses fundamentadas no modelo Freud–Lacan;
@@ -91,9 +91,13 @@ O Psyche AI **não**:
 - interpreta o sujeito de forma autônoma;
 - determina interpretações verdadeiras;
 - identifica estados mentais ocultos;
+- identifica significantes;
+- marca automaticamente uma palavra como sendo um significante;
 - afirma ter acesso direto ao inconsciente.
 
-O sistema organiza informações e produz hipóteses cuja validade depende da avaliação clínica do analista.
+O Psyche AI não identifica significantes. O Psyche AI identifica **estruturas discursivas** cuja relevância poderá, ou não, ser confirmada no processo analítico. O sistema organiza informações e produz hipóteses cuja validade depende da avaliação clínica do analista.
+
+O significante não é uma palavra; é uma representação que só o sujeito que diz pode confirmar. Por isso, o Psyche AI não marca automaticamente uma palavra como sendo um significante — trata palavras e recorrências apenas como pistas de uma estrutura discursiva possível, cujo estatuto de significante só pode ser confirmado pelo sujeito, no processo analítico.
 
 ### 6.6 Questão de pesquisa em aberto
 
@@ -101,7 +105,7 @@ Uma pergunta ainda mais fundamental orienta o horizonte científico do projeto:
 
 > Como representar computacionalmente um significante sem reduzi-lo a uma simples palavra?
 
-Em Lacan, um significante não se confunde com um vocábulo isolado — seu papel depende das relações que estabelece na cadeia discursiva. Traduzir essa ideia para uma estrutura computacional é um dos maiores desafios científicos do Psyche AI: uma resposta consistente a essa questão pode configurar não apenas uma aplicação de IA para psicanálise, mas um novo modelo de representação computacional do discurso inspirado em Freud e Lacan. Esta questão **não é respondida nesta fase** — orienta a pesquisa em sprints futuras.
+Em Lacan, um significante não se confunde com um vocábulo isolado — seu papel depende das relações que estabelece na cadeia discursiva. O significante não é uma palavra; é uma representação que só o sujeito que diz pode confirmar. Traduzir essa ideia para uma estrutura computacional é um dos maiores desafios científicos do Psyche AI: uma resposta consistente a essa questão pode configurar não apenas uma aplicação de IA para psicanálise, mas um novo modelo de representação computacional do discurso inspirado em Freud e Lacan. Esta questão **não é respondida nesta fase** — orienta a pesquisa em sprints futuras.
 
 ## 7. Arquitetura conceitual inicial
 

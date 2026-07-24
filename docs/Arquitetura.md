@@ -47,9 +47,11 @@ Discourse Engine
 
 - **Freud Engine** — núcleo conceitual do sistema. Define *o que* é observado: inconsciente, recalque, pulsão, desejo, formação de compromisso, ato falho, chiste, sonhos, repetição, transferência.
 - **Lacan Engine** — estrutura de leitura do sistema. Define *como* o discurso é organizado e relacionado: significante, cadeia significante, metáfora, metonímia, registros Simbólico/Imaginário/Real, desejo, falta, Outro, objeto a.
-- **Discourse Engine** — componente central do pipeline. Responsável por estruturar o discurso em unidades analisáveis, identificar cadeias de significantes, acompanhar a evolução das sessões, preservar o contexto temporal e alimentar os dois motores teóricos com dados organizados.
+- **Discourse Engine** — componente central do pipeline. Responsável por estruturar o discurso em unidades analisáveis, identificar estruturas discursivas recorrentes (candidatas a cadeias de significantes), acompanhar a evolução das sessões, preservar o contexto temporal e alimentar os dois motores teóricos com dados organizados.
 
 Esta é uma visão conceitual preliminar. **Nenhum desses motores é especificado ou implementado na Sprint 0** — o detalhamento técnico (contratos, interfaces, modelo de dados) será tratado em documento de arquitetura técnica dedicado, em sprint futura.
+
+> O sistema não identifica significantes: identifica estruturas discursivas cuja relevância poderá, ou não, ser confirmada no processo analítico (ver [Documento-Mestre.md](Documento-Mestre.md#65-limites-do-sistema)).
 
 ## 5. Estado atual
 
