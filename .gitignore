@@ -1,0 +1,29 @@
+# Vendor
+/vendor/*
+!/vendor/.gitkeep
+
+# Environment
+.env
+
+# Storage
+/storage/*
+!/storage/.gitkeep
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Composer
+composer.lock
+
+# PHPUnit
+.phpunit.result.cache
+
+# Claude Code (config local, não faz parte do projeto)
+/.claude/
