@@ -53,13 +53,55 @@ A arquitetura do sistema respeita a distinção entre:
 
 Este referencial teórico será progressivamente detalhado em sprints futuras. Nesta fase, apenas o posicionamento teórico e seus limites são estabelecidos.
 
-### Princípio fundamental
+### 6.1 Princípio fundador
 
-- O Psyche AI **não realiza diagnósticos**.
-- O Psyche AI **não substitui o analista**.
-- O Psyche AI **não interpreta o sujeito de forma autônoma**.
+O Psyche AI nasce da hipótese de que é possível construir um sistema computacional para organizar o discurso humano segundo um modelo inspirado no referencial Freud–Lacan.
 
-Sua função é organizar o discurso, identificar recorrências, estruturar cadeias de significantes, registrar padrões ao longo do tempo e produzir hipóteses fundamentadas no modelo teórico Freud–Lacan. **A interpretação clínica permanece responsabilidade exclusiva do psicanalista.**
+O objetivo do projeto **não é** reproduzir o trabalho do psicanalista, nem automatizar a interpretação clínica. Seu propósito é organizar estruturas discursivas, identificar padrões linguísticos, acompanhar cadeias de significantes ao longo do tempo e produzir hipóteses analíticas transparentes que auxiliem o trabalho do analista. **Toda interpretação clínica permanece sob responsabilidade do psicanalista.**
+
+### 6.2 Objeto de pesquisa
+
+O objeto de pesquisa do Psyche AI **não é o inconsciente em si** — é a **organização computacional do discurso**.
+
+Partindo da hipótese lacaniana de que o inconsciente é estruturado como uma linguagem, o projeto investiga de que maneira estruturas linguísticas observáveis podem ser representadas computacionalmente e utilizadas para construir hipóteses analíticas.
+
+### 6.3 Hipótese central
+
+> Se o inconsciente se manifesta na linguagem, então padrões linguísticos, cadeias de significantes e recorrências discursivas podem ser organizados computacionalmente para auxiliar o processo analítico.
+
+Essa hipótese orienta toda a arquitetura do sistema.
+
+### 6.4 Objetivo científico
+
+Desenvolver um modelo computacional capaz de:
+
+- organizar o discurso em estruturas analisáveis;
+- representar cadeias de significantes;
+- identificar recorrências e deslocamentos;
+- preservar o contexto temporal das sessões;
+- produzir hipóteses fundamentadas no modelo Freud–Lacan;
+- apresentar essas hipóteses de forma transparente e rastreável ao analista.
+
+### 6.5 Limites do sistema
+
+O Psyche AI **não**:
+
+- realiza diagnósticos;
+- substitui o psicanalista;
+- interpreta o sujeito de forma autônoma;
+- determina interpretações verdadeiras;
+- identifica estados mentais ocultos;
+- afirma ter acesso direto ao inconsciente.
+
+O sistema organiza informações e produz hipóteses cuja validade depende da avaliação clínica do analista.
+
+### 6.6 Questão de pesquisa em aberto
+
+Uma pergunta ainda mais fundamental orienta o horizonte científico do projeto:
+
+> Como representar computacionalmente um significante sem reduzi-lo a uma simples palavra?
+
+Em Lacan, um significante não se confunde com um vocábulo isolado — seu papel depende das relações que estabelece na cadeia discursiva. Traduzir essa ideia para uma estrutura computacional é um dos maiores desafios científicos do Psyche AI: uma resposta consistente a essa questão pode configurar não apenas uma aplicação de IA para psicanálise, mas um novo modelo de representação computacional do discurso inspirado em Freud e Lacan. Esta questão **não é respondida nesta fase** — orienta a pesquisa em sprints futuras.
 
 ## 7. Arquitetura conceitual inicial
 

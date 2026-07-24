@@ -15,6 +15,7 @@
 
 - Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura).
 - Desenvolvimento da fundamentação teórica psicanalítica Freud–Lacan aplicada ao projeto.
+- Investigação da questão de pesquisa central: como representar computacionalmente um significante sem reduzi-lo a uma simples palavra (ver [Documento-Mestre.md](Documento-Mestre.md#66-questão-de-pesquisa-em-aberto)).
 - Especificação e implementação do **Discourse Engine** (estruturação do discurso, cadeias de significantes, contexto temporal).
 - Especificação e implementação do **Freud Engine** (núcleo conceitual: inconsciente, recalque, pulsão, desejo, etc.).
 - Especificação e implementação do **Lacan Engine** (estrutura de leitura: significante, registros RSI, objeto a, etc.).
