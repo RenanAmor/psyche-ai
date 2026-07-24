@@ -1,8 +1,8 @@
 # Roadmap — Psyche AI
 
-> Versão 0.1 — Sprint 0 (Fundação)
+> Versão 0.2 — Sprint 1 (Modelo Computacional do Discurso)
 
-## Sprint 0 — Fundação oficial do projeto (atual)
+## Sprint 0 — Fundação oficial do projeto (concluída)
 
 - [x] Certificação do ambiente de desenvolvimento.
 - [x] Estrutura física do repositório.
@@ -11,9 +11,18 @@
 - [x] `composer.json` base (PHP 8.2, sem dependências).
 - [x] Publicação e sincronização do repositório remoto.
 
+## Sprint 1 — Modelo Computacional do Discurso (atual)
+
+- [x] `docs/Modelo-Computacional-Discurso.md`: objetivo do modelo, objeto computacional do sistema (discurso registrado), unidade fundamental (Evento Discursivo), estrutura do discurso, temporalidade, estruturas discursivas, representação conceitual de hipóteses e limites.
+- [x] Atualização do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente conceitual/científico — sem algoritmos, regras de negócio, banco de dados, classes, código ou especificação de Freud Engine / Lacan Engine.
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
-- Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura).
+- Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura), a partir do Modelo Computacional do Discurso.
+- Especificação técnica do Evento Discursivo (formato de registro, granularidade, critérios de segmentação) — ver [Modelo-Computacional-Discurso.md (3.2)](Modelo-Computacional-Discurso.md#32-por-que-uma-unidade-própria).
 - Desenvolvimento da fundamentação teórica psicanalítica Freud–Lacan aplicada ao projeto.
 - Investigação da questão de pesquisa central: como representar computacionalmente um significante sem reduzi-lo a uma simples palavra (ver [Documento-Mestre.md](Documento-Mestre.md#66-questão-de-pesquisa-em-aberto)).
 - Especificação e implementação do **Discourse Engine** (estruturação do discurso, estruturas discursivas recorrentes candidatas a cadeias de significantes, contexto temporal).

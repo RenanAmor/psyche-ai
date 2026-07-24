@@ -120,4 +120,5 @@ Nesta fase, a arquitetura é apenas conceitual e servirá de base para o detalha
 ## 8. Referências
 
 - [Arquitetura.md](Arquitetura.md)
+- [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md)
 - [Roadmap.md](Roadmap.md)
