@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.4 — Sprint 3 (Ontologia Lacan)
+> Versão 0.7 — Sprint 7 (Ports & Infrastructure Contracts)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -32,6 +32,32 @@
 - [x] Publicação e sincronização do repositório remoto.
 
 Escopo desta sprint é exclusivamente ontológico — sem algoritmos, regras de negócio, banco de dados, classes, código, APIs ou especificação do Lacan Engine / Discourse Engine.
+
+## Sprint 7 — Ports & Infrastructure Contracts (concluída)
+
+- [x] `app/Infrastructure/Contracts/`: dez portas (interfaces) que isolam o
+      núcleo do sistema de qualquer tecnologia externa — `ClockInterface`,
+      `LoggerInterface`, `PersistenceInterface`, `StorageInterface`,
+      `UuidGeneratorInterface`, `TransactionInterface`,
+      `EventDispatcherInterface`, `MessageBusInterface`,
+      `TranscriptionInterface` e `LLMInterface`.
+- [x] `app/Infrastructure/Contracts/DTOs/`: DTOs de suporte às portas de IA
+      (`LLMRequestDTO`, `LLMResponseDTO`, `TranscriptionResultDTO`).
+- [x] Pastas reservadas para futuras implementações concretas:
+      `Persistence/`, `Logging/`, `Messaging/`, `Storage/`, `AI/`, `Clock/`,
+      `UUID/` — sem nenhuma classe concreta nesta sprint.
+- [x] Testes unitários dos contratos em `tests/Unit/Infrastructure/`,
+      validando que cada porta é implementável e se comporta conforme
+      esperado através de dublês de teste.
+- [x] Domínio e Aplicação permanecem inalterados e independentes de
+      Infraestrutura.
+- [x] Atualização de `docs/Estrutura-de-Pastas.md` e do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente de contratos — sem SQLite, MySQL,
+PostgreSQL, HTTP, API REST, controllers, front-end, WhatsApp, Telegram,
+OpenAI, Claude, Gemini, transcrição real, persistência real, filas ou
+cache.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

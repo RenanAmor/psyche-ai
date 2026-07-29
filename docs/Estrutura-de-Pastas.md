@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.2
+> Versão 1.3
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -34,11 +34,14 @@ psyche-ai/
 │   │   └── ValueObjects/
 │   │
 │   ├── Infrastructure/
-│   │   ├── Database/
-│   │   ├── Logging/
+│   │   ├── Contracts/
 │   │   ├── Persistence/
-│   │   ├── Providers/
-│   │   └── Repositories/
+│   │   ├── Logging/
+│   │   ├── Messaging/
+│   │   ├── Storage/
+│   │   ├── AI/
+│   │   ├── Clock/
+│   │   └── UUID/
 │   │
 │   └── Presentation/
 │       ├── Controllers/
@@ -189,6 +192,27 @@ Inclui:
 - integrações.
 
 Nenhuma regra de negócio pertence à infraestrutura.
+
+### Contracts
+
+Portas (interfaces) que isolam o núcleo do sistema (Domínio e Aplicação) de
+qualquer tecnologia externa concreta: `ClockInterface`, `LoggerInterface`,
+`PersistenceInterface`, `StorageInterface`, `UuidGeneratorInterface`,
+`TransactionInterface`, `EventDispatcherInterface`, `MessageBusInterface`,
+`TranscriptionInterface` e `LLMInterface`, além dos DTOs de entrada/saída
+das portas de IA em `Contracts/DTOs/` (`LLMRequestDTO`, `LLMResponseDTO`,
+`TranscriptionResultDTO`).
+
+Nenhuma destas interfaces possui implementação concreta nesta fase — cada
+uma será implementada por um adaptador nas pastas abaixo apenas quando a
+tecnologia correspondente for integrada.
+
+### Persistence / Logging / Messaging / Storage / AI / Clock / UUID
+
+Pastas reservadas para as futuras implementações concretas de cada
+respectivo contrato (ex.: um adaptador SQLite implementará
+`PersistenceInterface` dentro de `Persistence/`). Permanecem vazias até que
+a tecnologia correspondente seja efetivamente integrada.
 
 ---
 

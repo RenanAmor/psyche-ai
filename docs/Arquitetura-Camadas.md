@@ -1,6 +1,6 @@
 # Arquitetura em Camadas — PsycheAI
 
-> Versão 1.0
+> Versão 1.1
 
 Este documento define a arquitetura em camadas do PsycheAI.
 
@@ -82,6 +82,18 @@ Contém:
 - configurações.
 
 A infraestrutura depende do domínio, nunca o contrário.
+
+## Contratos de Infraestrutura (Ports)
+
+A Infraestrutura define, em `app/Infrastructure/Contracts/`, as portas que
+isolam Domínio e Aplicação de qualquer tecnologia externa concreta (relógio,
+log, persistência, armazenamento de arquivos, geração de UUID, transações,
+despacho de eventos e mensagens, transcrição de áudio e provedores de LLM).
+
+Apenas as interfaces e os DTOs de entrada/saída são definidos nesta camada;
+as implementações concretas (SQLite, filas, provedores de IA, etc.) serão
+adicionadas em sprints futuras, uma tecnologia de cada vez, sem alterar os
+contratos publicados.
 
 ---
 
