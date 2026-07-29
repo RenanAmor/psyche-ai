@@ -37,4 +37,9 @@ final class SQLiteDiscursoRepository implements DiscursoRepository
         $statement = $this->pdo->prepare('DELETE FROM discursos WHERE id = :id');
         $statement->execute(['id' => $discurso->id()->valor()]);
     }
+
+    public function sessaoIdDoDiscurso(string $discursoId): ?string
+    {
+        return DiscursoMapper::sessaoIdDe($this->pdo, $discursoId);
+    }
 }

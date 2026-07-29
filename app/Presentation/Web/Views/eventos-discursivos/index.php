@@ -6,15 +6,25 @@ use PsycheAI\Presentation\Web\Components\TableComponent;
 $linhas = array_map(
     static fn ($evento) => [
         'id' => $evento->id,
-        'conteudo' => $evento->conteudo,
+        'sessaoId' => $evento->sessaoId,
+        'discursoId' => $evento->discursoId,
         'posicao' => $evento->posicao,
+        'conteudo' => $evento->conteudo,
+        'criadoEm' => $evento->criadoEm,
     ],
     $eventos
 );
 ?>
 <section class="pagina-lista">
     <?= TableComponent::render(
-        ['id' => 'ID', 'conteudo' => 'Conteúdo', 'posicao' => 'Posição'],
+        [
+            'id' => 'ID',
+            'sessaoId' => 'Sessão',
+            'discursoId' => 'Discurso',
+            'posicao' => 'Ordem',
+            'conteudo' => 'Conteúdo',
+            'criadoEm' => 'Criado em',
+        ],
         $linhas,
         'Nenhum evento discursivo registrado.'
     ) ?>

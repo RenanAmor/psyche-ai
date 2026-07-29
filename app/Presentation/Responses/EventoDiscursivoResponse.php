@@ -26,8 +26,10 @@ final class EventoDiscursivoResponse
         return [
             'id' => $this->dto->id,
             'discursoId' => $this->dto->discursoId,
+            'sessaoId' => $this->dto->sessaoId,
             'conteudo' => $this->dto->conteudo,
             'posicao' => $this->dto->posicao,
+            'criadoEm' => $this->dto->criadoEm,
         ];
     }
 }

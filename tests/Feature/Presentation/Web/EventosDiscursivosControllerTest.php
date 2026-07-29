@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Feature\Presentation\Web;
 
 use PHPUnit\Framework\TestCase;
-use PsycheAI\Presentation\Web\Client\MockApiHttpClient;
 use PsycheAI\Presentation\Web\Controllers\EventosDiscursivosController;
 use PsycheAI\Presentation\Web\Http\Request;
+use PsycheAI\Tests\Support\HttpClientStub;
 
 final class EventosDiscursivosControllerTest extends TestCase
 {
     public function testEstadoVazioPorPadrao(): void
     {
-        $controller = new EventosDiscursivosController(new MockApiHttpClient());
+        $controller = new EventosDiscursivosController(new HttpClientStub());
 
         $resposta = $controller->index(Request::criar('GET', '/eventos-discursivos'));
 
@@ -23,8 +23,8 @@ final class EventosDiscursivosControllerTest extends TestCase
 
     public function testListaEventosQuandoHaDados(): void
     {
-        $controller = new EventosDiscursivosController(new MockApiHttpClient([
-            'eventos-discursivos' => [['id' => 'evt-1', 'conteudo' => 'Ato falho', 'posicao' => 1]],
+        $controller = new EventosDiscursivosController(new HttpClientStub([
+            'events' => [['id' => 'evt-1', 'conteudo' => 'Ato falho', 'posicao' => 1]],
         ]));
 
         $resposta = $controller->index(Request::criar('GET', '/eventos-discursivos'));

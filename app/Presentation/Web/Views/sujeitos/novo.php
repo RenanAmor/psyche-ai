@@ -18,6 +18,12 @@ $temErros = $erros !== [];
         'POST',
         [
             [
+                'nome' => 'id',
+                'rotulo' => 'ID',
+                'valor' => $valores['id'] ?? '',
+                'erro' => $erros['id'] ?? null,
+            ],
+            [
                 'nome' => 'nome',
                 'rotulo' => 'Nome',
                 'valor' => $valores['nome'] ?? '',

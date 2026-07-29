@@ -12,17 +12,21 @@ final class EventoDiscursivoDTO
         public readonly string $id,
         public readonly string $conteudo,
         public readonly int $posicao,
-        public readonly string $discursoId = ''
+        public readonly string $discursoId = '',
+        public readonly ?string $sessaoId = null,
+        public readonly string $criadoEm = ''
     ) {
     }
 
-    public static function fromEntity(EventoDiscursivo $evento, string $discursoId = ''): self
+    public static function fromEntity(EventoDiscursivo $evento, string $discursoId = '', ?string $sessaoId = null): self
     {
         return new self(
             id: $evento->id()->valor(),
             conteudo: $evento->conteudo()->valor(),
             posicao: $evento->posicao()->valor(),
-            discursoId: $discursoId
+            discursoId: $discursoId,
+            sessaoId: $sessaoId,
+            criadoEm: $evento->criadoEm()->format('Y-m-d H:i:s')
         );
     }
 }

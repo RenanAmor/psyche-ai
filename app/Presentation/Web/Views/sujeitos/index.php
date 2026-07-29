@@ -9,6 +9,8 @@ $linhas = array_map(
         'id' => $sujeito->id,
         'nome' => $sujeito->nome,
         'quantidadeDeSessoes' => $sujeito->quantidadeDeSessoes,
+        'acoes' => ButtonComponent::link('Ver', '/sujeitos/' . $sujeito->id, 'secundario')
+            . ' ' . ButtonComponent::link('Editar', '/sujeitos/' . $sujeito->id . '/editar', 'secundario'),
     ],
     $sujeitos
 );
@@ -18,8 +20,9 @@ $linhas = array_map(
         <?= ButtonComponent::link('Novo Sujeito', '/sujeitos/novo') ?>
     </div>
     <?= TableComponent::render(
-        ['id' => 'ID', 'nome' => 'Nome', 'quantidadeDeSessoes' => 'Sessões'],
+        ['id' => 'ID', 'nome' => 'Nome', 'quantidadeDeSessoes' => 'Sessões', 'acoes' => 'Ações'],
         $linhas,
-        'Nenhum sujeito cadastrado.'
+        'Nenhum sujeito cadastrado.',
+        ['acoes']
     ) ?>
 </section>

@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.10 — Sprint 11A (Estrutura da Interface Web)
+> Versão 0.11 — Sprint 11B (Integração da Interface Web com a API REST)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -209,6 +209,63 @@ Escopo desta sprint é exclusivamente a estrutura da interface web —
 sem consumir a API REST, acessar SQLite, Application Services ou
 Domain, e sem autenticação ou autorização. Toda comunicação permanece
 mockada através de `MockApiHttpClient`.
+
+## Sprint 11B — Integração da Interface Web com a API REST (concluída)
+
+- [x] `Web/Client/ApiHttpClient`: substitui `MockApiHttpClient` (removida
+      por completo, junto de seu teste unitário) como única implementação
+      de produção de `HttpClientInterface` — fala HTTP de verdade (cURL)
+      com a API REST da Sprint 10, com `get`/`post`/`put`/`delete`.
+      Traduz o envelope JSON e os status HTTP reais (200-299, 204, 400,
+      404, 409, 422, 500, falha de conexão) para o mesmo catálogo fechado
+      de `ErrorType` da Sprint 11A, preservando a mensagem vinda da API
+      sempre que houver uma.
+- [x] `Presentation\Controllers\SujeitoController` + `CriarSujeitoRequest`
+      + `AtualizarSujeitoRequest` + `SujeitoResponse` + rotas `/subjects`:
+      a Sprint 10 havia implementado `SujeitoApplicationService` por
+      completo, mas nunca expôs um endpoint HTTP para ele — lacuna
+      fechada nesta Sprint para que o módulo de Sujeitos tivesse CRUD
+      real para integrar.
+- [x] `eventos_discursivos.criado_em` (migration `0007`) +
+      `EventoDiscursivo::criadoEm()` (parâmetro opcional, compatível com
+      todos os pontos de construção já existentes) + `sessaoId` exposto
+      via `DiscursoRepository::sessaoIdDoDiscurso()`: a tela de Eventos
+      Discursivos passou a exibir identificador, sessão, discurso, ordem,
+      conteúdo e data de criação, conforme exigido — os dois únicos
+      campos que a Sprint 10 ainda não persistia/expunha.
+- [x] `Web/Controllers/AbstractCrudResourceController`: "mostrar" e
+      "excluir" (idênticos nos quatro módulos com CRUD completo) —
+      `SujeitosController`, `SessoesController`, `DiscursosController`,
+      `MemoriasController` — cada um com `novo/store/editar/atualizar`
+      próprios, pois os campos de formulário divergem por recurso.
+      `EventosDiscursivosController` permanece somente para consulta.
+- [x] `Web/Views/*/mostrar.php` e `*/editar.php` para os quatro módulos
+      de CRUD completo, formulário de Discursos com `<textarea>`
+      (suporte a textos extensos), e coluna de ações (Ver/Editar) nas
+      listagens via novo parâmetro `$colunasComHtml` de `TableComponent`.
+- [x] Tratamento de erros consistente em todas as ações mutáveis: falha
+      de validação da API reexibe o formulário com a mensagem real;
+      falha de comunicação/não encontrado/interna substitui a página
+      inteira pela tela de erro correspondente (`ErrorController`).
+- [x] `MockApiHttpClient` removida por completo de `app/`; testes que a
+      usavam passaram a usar `PsycheAI\Tests\Support\HttpClientStub`
+      (duplo de teste equivalente, chaves de recurso iguais às rotas
+      reais da API) ou a API real de ponta a ponta.
+- [x] `tests/Integration/Web/RealApiTestCase` + `FakeApiServerTestCase`:
+      sobem a API REST real (ou um roteador fixo mínimo, só para status
+      HTTP que a API saudável nunca produz) via `php -S` sobre SQLite
+      temporário, para que `ApiHttpClientTest` e
+      `SujeitosApiIntegrationTest` exercitem Interface ↔ API por HTTP de
+      verdade — CRUD completo, 404/409/422 reais e falha de comunicação
+      por indisponibilidade real.
+- [x] Suíte completa executada sem regressões (294 testes, 716
+      asserções; eram 246 testes e 589 asserções ao final da Sprint 11A).
+- [x] Atualização do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente a integração HTTP real — sem
+autenticação, autorização, WebSocket, notificações em tempo real,
+dashboards analíticos ou identidade visual definitiva.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

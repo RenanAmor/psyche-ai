@@ -9,7 +9,10 @@ final class EventoDiscursivoViewModel
     public function __construct(
         public readonly string $id,
         public readonly string $conteudo,
-        public readonly int $posicao
+        public readonly int $posicao,
+        public readonly string $discursoId = '',
+        public readonly string $sessaoId = '',
+        public readonly string $criadoEm = ''
     ) {
     }
 
@@ -21,7 +24,10 @@ final class EventoDiscursivoViewModel
         return new self(
             id: (string) ($dados['id'] ?? ''),
             conteudo: (string) ($dados['conteudo'] ?? ''),
-            posicao: (int) ($dados['posicao'] ?? 0)
+            posicao: (int) ($dados['posicao'] ?? 0),
+            discursoId: (string) ($dados['discursoId'] ?? ''),
+            sessaoId: (string) ($dados['sessaoId'] ?? ''),
+            criadoEm: (string) ($dados['criadoEm'] ?? '')
         );
     }
 

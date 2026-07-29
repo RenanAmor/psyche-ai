@@ -97,6 +97,20 @@ final class DiscursoMapper
         );
     }
 
+    public static function sessaoIdDe(PDO $pdo, string $discursoId): ?string
+    {
+        $statement = $pdo->prepare('SELECT sessao_id FROM discursos WHERE id = :id');
+        $statement->execute(['id' => $discursoId]);
+
+        $linha = $statement->fetch();
+
+        if ($linha === false || $linha['sessao_id'] === null) {
+            return null;
+        }
+
+        return (string) $linha['sessao_id'];
+    }
+
     /**
      * @param array<string, mixed> $linha
      */

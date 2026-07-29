@@ -23,16 +23,27 @@ final class FormComponent
             $valor = $campo['valor'] ?? '';
             $erro = $campo['erro'] ?? null;
 
+            $controle = $tipo === 'textarea'
+                ? sprintf(
+                    '<textarea id="%s" name="%s" rows="6">%s</textarea>',
+                    Html::e($campo['nome']),
+                    Html::e($campo['nome']),
+                    Html::e($valor)
+                )
+                : sprintf(
+                    '<input type="%s" id="%s" name="%s" value="%s">',
+                    Html::e($tipo),
+                    Html::e($campo['nome']),
+                    Html::e($campo['nome']),
+                    Html::e($valor)
+                );
+
             $camposHtml .= sprintf(
-                '<div class="campo-formulario%s"><label for="%s">%s</label>'
-                    . '<input type="%s" id="%s" name="%s" value="%s">%s</div>',
+                '<div class="campo-formulario%s"><label for="%s">%s</label>%s%s</div>',
                 $erro !== null ? ' campo-com-erro' : '',
                 Html::e($campo['nome']),
                 Html::e($campo['rotulo']),
-                Html::e($tipo),
-                Html::e($campo['nome']),
-                Html::e($campo['nome']),
-                Html::e($valor),
+                $controle,
                 $erro !== null ? sprintf('<span class="mensagem-erro">%s</span>', Html::e($erro)) : ''
             );
         }

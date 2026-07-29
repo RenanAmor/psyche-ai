@@ -29,8 +29,10 @@ final class EventoDiscursivoEndpointsTest extends HttpTestCase
         self::assertSame(201, $response->status());
         self::assertSame('evento-1', $corpo['data']['id']);
         self::assertSame('discurso-1', $corpo['data']['discursoId']);
+        self::assertSame('sessao-1', $corpo['data']['sessaoId']);
         self::assertSame('Lapso', $corpo['data']['conteudo']);
         self::assertSame(3, $corpo['data']['posicao']);
+        self::assertNotSame('', $corpo['data']['criadoEm']);
     }
 
     public function testPostComDiscursoInexistenteRetorna404(): void
@@ -96,6 +98,17 @@ final class EventoDiscursivoEndpointsTest extends HttpTestCase
         self::assertSame('Lapso revisado', $corpo['data']['conteudo']);
         self::assertSame(5, $corpo['data']['posicao']);
         self::assertSame('discurso-1', $corpo['data']['discursoId']);
+    }
+
+    public function testPutPreservaODataDeCriacaoOriginal(): void
+    {
+        $this->despachar('POST', '/events', ['discursoId' => 'discurso-1', 'id' => 'evento-1', 'conteudo' => 'Lapso', 'posicao' => 3]);
+
+        $criadoEmOriginal = $this->decodificar($this->despachar('GET', '/events/evento-1'))['data']['criadoEm'];
+
+        $response = $this->despachar('PUT', '/events/evento-1', ['conteudo' => 'Lapso revisado', 'posicao' => 5]);
+
+        self::assertSame($criadoEmOriginal, $this->decodificar($response)['data']['criadoEm']);
     }
 
     public function testPutComPosicaoNegativaRetorna422(): void

@@ -94,8 +94,10 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
         $itens = [];
 
         foreach ($this->discursoRepository->findAll() as $discurso) {
+            $sessaoId = $this->discursoRepository->sessaoIdDoDiscurso($discurso->id()->valor());
+
             foreach ($discurso->eventos() as $evento) {
-                $itens[] = EventoDiscursivoDTO::fromEntity($evento, $discurso->id()->valor());
+                $itens[] = EventoDiscursivoDTO::fromEntity($evento, $discurso->id()->valor(), $sessaoId);
             }
         }
 
@@ -107,7 +109,9 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
         foreach ($this->discursoRepository->findAll() as $discurso) {
             foreach ($discurso->eventos() as $evento) {
                 if ($evento->id()->valor() === $eventoId) {
-                    return EventoDiscursivoDTO::fromEntity($evento, $discurso->id()->valor());
+                    $sessaoId = $this->discursoRepository->sessaoIdDoDiscurso($discurso->id()->valor());
+
+                    return EventoDiscursivoDTO::fromEntity($evento, $discurso->id()->valor(), $sessaoId);
                 }
             }
         }
@@ -118,12 +122,14 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
     public function atualizarEvento(string $eventoId, string $novoConteudo, int $novaPosicao): EventoDiscursivoDTO
     {
         $discurso = $this->buscarDiscursoDoEvento($eventoId);
+        $original = $this->buscarEventoNoDiscurso($discurso, $eventoId);
 
         $atualizado = new Discurso($discurso->id(), $discurso->conteudo());
         $eventoAtualizado = new EventoDiscursivo(
             new Identificador($eventoId),
             new ConteudoDiscursivo($novoConteudo),
-            new Posicao($novaPosicao)
+            new Posicao($novaPosicao),
+            $original->criadoEm()
         );
 
         foreach ($discurso->eventos() as $evento) {
@@ -134,7 +140,9 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
 
         $this->discursoRepository->save($atualizado);
 
-        return EventoDiscursivoDTO::fromEntity($eventoAtualizado, $discurso->id()->valor());
+        $sessaoId = $this->discursoRepository->sessaoIdDoDiscurso($discurso->id()->valor());
+
+        return EventoDiscursivoDTO::fromEntity($eventoAtualizado, $discurso->id()->valor(), $sessaoId);
     }
 
     public function removerEvento(string $eventoId): void
@@ -198,6 +206,17 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
                 if ($evento->id()->valor() === $eventoId) {
                     return $discurso;
                 }
+            }
+        }
+
+        throw RecursoNaoEncontradoException::paraId('EventoDiscursivo', $eventoId);
+    }
+
+    private function buscarEventoNoDiscurso(Discurso $discurso, string $eventoId): EventoDiscursivo
+    {
+        foreach ($discurso->eventos() as $evento) {
+            if ($evento->id()->valor() === $eventoId) {
+                return $evento;
             }
         }
 

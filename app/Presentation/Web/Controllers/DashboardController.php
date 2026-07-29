@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace PsycheAI\Presentation\Web\Controllers;
 
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
-use PsycheAI\Presentation\Web\Client\MockApiHttpClient;
 use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Response;
 use PsycheAI\Presentation\Web\Http\ViewRenderer;
@@ -16,7 +15,7 @@ final class DashboardController
     private const ROTA = '/';
 
     public function __construct(
-        private readonly HttpClientInterface $httpClient = new MockApiHttpClient(),
+        private readonly HttpClientInterface $httpClient,
         private readonly ViewRenderer $viewRenderer = new ViewRenderer()
     ) {
     }
@@ -34,11 +33,11 @@ final class DashboardController
             );
         }
 
-        $sujeitos = $this->httpClient->get('sujeitos');
-        $sessoes = $this->httpClient->get('sessoes');
-        $discursos = $this->httpClient->get('discursos');
-        $memorias = $this->httpClient->get('memorias');
-        $eventos = $this->httpClient->get('eventos-discursivos');
+        $sujeitos = $this->httpClient->get('subjects');
+        $sessoes = $this->httpClient->get('sessions');
+        $discursos = $this->httpClient->get('discourses');
+        $memorias = $this->httpClient->get('memories');
+        $eventos = $this->httpClient->get('events');
 
         foreach ([$sujeitos, $sessoes, $discursos, $memorias, $eventos] as $resposta) {
             if (!$resposta->sucesso) {

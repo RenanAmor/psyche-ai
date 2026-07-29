@@ -10,7 +10,7 @@ final class EventosDiscursivosController extends AbstractResourceController
 {
     protected function recurso(): string
     {
-        return 'eventos-discursivos';
+        return 'events';
     }
 
     protected function rota(): string

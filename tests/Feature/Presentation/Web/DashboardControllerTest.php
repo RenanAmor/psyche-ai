@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Feature\Presentation\Web;
 
 use PHPUnit\Framework\TestCase;
-use PsycheAI\Presentation\Web\Client\MockApiHttpClient;
 use PsycheAI\Presentation\Web\Controllers\DashboardController;
 use PsycheAI\Presentation\Web\Errors\ErrorType;
 use PsycheAI\Presentation\Web\Http\Request;
+use PsycheAI\Tests\Support\HttpClientStub;
 
 final class DashboardControllerTest extends TestCase
 {
     public function testExibeUmCartaoPorRecursoComOsTotaisMockados(): void
     {
-        $controller = new DashboardController(new MockApiHttpClient());
+        $controller = new DashboardController(new HttpClientStub());
 
         $resposta = $controller->index(Request::criar('GET', '/'));
 
@@ -29,7 +29,7 @@ final class DashboardControllerTest extends TestCase
 
     public function testEstadoDeCarregamento(): void
     {
-        $controller = new DashboardController(new MockApiHttpClient());
+        $controller = new DashboardController(new HttpClientStub());
 
         $resposta = $controller->index(Request::criar('GET', '/', ['estado' => 'carregando']));
 
@@ -39,7 +39,7 @@ final class DashboardControllerTest extends TestCase
 
     public function testFalhaDeComunicacaoExibePaginaDeErro(): void
     {
-        $controller = new DashboardController(MockApiHttpClient::comFalha(ErrorType::COMUNICACAO));
+        $controller = new DashboardController(HttpClientStub::comFalha(ErrorType::COMUNICACAO));
 
         $resposta = $controller->index(Request::criar('GET', '/'));
 

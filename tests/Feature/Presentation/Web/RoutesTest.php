@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Feature\Presentation\Web;
 
 use PHPUnit\Framework\TestCase;
-use PsycheAI\Presentation\Web\Client\MockApiHttpClient;
 use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Router;
 use PsycheAI\Presentation\Web\Navigation\NavigationMenu;
 use PsycheAI\Presentation\Web\Routes;
+use PsycheAI\Tests\Support\HttpClientStub;
 
 /**
  * Garante que a navegação é funcional de ponta a ponta: cada rota do
@@ -22,7 +22,7 @@ final class RoutesTest extends TestCase
     private function criarRouter(): Router
     {
         $router = new Router();
-        Routes::registrar($router, new MockApiHttpClient());
+        Routes::registrar($router, new HttpClientStub());
 
         return $router;
     }
@@ -48,10 +48,34 @@ final class RoutesTest extends TestCase
 
     public function testEnvioDoFormularioDeNovoSujeitoFuncional(): void
     {
-        $resposta = $this->criarRouter()->despachar(Request::criar('POST', '/sujeitos', [], ['nome' => 'Nova Pessoa']));
+        $resposta = $this->criarRouter()->despachar(
+            Request::criar('POST', '/sujeitos', [], ['id' => 'sub-999', 'nome' => 'Nova Pessoa'])
+        );
 
         $this->assertSame(200, $resposta->status);
         $this->assertStringContainsString('<table', $resposta->corpo);
+    }
+
+    public function testFluxoCompletoDeCrudDeSujeitoFuncionalAtravesDasRotas(): void
+    {
+        $router = $this->criarRouter();
+
+        $mostrar = $router->despachar(Request::criar('GET', '/sujeitos/sub-001'));
+        $this->assertSame(200, $mostrar->status);
+        $this->assertStringContainsString('Sujeito A', $mostrar->corpo);
+
+        $editar = $router->despachar(Request::criar('GET', '/sujeitos/sub-001/editar'));
+        $this->assertSame(200, $editar->status);
+        $this->assertStringContainsString('<form', $editar->corpo);
+
+        $atualizar = $router->despachar(Request::criar('POST', '/sujeitos/sub-001', [], ['nome' => 'Sujeito Atualizado']));
+        $this->assertSame(200, $atualizar->status);
+
+        $excluir = $router->despachar(Request::criar('POST', '/sujeitos/sub-001/excluir'));
+        $this->assertSame(200, $excluir->status);
+
+        $naoEncontrado = $router->despachar(Request::criar('GET', '/sujeitos/sub-001'));
+        $this->assertSame(404, $naoEncontrado->status);
     }
 
     public function testRotasDeErroSimuladoFuncionais(): void

@@ -39,14 +39,14 @@ Responsabilidades:
 ## Interface Web
 
 Desde a Sprint 11A, a Apresentação inclui uma interface web
-(`Presentation/Web/`) construída de forma inteiramente independente da
-API REST, para não bloquear sua evolução em paralelo. Toda comunicação
-passa por `HttpClientInterface`, cuja única implementação nesta fase é
-`MockApiHttpClient` — nenhuma rota web acessa a API REST, SQLite,
-Application Services ou Domain. Quando a API REST estiver disponível,
-apenas uma nova implementação de `HttpClientInterface` precisará ser
-escrita; Controllers, ViewModels, Componentes e Views permanecem
-inalterados.
+(`Presentation/Web/`), inicialmente construída de forma independente da
+API REST para não bloquear sua evolução em paralelo. Toda comunicação
+passa por `HttpClientInterface`. Desde a Sprint 11B, sua implementação de
+produção é `ApiHttpClient`, que fala HTTP de verdade (cURL) com a API
+REST (Sprint 10) — nenhum mock permanece em produção. A troca confirmou
+o isolamento buscado desde a Sprint 11A: Controllers, ViewModels,
+Componentes e Views não precisaram mudar, apenas a implementação
+concreta de `HttpClientInterface` injetada em `Web/Routes.php`.
 
 ---
 

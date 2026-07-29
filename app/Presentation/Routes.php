@@ -9,6 +9,7 @@ use PsycheAI\Presentation\Controllers\DiscursoController;
 use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
 use PsycheAI\Presentation\Controllers\MemoriaController;
 use PsycheAI\Presentation\Controllers\SessaoController;
+use PsycheAI\Presentation\Controllers\SujeitoController;
 use PsycheAI\Presentation\Http\Router;
 
 /**
@@ -22,10 +23,17 @@ final class Routes
 {
     public static function registrar(Router $router, ApplicationServiceProvider $provider): void
     {
+        $sujeitos = new SujeitoController($provider->sujeitos());
         $sessoes = new SessaoController($provider->sessoes());
         $discursos = new DiscursoController($provider->discursos());
         $eventos = new EventoDiscursivoController($provider->discursos());
         $memorias = new MemoriaController($provider->memorias(), $provider->sujeitoRepository());
+
+        $router->post('/subjects', [$sujeitos, 'criar']);
+        $router->get('/subjects', [$sujeitos, 'listar']);
+        $router->get('/subjects/{id}', [$sujeitos, 'buscar']);
+        $router->put('/subjects/{id}', [$sujeitos, 'atualizar']);
+        $router->delete('/subjects/{id}', [$sujeitos, 'excluir']);
 
         $router->post('/sessions', [$sessoes, 'criar']);
         $router->get('/sessions', [$sessoes, 'listar']);

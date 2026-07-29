@@ -296,11 +296,11 @@ Controllers/Requests/Responses/Http já existentes na raiz de
 - `Http/`: `Request`, `Response`, `Router` (com handler de "não
   encontrado" configurável) e `ViewRenderer` (renderiza uma view PHP
   isolada e, opcionalmente, a encaixa no layout principal).
-- `Client/`: `HttpClientInterface` — porta de comunicação com a futura
-  API REST — e `MockApiHttpClient`, sua única implementação nesta
-  Sprint, que devolve dados fixos simulados e permite forçar qualquer
-  um dos quatro tipos de erro (`ErrorType`) para fins de teste e
-  demonstração. `ApiResponse` é o envelope de retorno.
+- `Client/`: `HttpClientInterface` — porta de comunicação com a API
+  REST (Sprint 10) — e `ApiHttpClient`, sua implementação de produção
+  desde a Sprint 11B, que fala HTTP de verdade (cURL) com a API REST e
+  traduz status HTTP reais para os quatro tipos de erro (`ErrorType`).
+  `ApiResponse` é o envelope de retorno.
 - `ViewModels/`: `SujeitoViewModel`, `SessaoViewModel`,
   `DiscursoViewModel`, `MemoriaViewModel`, `EventoDiscursivoViewModel` e
   `DashboardViewModel` — projeções somente-leitura construídas a partir

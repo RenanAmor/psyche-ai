@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace PsycheAI\Presentation\Web\Controllers;
 
+use PsycheAI\Presentation\Web\Client\ApiResponse;
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
-use PsycheAI\Presentation\Web\Client\MockApiHttpClient;
 use PsycheAI\Presentation\Web\Components\LoadingIndicatorComponent;
+use PsycheAI\Presentation\Web\Errors\ErrorViewModel;
 use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Response;
 use PsycheAI\Presentation\Web\Http\ViewRenderer;
@@ -20,7 +21,7 @@ use PsycheAI\Presentation\Web\Http\ViewRenderer;
 abstract class AbstractResourceController
 {
     public function __construct(
-        protected readonly HttpClientInterface $httpClient = new MockApiHttpClient(),
+        protected readonly HttpClientInterface $httpClient,
         protected readonly ViewRenderer $viewRenderer = new ViewRenderer()
     ) {
     }
@@ -73,5 +74,21 @@ abstract class AbstractResourceController
         );
 
         return Response::ok($html);
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     */
+    protected function mapearViewModelUnico(array $dados): object
+    {
+        return $this->mapearViewModels([$dados])[0];
+    }
+
+    protected function erroDe(ApiResponse $resposta): ErrorViewModel
+    {
+        /** @var ErrorViewModel $erro */
+        $erro = $resposta->erro;
+
+        return $erro;
     }
 }
