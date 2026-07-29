@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.3
+> Versão 1.4
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -207,12 +207,34 @@ Nenhuma destas interfaces possui implementação concreta nesta fase — cada
 uma será implementada por um adaptador nas pastas abaixo apenas quando a
 tecnologia correspondente for integrada.
 
-### Persistence / Logging / Messaging / Storage / AI / Clock / UUID
+### Persistence
+
+Contém a primeira implementação concreta de persistência do sistema, em
+`Persistence/SQLite/`:
+
+- `Connection.php`: conexão PDO com o banco SQLite, criando diretório e
+  arquivo automaticamente quando inexistentes e habilitando
+  `PRAGMA foreign_keys`.
+- `TransactionManager.php`: implementação de `TransactionInterface` sobre
+  transações nativas do PDO.
+- `Migrations/`: uma classe `Migration` por tabela (`CreateSujeitosTable`,
+  `CreateSessoesTable`, `CreateDiscursosTable`,
+  `CreateEventosDiscursivosTable`, `CreateMemoriasLongitudinaisTable`,
+  `CreateMemoriaSessoesTable`) e `MigrationRunner`, que as aplica de forma
+  ordenada e idempotente, registrando o histórico em `schema_migrations`.
+- `Repositories/`: adaptadores `SQLiteSujeitoRepository`,
+  `SQLiteSessaoRepository`, `SQLiteDiscursoRepository` e
+  `SQLiteMemoriaRepository`, que implementam os respectivos Repositórios do
+  Domínio usando PDO puro. `SessaoMapper`, `DiscursoMapper` e
+  `EventoDiscursivoMapper` são hidratadores internos, compartilhados entre
+  os repositórios para persistir/carregar os agregados em cascata
+  (Sujeito → Sessão → Discurso → Evento Discursivo).
+
+### Logging / Messaging / Storage / AI / Clock / UUID
 
 Pastas reservadas para as futuras implementações concretas de cada
-respectivo contrato (ex.: um adaptador SQLite implementará
-`PersistenceInterface` dentro de `Persistence/`). Permanecem vazias até que
-a tecnologia correspondente seja efetivamente integrada.
+respectivo contrato. Permanecem vazias até que a tecnologia correspondente
+seja efetivamente integrada.
 
 ---
 

@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.7 — Sprint 7 (Ports & Infrastructure Contracts)
+> Versão 0.8 — Sprint 8 (Persistência Local)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -58,6 +58,44 @@ Escopo desta sprint é exclusivamente de contratos — sem SQLite, MySQL,
 PostgreSQL, HTTP, API REST, controllers, front-end, WhatsApp, Telegram,
 OpenAI, Claude, Gemini, transcrição real, persistência real, filas ou
 cache.
+
+## Sprint 8 — Persistência Local (concluída)
+
+- [x] `app/Infrastructure/Persistence/SQLite/Connection.php`: conexão PDO
+      com criação automática do diretório e do arquivo de banco quando
+      inexistentes, e `PRAGMA foreign_keys` habilitado.
+- [x] `app/Infrastructure/Persistence/SQLite/TransactionManager.php`:
+      implementação de `TransactionInterface` sobre transações nativas do
+      PDO.
+- [x] `app/Infrastructure/Persistence/SQLite/Migrations/`: seis migrations
+      (uma por tabela) e um `MigrationRunner` idempotente, com histórico em
+      `schema_migrations`.
+- [x] `app/Infrastructure/Persistence/SQLite/Repositories/`: adaptadores
+      concretos `SQLiteSujeitoRepository`, `SQLiteSessaoRepository`,
+      `SQLiteDiscursoRepository` e `SQLiteMemoriaRepository`, implementando
+      os Repositórios do Domínio via PDO puro, com mapeadores internos
+      (`SessaoMapper`, `DiscursoMapper`, `EventoDiscursivoMapper`)
+      cascateando o agregado Sujeito → Sessão → Discurso → Evento
+      Discursivo.
+- [x] Correção de defeito pré-existente em
+      `Domain/Contracts/RepositoryInterface.php`: os métodos genéricos
+      `save`/`remove`/`findById(object)` violavam a variância de
+      parâmetros do PHP ao serem restringidos para tipos concretos nas
+      interfaces filhas (`SujeitoRepository`, `SessaoRepository`,
+      `DiscursoRepository`, `MemoriaRepository`), causando um erro fatal ao
+      carregar qualquer implementação. A interface tornou-se um marcador
+      vazio; cada Repositório mantém suas próprias assinaturas tipadas.
+- [x] Testes de integração em `tests/Integration/Persistence/SQLite/`
+      cobrindo criação do banco, execução e idempotência das migrations,
+      transações (commit/rollback), e inserção/atualização/consulta/remoção
+      — incluindo cascatas — para os quatro repositórios.
+- [x] Suíte completa executada sem regressões (73 testes, 147 asserções).
+- [x] Atualização de `docs/Estrutura-de-Pastas.md` e do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente persistência local — sem API REST,
+controllers, front-end, chat, WhatsApp, Telegram, IA, OpenAI, Claude,
+Gemini, uploads, áudio ou transcrição.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
