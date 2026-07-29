@@ -66,6 +66,19 @@ final class DiscursoMapper
     /**
      * @return Discurso[]
      */
+    public static function findAll(PDO $pdo): array
+    {
+        $statement = $pdo->query('SELECT id, conteudo FROM discursos ORDER BY rowid ASC');
+
+        return array_map(
+            fn (array $linha): Discurso => self::hidratar($pdo, $linha),
+            $statement->fetchAll()
+        );
+    }
+
+    /**
+     * @return Discurso[]
+     */
     public static function findBySessaoId(PDO $pdo, string $sessaoId): array
     {
         $statement = $pdo->prepare(

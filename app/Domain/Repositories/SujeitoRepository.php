@@ -11,6 +11,11 @@ interface SujeitoRepository extends RepositoryInterface
 {
     public function findById(string $id): ?Sujeito;
 
+    /**
+     * @return Sujeito[]
+     */
+    public function findAll(): array;
+
     public function save(Sujeito $sujeito): void;
 
     public function remove(Sujeito $sujeito): void;

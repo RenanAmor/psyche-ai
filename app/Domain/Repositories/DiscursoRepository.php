@@ -11,6 +11,11 @@ interface DiscursoRepository extends RepositoryInterface
 {
     public function findById(string $id): ?Discurso;
 
+    /**
+     * @return Discurso[]
+     */
+    public function findAll(): array;
+
     public function save(Discurso $discurso): void;
 
     public function remove(Discurso $discurso): void;

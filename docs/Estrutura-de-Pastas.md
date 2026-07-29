@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.4
+> Versão 1.5
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -36,6 +36,7 @@ psyche-ai/
 │   ├── Infrastructure/
 │   │   ├── Contracts/
 │   │   ├── Persistence/
+│   │   ├── Providers/
 │   │   ├── Logging/
 │   │   ├── Messaging/
 │   │   ├── Storage/
@@ -100,6 +101,18 @@ Value Objects do domínio).
 Serviços de Aplicação que compõem múltiplos Use Cases em um fluxo maior
 (ex.: `CicloDeObservacaoService`, que encadeia Construir Memória
 Longitudinal → Detectar Recorrências → Gerar Observações).
+
+Também inclui, desde a Sprint 9, uma Application Service por agregado —
+`SujeitoApplicationService`, `SessaoApplicationService`,
+`DiscursoApplicationService` e `MemoriaApplicationService` — cada uma
+recebendo por injeção de dependência apenas o(s) Repositório(s) de
+Domínio correspondente(s) (`PsycheAI\Domain\Repositories\*`), nunca uma
+implementação concreta de Infraestrutura. Expõem `criar`, `atualizar`,
+`excluir`, `buscarPorId` e `listar`, delegando a montagem/validação das
+Entidades aos Use Cases já existentes e a persistência ao Repositório
+injetado. `EventoDiscursivo` não é raiz de agregado — seu registro é
+exposto como uma operação de `DiscursoApplicationService`
+(`adicionarEvento`), e não como um serviço próprio.
 
 ### UseCases
 
@@ -229,6 +242,14 @@ Contém a primeira implementação concreta de persistência do sistema, em
   `EventoDiscursivoMapper` são hidratadores internos, compartilhados entre
   os repositórios para persistir/carregar os agregados em cascata
   (Sujeito → Sessão → Discurso → Evento Discursivo).
+
+### Providers
+
+Raiz de composição da aplicação. `ApplicationServiceProvider` monta a
+conexão SQLite, aplica as migrations pendentes e injeta os Repositórios
+concretos (`Persistence/SQLite/Repositories/*`) nas Application Services
+correspondentes — é o único ponto do sistema autorizado a conhecer
+Application e Infrastructure simultaneamente.
 
 ### Logging / Messaging / Storage / AI / Clock / UUID
 

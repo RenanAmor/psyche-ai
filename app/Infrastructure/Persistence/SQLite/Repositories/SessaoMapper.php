@@ -67,6 +67,19 @@ final class SessaoMapper
     /**
      * @return Sessao[]
      */
+    public static function findAll(PDO $pdo): array
+    {
+        $statement = $pdo->query('SELECT id, data FROM sessoes ORDER BY data ASC');
+
+        return array_map(
+            fn (array $linha): Sessao => self::hidratar($pdo, $linha),
+            $statement->fetchAll()
+        );
+    }
+
+    /**
+     * @return Sessao[]
+     */
     public static function findBySujeitoId(PDO $pdo, string $sujeitoId): array
     {
         $statement = $pdo->prepare(

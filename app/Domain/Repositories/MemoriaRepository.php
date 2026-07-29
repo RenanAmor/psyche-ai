@@ -11,6 +11,11 @@ interface MemoriaRepository extends RepositoryInterface
 {
     public function findById(string $id): ?MemoriaLongitudinal;
 
+    /**
+     * @return MemoriaLongitudinal[]
+     */
+    public function findAll(): array;
+
     public function save(MemoriaLongitudinal $memoria): void;
 
     public function remove(MemoriaLongitudinal $memoria): void;

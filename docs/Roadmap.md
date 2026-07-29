@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.8 — Sprint 8 (Persistência Local)
+> Versão 0.9 — Sprint 9 (Integração Application → Persistence)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -96,6 +96,58 @@ cache.
 Escopo desta sprint é exclusivamente persistência local — sem API REST,
 controllers, front-end, chat, WhatsApp, Telegram, IA, OpenAI, Claude,
 Gemini, uploads, áudio ou transcrição.
+
+## Sprint 9 — Integração Application → Persistence (concluída)
+
+- [x] `app/Domain/Repositories/`: `findAll(): array` adicionado às quatro
+      interfaces (`SujeitoRepository`, `SessaoRepository`,
+      `DiscursoRepository`, `MemoriaRepository`) para suportar a operação
+      "listar", exigida pelos critérios de aceite, sem violar o contrato
+      de Domínio.
+- [x] `app/Infrastructure/Persistence/SQLite/Repositories/`: os quatro
+      adaptadores concretos e os mapeadores internos (`SessaoMapper`,
+      `DiscursoMapper`) passam a implementar `findAll()`.
+- [x] `app/Application/Services/`: quatro novas Application Services —
+      `SujeitoApplicationService`, `SessaoApplicationService`,
+      `DiscursoApplicationService` e `MemoriaApplicationService` — cada
+      uma recebendo por injeção de dependência apenas Repositórios do
+      Domínio (nunca SQLite), expondo `criar`, `atualizar`, `excluir`,
+      `buscarPorId` e `listar`. Reaproveitam os Use Cases da Sprint 6 para
+      construir/validar as Entidades e delegam a persistência ao
+      Repositório injetado.
+- [x] Decisão arquitetural: `EventoDiscursivo` não é raiz de agregado
+      (não possui Repositório de Domínio próprio desde a Sprint 8 — é
+      persistido apenas em cascata através de `Discurso`). Seu registro é
+      exposto como `DiscursoApplicationService::adicionarEvento()`, e não
+      como um serviço/repositório à parte, preservando o limite do
+      agregado em vez de seguir literalmente a menção a um
+      "EventoDiscursoRepository" no briefing da sprint.
+- [x] `app/Application/Exceptions/RecursoNaoEncontradoException.php`:
+      lançada por `atualizar`/`excluir`/operações dependentes quando o id
+      informado não é encontrado pelo Repositório.
+- [x] `app/Infrastructure/Providers/ApplicationServiceProvider.php`: raiz
+      de composição da aplicação — monta a conexão SQLite, executa as
+      migrations pendentes e injeta os Repositórios concretos nas quatro
+      Application Services. Único ponto do sistema que conhece
+      Application e Infrastructure simultaneamente.
+- [x] Testes de integração em `tests/Integration/Application/` cobrindo,
+      para cada Application Service, criação, atualização, exclusão,
+      recuperação por id e listagem, além de um teste de ponta a ponta
+      (`ApplicationServiceProviderTest`) que percorre o grafo completo
+      Sujeito → Sessão → Discurso → Evento Discursivo → Memória
+      Longitudinal inteiramente através das Application Services e
+      confirma a cascata de remoção.
+- [x] Suíte completa executada sem regressões (101 testes, 203 asserções;
+      eram 73 testes e 147 asserções ao final da Sprint 8).
+- [x] Atualização de `docs/Estrutura-de-Pastas.md` e do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente a integração Application →
+Persistence — sem API REST, controllers, front-end, chat, WhatsApp,
+Telegram, IA, OpenAI, Claude, Gemini, uploads, áudio, transcrição ou
+gerenciamento explícito de transações na camada de Aplicação (cada
+`save()` de agregado já é uma unidade cascateada única, conforme
+desenhado na Sprint 8).
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

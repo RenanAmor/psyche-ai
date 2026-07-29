@@ -27,6 +27,27 @@ final class SQLiteSujeitoRepository implements SujeitoRepository
             return null;
         }
 
+        return $this->hidratar($linha);
+    }
+
+    /**
+     * @return Sujeito[]
+     */
+    public function findAll(): array
+    {
+        $statement = $this->pdo->query('SELECT id, nome FROM sujeitos ORDER BY rowid ASC');
+
+        return array_map(
+            fn (array $linha): Sujeito => $this->hidratar($linha),
+            $statement->fetchAll()
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $linha
+     */
+    private function hidratar(array $linha): Sujeito
+    {
         $sujeito = new Sujeito(
             new Identificador((string) $linha['id']),
             new NomeSujeito((string) $linha['nome'])

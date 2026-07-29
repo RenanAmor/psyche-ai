@@ -19,6 +19,14 @@ final class SQLiteSessaoRepository implements SessaoRepository
         return SessaoMapper::findById($this->pdo, $id);
     }
 
+    /**
+     * @return Sessao[]
+     */
+    public function findAll(): array
+    {
+        return SessaoMapper::findAll($this->pdo);
+    }
+
     public function save(Sessao $sessao): void
     {
         SessaoMapper::save($this->pdo, $sessao, null);

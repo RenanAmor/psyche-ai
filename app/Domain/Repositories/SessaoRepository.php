@@ -11,6 +11,11 @@ interface SessaoRepository extends RepositoryInterface
 {
     public function findById(string $id): ?Sessao;
 
+    /**
+     * @return Sessao[]
+     */
+    public function findAll(): array;
+
     public function save(Sessao $sessao): void;
 
     public function remove(Sessao $sessao): void;

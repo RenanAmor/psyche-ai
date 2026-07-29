@@ -26,12 +26,33 @@ final class SQLiteMemoriaRepository implements MemoriaRepository
             return null;
         }
 
+        return $this->hidratar($linha);
+    }
+
+    /**
+     * @return MemoriaLongitudinal[]
+     */
+    public function findAll(): array
+    {
+        $statement = $this->pdo->query('SELECT id FROM memorias_longitudinais ORDER BY rowid ASC');
+
+        return array_map(
+            fn (array $linha): MemoriaLongitudinal => $this->hidratar($linha),
+            $statement->fetchAll()
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $linha
+     */
+    private function hidratar(array $linha): MemoriaLongitudinal
+    {
         $memoria = new MemoriaLongitudinal(new Identificador((string) $linha['id']));
 
         $pivotStatement = $this->pdo->prepare(
             'SELECT sessao_id FROM memoria_sessoes WHERE memoria_id = :memoria_id ORDER BY ordem ASC'
         );
-        $pivotStatement->execute(['memoria_id' => $id]);
+        $pivotStatement->execute(['memoria_id' => $memoria->id()->valor()]);
 
         foreach ($pivotStatement->fetchAll() as $pivotLinha) {
             $sessao = SessaoMapper::findById($this->pdo, (string) $pivotLinha['sessao_id']);

@@ -19,6 +19,14 @@ final class SQLiteDiscursoRepository implements DiscursoRepository
         return DiscursoMapper::findById($this->pdo, $id);
     }
 
+    /**
+     * @return Discurso[]
+     */
+    public function findAll(): array
+    {
+        return DiscursoMapper::findAll($this->pdo);
+    }
+
     public function save(Discurso $discurso): void
     {
         DiscursoMapper::save($this->pdo, $discurso, null);

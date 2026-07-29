@@ -1,0 +1,119 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PsycheAI\Application\Services;
+
+use PsycheAI\Application\Contracts\ApplicationServiceInterface;
+use PsycheAI\Application\DTOs\DiscursoDTO;
+use PsycheAI\Application\Exceptions\RecursoNaoEncontradoException;
+use PsycheAI\Application\UseCases\RegistrarDiscurso\RegistrarDiscursoCommand;
+use PsycheAI\Application\UseCases\RegistrarDiscurso\RegistrarDiscursoHandler;
+use PsycheAI\Application\UseCases\RegistrarEventoDiscursivo\RegistrarEventoDiscursivoCommand;
+use PsycheAI\Application\UseCases\RegistrarEventoDiscursivo\RegistrarEventoDiscursivoHandler;
+use PsycheAI\Domain\Entities\Discurso;
+use PsycheAI\Domain\Repositories\DiscursoRepository;
+use PsycheAI\Domain\Repositories\SessaoRepository;
+use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
+use PsycheAI\Domain\ValueObjects\Identificador;
+
+/**
+ * Orquestra o ciclo de vida completo de Discurso. A criação exige o
+ * SessaoRepository pelo mesmo motivo do vínculo Sujeito/Sessao: o
+ * Discurso só é persistido com a chave estrangeira correta quando salvo
+ * em cascata através da Sessao que o contém.
+ *
+ * EventoDiscursivo não possui repositório de Domínio próprio (não é raiz
+ * de agregado — é persistido apenas em cascata através de Discurso), por
+ * isso seu registro é exposto aqui como uma operação do agregado
+ * Discurso, e não como um serviço à parte.
+ */
+final class DiscursoApplicationService implements ApplicationServiceInterface
+{
+    public function __construct(
+        private readonly DiscursoRepository $discursoRepository,
+        private readonly SessaoRepository $sessaoRepository,
+        private readonly RegistrarDiscursoHandler $registrarDiscurso = new RegistrarDiscursoHandler(),
+        private readonly RegistrarEventoDiscursivoHandler $registrarEvento = new RegistrarEventoDiscursivoHandler()
+    ) {
+    }
+
+    public function criar(string $sessaoId, string $id, string $conteudo): DiscursoDTO
+    {
+        $sessao = $this->sessaoRepository->findById($sessaoId);
+
+        if ($sessao === null) {
+            throw RecursoNaoEncontradoException::paraId('Sessao', $sessaoId);
+        }
+
+        $discurso = $this->registrarDiscurso
+            ->handle(new RegistrarDiscursoCommand($sessao, $id, $conteudo))
+            ->discurso();
+
+        $this->sessaoRepository->save($sessao);
+
+        return DiscursoDTO::fromEntity($discurso);
+    }
+
+    public function atualizar(string $id, string $novoConteudo): DiscursoDTO
+    {
+        $existente = $this->buscarEntidadePorId($id);
+
+        $atualizado = new Discurso(new Identificador($id), new ConteudoDiscursivo($novoConteudo));
+
+        foreach ($existente->eventos() as $evento) {
+            $atualizado->adicionarEvento($evento);
+        }
+
+        $this->discursoRepository->save($atualizado);
+
+        return DiscursoDTO::fromEntity($atualizado);
+    }
+
+    public function adicionarEvento(string $discursoId, string $eventoId, string $conteudo, int $posicao): DiscursoDTO
+    {
+        $discurso = $this->buscarEntidadePorId($discursoId);
+
+        $this->registrarEvento->handle(
+            new RegistrarEventoDiscursivoCommand($discurso, $eventoId, $conteudo, $posicao)
+        );
+
+        $this->discursoRepository->save($discurso);
+
+        return DiscursoDTO::fromEntity($discurso);
+    }
+
+    public function excluir(string $id): void
+    {
+        $this->discursoRepository->remove($this->buscarEntidadePorId($id));
+    }
+
+    public function buscarPorId(string $id): ?DiscursoDTO
+    {
+        $discurso = $this->discursoRepository->findById($id);
+
+        return $discurso === null ? null : DiscursoDTO::fromEntity($discurso);
+    }
+
+    /**
+     * @return DiscursoDTO[]
+     */
+    public function listar(): array
+    {
+        return array_map(
+            static fn (Discurso $discurso): DiscursoDTO => DiscursoDTO::fromEntity($discurso),
+            $this->discursoRepository->findAll()
+        );
+    }
+
+    private function buscarEntidadePorId(string $id): Discurso
+    {
+        $discurso = $this->discursoRepository->findById($id);
+
+        if ($discurso === null) {
+            throw RecursoNaoEncontradoException::paraId('Discurso', $id);
+        }
+
+        return $discurso;
+    }
+}
