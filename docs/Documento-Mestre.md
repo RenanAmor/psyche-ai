@@ -42,85 +42,37 @@ Essas frentes serão desenvolvidas em sprints subsequentes, com documentação p
 - **Responsabilidade**: decisões técnicas devem considerar o impacto potencial sobre pessoas em situação de vulnerabilidade.
 - **Rigor técnico e teórico**: qualquer aplicação de conceitos psicológicos/psicanalíticos deve ser feita com cuidado e fundamentação, evitando simplificações que distorçam o campo teórico de origem.
 
-## 6. Modelo teórico fundamental
+## Seção 6.1 – Princípio fundador
 
-O Psyche AI adota **exclusivamente** o referencial psicanalítico **Freud–Lacan**. Todo o desenvolvimento do sistema é fundamentado na obra de Sigmund Freud e na releitura estrutural proposta por Jacques Lacan.
+Reescrever para definir claramente que o objeto do PsycheAI é preservar, organizar e acompanhar longitudinalmente o discurso humano.
+Remover a expressão "produzir hipóteses analíticas".
 
-A arquitetura do sistema respeita a distinção entre:
+## Seção 6.2 – Objeto de pesquisa
+Manter que o objeto é a organização computacional do discurso.
+Acrescentar que o foco é a observação longitudinal das recorrências discursivas.
 
-- os **conceitos fundamentais** desenvolvidos por Freud — organizados em [Ontologia-Freud.md](Ontologia-Freud.md);
-- a **estrutura de leitura** proposta por Lacan — organizada em [Ontologia-Lacan.md](Ontologia-Lacan.md).
+## Seção 6.3 – Hipótese central
+Reformular a hipótese para refletir o modelo atual.
+A hipótese deve tratar da possibilidade de identificar recorrências estruturais no discurso ao longo do tempo, sem afirmar representação de significantes.
 
-Este referencial teórico será progressivamente detalhado em sprints futuras. Nesta fase, apenas o posicionamento teórico e seus limites são estabelecidos.
+## Seção 6.4 – Objetivo científico
+Remover:
+"representar estruturas discursivas candidatas a cadeias de significantes";
+"produzir hipóteses fundamentadas";
+"apresentar essas hipóteses".
+Manter apenas objetivos compatíveis com observação, organização e rastreabilidade do discurso.
 
-### 6.1 Princípio fundador
+## Seção 6.5 – Limites do sistema
+Manter todos os limites atuais.
+Reforçar explicitamente:
+o sistema não interpreta;
+o sistema não atribui significado;
+o sistema não substitui a escuta clínica.
 
-O Psyche AI nasce da hipótese de que é possível construir um sistema computacional para organizar o discurso humano segundo um modelo inspirado no referencial Freud–Lacan.
+## Seção 6.6 – Questão de pesquisa
+Não alterar.
+Ela continua válida como questão científica aberta.
 
-O objetivo do projeto **não é** reproduzir o trabalho do psicanalista, nem automatizar a interpretação clínica. Seu propósito é organizar estruturas discursivas, identificar padrões linguísticos, acompanhar estruturas discursivas recorrentes ao longo do tempo e produzir hipóteses analíticas transparentes que auxiliem o trabalho do analista. **Toda interpretação clínica permanece sob responsabilidade do psicanalista.**
-
-### 6.2 Objeto de pesquisa
-
-O objeto de pesquisa do Psyche AI **não é o inconsciente em si** — é a **organização computacional do discurso**.
-
-Partindo da hipótese lacaniana de que o inconsciente é estruturado como uma linguagem, o projeto investiga de que maneira estruturas linguísticas observáveis podem ser representadas computacionalmente e utilizadas para construir hipóteses analíticas.
-
-### 6.3 Hipótese central
-
-> Se o inconsciente se manifesta na linguagem, então padrões linguísticos, cadeias de significantes e recorrências discursivas podem ser organizados computacionalmente para auxiliar o processo analítico.
-
-Essa hipótese orienta toda a arquitetura do sistema.
-
-### 6.4 Objetivo científico
-
-Desenvolver um modelo computacional capaz de:
-
-- organizar o discurso em estruturas analisáveis;
-- representar estruturas discursivas candidatas a cadeias de significantes;
-- identificar recorrências e deslocamentos;
-- preservar o contexto temporal das sessões;
-- produzir hipóteses fundamentadas no modelo Freud–Lacan;
-- apresentar essas hipóteses de forma transparente e rastreável ao analista.
-
-### 6.5 Limites do sistema
-
-O Psyche AI **não**:
-
-- realiza diagnósticos;
-- substitui o psicanalista;
-- interpreta o sujeito de forma autônoma;
-- determina interpretações verdadeiras;
-- identifica estados mentais ocultos;
-- identifica significantes;
-- marca automaticamente uma palavra como sendo um significante;
-- afirma ter acesso direto ao inconsciente.
-
-O Psyche AI não identifica significantes. O Psyche AI identifica **estruturas discursivas** cuja relevância poderá, ou não, ser confirmada no processo analítico. O sistema organiza informações e produz hipóteses cuja validade depende da avaliação clínica do analista.
-
-O significante não é uma palavra; é uma representação que só o sujeito que diz pode confirmar. Por isso, o Psyche AI não marca automaticamente uma palavra como sendo um significante — trata palavras e recorrências apenas como pistas de uma estrutura discursiva possível, cujo estatuto de significante só pode ser confirmado pelo sujeito, no processo analítico.
-
-### 6.6 Questão de pesquisa em aberto
-
-Uma pergunta ainda mais fundamental orienta o horizonte científico do projeto:
-
-> Como representar computacionalmente um significante sem reduzi-lo a uma simples palavra?
-
-Em Lacan, um significante não se confunde com um vocábulo isolado — seu papel depende das relações que estabelece na cadeia discursiva. O significante não é uma palavra; é uma representação que só o sujeito que diz pode confirmar. Traduzir essa ideia para uma estrutura computacional é um dos maiores desafios científicos do Psyche AI: uma resposta consistente a essa questão pode configurar não apenas uma aplicação de IA para psicanálise, mas um novo modelo de representação computacional do discurso inspirado em Freud e Lacan. Esta questão **não é respondida nesta fase** — orienta a pesquisa em sprints futuras.
-
-## 7. Arquitetura conceitual inicial
-
-Nesta fase, a arquitetura é apenas conceitual e servirá de base para o detalhamento técnico em [Arquitetura.md](Arquitetura.md).
-
-- Projeto construído em **PHP 8.2+**, seguindo os padrões do ecossistema L369.
-- Estrutura de diretórios convencional: `app/` (código da aplicação), `config/` (configurações), `storage/` (armazenamento local), `tests/` (testes automatizados).
-- Gestão de dependências via **Composer**, com autoload PSR-4.
-- Configuração sensível isolada via variáveis de ambiente (`.env`), nunca versionada.
-- Visão de longo prazo organizada em três motores conceituais (Freud Engine, Lacan Engine, Discourse Engine) — ver [Arquitetura.md](Arquitetura.md) para o desenho preliminar. Nenhum desses motores é implementado nesta fase.
-
-## 8. Referências
-
-- [Arquitetura.md](Arquitetura.md)
-- [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md)
-- [Ontologia-Freud.md](Ontologia-Freud.md)
-- [Ontologia-Lacan.md](Ontologia-Lacan.md)
-- [Roadmap.md](Roadmap.md)
+## Seção 7 – Arquitetura conceitual
+Remover a referência aos três motores (Freud Engine, Lacan Engine e Discourse Engine).
+Substituir por uma referência simples ao documento Arquitetura.md, que passará a definir a arquitetura técnica nas próximas sprints.

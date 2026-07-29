@@ -24,6 +24,7 @@ composer.lock
 
 # PHPUnit
 .phpunit.result.cache
+.phpunit.cache/
 
 # Claude Code (config local, não faz parte do projeto)
 /.claude/

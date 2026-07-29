@@ -1,62 +1,148 @@
 # Arquitetura — Psyche AI
 
-> Versão 0.1 — Sprint 0 (Fundação)
-> Este documento descreve apenas a arquitetura conceitual/estrutural inicial. Detalhamento de componentes de IA, integrações e regras de negócio serão adicionados em sprints futuras.
+> Versão 0.2 — Sprint 4 (Fundação Arquitetural)
 
-## 1. Stack tecnológica
+Este documento define a arquitetura conceitual do PsycheAI. O detalhamento das camadas, componentes e implementações será realizado nas próximas sprints.
 
-- **Linguagem**: PHP 8.2+
-- **Gestão de dependências**: Composer
-- **Testes**: PHPUnit (a ser configurado quando houver código a testar)
-- **Padrão de ecossistema**: alinhado às convenções dos demais projetos L369
+---
 
-## 2. Estrutura de diretórios
+# 1. Stack Tecnológica
 
-```
+- PHP 8.2+
+- Composer
+- PHPUnit
+- PSR-4
+- Ecossistema L369
+
+---
+
+# 2. Estrutura do Projeto
+
+```text
 psyche-ai/
-├── app/          # Código-fonte da aplicação
-├── config/       # Arquivos de configuração
-├── docs/         # Documentação do projeto
-├── storage/      # Armazenamento local (logs, cache, arquivos gerados)
-├── tests/        # Testes automatizados
+├── app/
+├── config/
+├── docs/
+├── storage/
+├── tests/
 ├── README.md
 ├── composer.json
 ├── .env.example
 └── .gitignore
 ```
 
-## 3. Convenções
+---
 
-- Autoload de classes via **PSR-4**, com o namespace raiz mapeado para `app/`.
-- Configurações sensíveis (chaves, credenciais, endpoints) nunca são versionadas — apenas documentadas em `.env.example`.
-- `storage/` é destinado a artefatos gerados em tempo de execução e não deve conter código-fonte.
+# 3. Convenções
 
-## 4. Visão arquitetural de longo prazo — motores conceituais
+- Namespace seguindo PSR-4.
+- Configurações em `.env`.
+- `storage/` contém somente dados produzidos pela aplicação.
+- O domínio permanece independente da infraestrutura.
 
-O modelo teórico fundamental do projeto (Freud–Lacan, ver [Documento-Mestre.md](Documento-Mestre.md#6-modelo-teórico-fundamental)) se traduz, em visão de longo prazo, em três motores conceituais organizados em pipeline:
+---
 
+# 4. Arquitetura do Domínio
+
+O PsycheAI é um sistema para observação longitudinal do discurso humano.
+
+Seu domínio consiste em organizar, preservar e tornar observáveis as recorrências presentes na história do discurso.
+
+O sistema não interpreta o sujeito.
+
+O sistema não realiza diagnósticos.
+
+O sistema não atribui significado clínico.
+
+A interpretação permanece responsabilidade do analista.
+
+---
+
+## Fluxo Arquitetural
+
+```text
+Discurso
+    │
+    ▼
+Sessão
+    │
+    ▼
+Memória Longitudinal
+    │
+    ▼
+Recorrências
+    │
+    ▼
+Observações
 ```
-Freud Engine
-     │
-     ▼
-Lacan Engine
-     │
-     ▼
-Discourse Engine
-```
 
-- **Freud Engine** — núcleo conceitual do sistema. Define *o que* é observado: inconsciente, recalque, pulsão, desejo, formação de compromisso, ato falho, chiste, sonhos, repetição, transferência.
-- **Lacan Engine** — estrutura de leitura do sistema. Define *como* o discurso é organizado e relacionado: significante, cadeia significante, metáfora, metonímia, registros Simbólico/Imaginário/Real, desejo, falta, Outro, objeto a.
-- **Discourse Engine** — componente central do pipeline. Responsável por estruturar o discurso em unidades analisáveis, identificar estruturas discursivas recorrentes (candidatas a cadeias de significantes), acompanhar a evolução das sessões, preservar o contexto temporal e alimentar os dois motores teóricos com dados organizados.
+---
 
-Esta é uma visão conceitual preliminar. **Nenhum desses motores é especificado ou implementado na Sprint 0** — o detalhamento técnico (contratos, interfaces, modelo de dados) será tratado em documento de arquitetura técnica dedicado, em sprint futura.
+### Discurso
 
-> O sistema não identifica significantes: identifica estruturas discursivas cuja relevância poderá, ou não, ser confirmada no processo analítico (ver [Documento-Mestre.md](Documento-Mestre.md#65-limites-do-sistema)).
+Representa todo conteúdo produzido pelo sujeito.
 
-## 5. Estado atual
+---
 
-Nesta fase, o projeto não possui camadas de aplicação, domínio ou infraestrutura definidas — apenas o esqueleto estrutural. A definição de camadas (domínio, aplicação, infraestrutura, IA) será tratada em documento de arquitetura técnica dedicado, em sprint futura.
+### Sessão
 
-## 6. Próximos passos
+Agrupa temporalmente os discursos produzidos em um mesmo contexto.
 
-Ver [Roadmap.md](Roadmap.md) para o planejamento das próximas sprints.
+---
+
+### Memória Longitudinal
+
+Preserva toda a história discursiva do sujeito.
+
+---
+
+### Recorrências
+
+Representam elementos que reaparecem ao longo da história do discurso.
+
+São registradas sem interpretação clínica.
+
+---
+
+### Observações
+
+São registros estruturados produzidos pelo sistema a partir das recorrências identificadas.
+
+Observações nunca representam interpretações.
+
+---
+
+# 5. Princípios Arquiteturais
+
+- O domínio do PsycheAI é o discurso.
+- O sistema preserva a história do discurso.
+- O sistema organiza eventos discursivos.
+- O sistema constrói memória longitudinal.
+- O sistema identifica recorrências.
+- O sistema não interpreta o sujeito.
+- O sistema não realiza diagnósticos.
+- O sistema não identifica significantes.
+- O sistema não produz conclusões clínicas.
+- Toda interpretação permanece responsabilidade do analista.
+
+---
+
+# 6. Estado Atual
+
+Nesta fase existe apenas a fundação arquitetural do projeto.
+
+As camadas de domínio, aplicação e infraestrutura serão implementadas nas próximas sprints.
+
+---
+
+# 7. Próximos Passos
+
+1. Definir os objetos fundamentais do domínio.
+2. Implementar as entidades.
+3. Implementar os Value Objects.
+4. Implementar os Eventos de Domínio.
+5. Implementar os Serviços de Domínio.
+6. Implementar os Casos de Uso.
+7. Implementar a Persistência.
+8. Implementar os mecanismos computacionais de recorrência.
+9. Implementar a interface da aplicação.
