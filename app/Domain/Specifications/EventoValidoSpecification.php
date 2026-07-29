@@ -10,6 +10,6 @@ final class EventoValidoSpecification
 {
     public function isSatisfiedBy(EventoDiscursivo $evento): bool
     {
-        return trim($evento->conteudo()) !== '';
+        return trim($evento->conteudo()->valor()) !== '';
     }
 }

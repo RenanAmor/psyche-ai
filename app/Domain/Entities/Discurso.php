@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace PsycheAI\Domain\Entities;
 
+use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
+use PsycheAI\Domain\ValueObjects\Identificador;
+
 final class Discurso extends Entity
 {
     /**
@@ -12,13 +15,13 @@ final class Discurso extends Entity
     private array $eventos = [];
 
     public function __construct(
-        string $id,
-        private readonly string $conteudo
+        Identificador $id,
+        private readonly ConteudoDiscursivo $conteudo
     ) {
         parent::__construct($id);
     }
 
-    public function conteudo(): string
+    public function conteudo(): ConteudoDiscursivo
     {
         return $this->conteudo;
     }

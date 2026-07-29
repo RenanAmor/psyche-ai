@@ -18,7 +18,7 @@ final class DetectorRecorrencias implements DomainServiceInterface
         $recorrencias = [];
 
         foreach ($eventos as $evento) {
-            $conteudo = $evento->conteudo();
+            $conteudo = $evento->conteudo()->valor();
 
             if (!isset($recorrencias[$conteudo])) {
                 $recorrencias[$conteudo] = 0;

@@ -15,6 +15,6 @@ final class RecorrenciaMinimaSpecification
 
     public function isSatisfiedBy(Recorrencia $recorrencia): bool
     {
-        return $recorrencia->frequencia() >= $this->minimo;
+        return $recorrencia->frequencia()->valor() >= $this->minimo;
     }
 }

@@ -7,6 +7,8 @@ namespace PsycheAI\Domain\Services;
 use PsycheAI\Domain\Contracts\DomainServiceInterface;
 use PsycheAI\Domain\Entities\Observacao;
 use PsycheAI\Domain\Entities\Recorrencia;
+use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\ObservacaoTexto;
 
 final class GeradorObservacoes implements DomainServiceInterface
 {
@@ -20,12 +22,12 @@ final class GeradorObservacoes implements DomainServiceInterface
 
         foreach ($recorrencias as $indice => $recorrencia) {
             $observacoes[] = new Observacao(
-                (string) ($indice + 1),
-                sprintf(
+                new Identificador((string) ($indice + 1)),
+                new ObservacaoTexto(sprintf(
                     'Recorrência observada: %s (%d ocorrência(s)).',
-                    $recorrencia->descricao(),
-                    $recorrencia->frequencia()
-                )
+                    $recorrencia->descricao()->valor(),
+                    $recorrencia->frequencia()->valor()
+                ))
             );
         }
 

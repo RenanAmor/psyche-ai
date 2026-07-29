@@ -4,28 +4,32 @@ declare(strict_types=1);
 
 namespace PsycheAI\Domain\Entities;
 
+use PsycheAI\Domain\ValueObjects\Frequencia;
+use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Texto;
+
 final class Recorrencia extends Entity
 {
     public function __construct(
-        string $id,
-        private readonly string $descricao,
-        private int $frequencia = 1
+        Identificador $id,
+        private readonly Texto $descricao,
+        private Frequencia $frequencia = new Frequencia(1)
     ) {
         parent::__construct($id);
     }
 
-    public function descricao(): string
+    public function descricao(): Texto
     {
         return $this->descricao;
     }
 
-    public function frequencia(): int
+    public function frequencia(): Frequencia
     {
         return $this->frequencia;
     }
 
     public function incrementar(): void
     {
-        $this->frequencia++;
+        $this->frequencia = $this->frequencia->incrementar();
     }
 }
