@@ -1,0 +1,59 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PsycheAI\Presentation\Web\Http;
+
+/**
+ * Resposta HTML da interface web. Distinta da Response da API REST
+ * (Presentation\Http\Response, que é JSON) — aqui o corpo é sempre um
+ * documento HTML já renderizado pelo ViewRenderer.
+ */
+final class Response
+{
+    /**
+     * @param array<string, string> $headers
+     */
+    public function __construct(
+        public readonly string $corpo,
+        public readonly int $status = 200,
+        public readonly array $headers = ['Content-Type' => 'text/html; charset=utf-8']
+    ) {
+    }
+
+    public static function ok(string $corpo): self
+    {
+        return new self($corpo, 200);
+    }
+
+    public static function naoEncontrado(string $corpo): self
+    {
+        return new self($corpo, 404);
+    }
+
+    public static function erroValidacao(string $corpo): self
+    {
+        return new self($corpo, 422);
+    }
+
+    public static function erroServico(string $corpo): self
+    {
+        return new self($corpo, 502);
+    }
+
+    public static function erroInterno(string $corpo): self
+    {
+        return new self($corpo, 500);
+    }
+
+    public function enviar(): void
+    {
+        http_response_code($this->status);
+
+        foreach ($this->headers as $nome => $valor) {
+            header(sprintf('%s: %s', $nome, $valor));
+        }
+
+        echo $this->corpo;
+    }
+}

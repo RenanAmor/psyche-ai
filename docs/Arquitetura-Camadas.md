@@ -1,6 +1,6 @@
 # Arquitetura em Camadas — PsycheAI
 
-> Versão 1.1
+> Versão 1.2
 
 Este documento define a arquitetura em camadas do PsycheAI.
 
@@ -35,6 +35,18 @@ Responsabilidades:
 - apresentar respostas;
 - validar dados básicos de entrada;
 - nunca conter regras de negócio.
+
+## Interface Web
+
+Desde a Sprint 11A, a Apresentação inclui uma interface web
+(`Presentation/Web/`) construída de forma inteiramente independente da
+API REST, para não bloquear sua evolução em paralelo. Toda comunicação
+passa por `HttpClientInterface`, cuja única implementação nesta fase é
+`MockApiHttpClient` — nenhuma rota web acessa a API REST, SQLite,
+Application Services ou Domain. Quando a API REST estiver disponível,
+apenas uma nova implementação de `HttpClientInterface` precisará ser
+escrita; Controllers, ViewModels, Componentes e Views permanecem
+inalterados.
 
 ---
 

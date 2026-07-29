@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.5
+> Versão 1.6
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -48,10 +48,23 @@ psyche-ai/
 │       ├── Controllers/
 │       ├── Requests/
 │       ├── Responses/
-│       └── Views/
+│       ├── Views/
+│       └── Web/
+│           ├── Client/
+│           ├── Components/
+│           ├── Controllers/
+│           ├── Errors/
+│           ├── Http/
+│           ├── Navigation/
+│           ├── ViewModels/
+│           ├── Views/
+│           └── Routes.php
 │
 ├── config/
 ├── docs/
+├── public/
+│   └── web/
+│       └── index.php
 ├── storage/
 │   ├── cache/
 │   ├── data/
@@ -271,6 +284,59 @@ Contém:
 - views.
 
 Não implementa regras de negócio.
+
+### Web
+
+Interface web (HTML) do PsycheAI, construída na Sprint 11A de forma
+inteiramente independente da API REST — inclusive isolada em namespace
+próprio (`PsycheAI\Presentation\Web`) para não colidir com os
+Controllers/Requests/Responses/Http já existentes na raiz de
+`Presentation/`, que pertencem à API REST.
+
+- `Http/`: `Request`, `Response`, `Router` (com handler de "não
+  encontrado" configurável) e `ViewRenderer` (renderiza uma view PHP
+  isolada e, opcionalmente, a encaixa no layout principal).
+- `Client/`: `HttpClientInterface` — porta de comunicação com a futura
+  API REST — e `MockApiHttpClient`, sua única implementação nesta
+  Sprint, que devolve dados fixos simulados e permite forçar qualquer
+  um dos quatro tipos de erro (`ErrorType`) para fins de teste e
+  demonstração. `ApiResponse` é o envelope de retorno.
+- `ViewModels/`: `SujeitoViewModel`, `SessaoViewModel`,
+  `DiscursoViewModel`, `MemoriaViewModel`, `EventoDiscursivoViewModel` e
+  `DashboardViewModel` — projeções somente-leitura construídas a partir
+  do array devolvido pelo Cliente HTTP (`fromArray`/`fromArrayList`),
+  nunca a partir de uma Entidade de Domínio.
+- `Navigation/`: `NavigationItem` e `NavigationMenu`, fonte única das
+  seis seções do menu lateral (Dashboard, Sujeitos, Sessões, Discursos,
+  Memórias, Eventos Discursivos), compartilhada entre a Sidebar e
+  `Routes.php`.
+- `Components/`: componentes reutilizáveis orientados a dados —
+  `TableComponent` (com estado vazio automático via
+  `EmptyStateComponent`), `CardComponent`, `ButtonComponent`,
+  `FormComponent`, `ModalComponent`, `AlertComponent` e
+  `LoadingIndicatorComponent` — todos escapando HTML através do
+  utilitário `Html`.
+- `Errors/`: `ErrorType` (enum fechado com os quatro tipos exigidos:
+  comunicação, não encontrado, validação, interno), `ErrorViewModel` e
+  `ErrorViewModelFactory`.
+- `Controllers/`: `DashboardController`, `AbstractResourceController`
+  (ceremonial comum às cinco páginas de listagem) e suas cinco
+  especializações (`SujeitosController`, `SessoesController`,
+  `DiscursosController`, `MemoriasController`,
+  `EventosDiscursivosController`), além de `ErrorController`.
+  `SujeitosController` também expõe `novo`/`store`, único ponto que
+  aplica validação básica de entrada (campo obrigatório), permitida
+  pela Arquitetura em Camadas.
+- `Views/`: `layout.php` (com `partials/header.php` e
+  `partials/sidebar.php`), uma view por seção, `carregando.php` e
+  `errors/error.php`.
+- `Routes.php`: registra todas as rotas internas sobre um `Router`,
+  reaproveitando os mesmos caminhos do `NavigationMenu`.
+- `public/web/index.php`: front controller da interface web,
+  independente de `public/index.php` (API REST).
+
+Nesta Sprint toda a comunicação é mockada: nenhuma rota consome a API
+REST, acessa SQLite, Application Services ou Domain.
 
 ---
 

@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.9 — Sprint 9 (Integração Application → Persistence)
+> Versão 0.10 — Sprint 11A (Estrutura da Interface Web)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -148,6 +148,67 @@ Telegram, IA, OpenAI, Claude, Gemini, uploads, áudio, transcrição ou
 gerenciamento explícito de transações na camada de Aplicação (cada
 `save()` de agregado já é uma unidade cascateada única, conforme
 desenhado na Sprint 8).
+
+## Sprint 11A — Estrutura da Interface Web (concluída)
+
+- [x] `app/Presentation/Web/`: interface web (HTML) construída de forma
+      inteiramente independente da conclusão da API REST (Sprint 10),
+      isolada em namespace próprio (`PsycheAI\Presentation\Web`) para
+      não colidir com os Controllers/Requests/Responses/Http da API
+      REST, que já ocupam a raiz de `Presentation/`.
+- [x] `Web/Http/`: `Request`, `Response`, `Router` (com handler de "não
+      encontrado" configurável) e `ViewRenderer`, que renderiza uma
+      view PHP isolada e a encaixa no layout principal (header +
+      sidebar + área de conteúdo).
+- [x] `Web/Client/`: `HttpClientInterface` — a estrutura de comunicação
+      com a futura API REST — e `MockApiHttpClient`, sua única
+      implementação nesta Sprint, devolvendo dados fixos simulados para
+      os cinco recursos e permitindo forçar qualquer um dos quatro
+      tipos de erro para fins de teste e demonstração. Nenhuma chamada
+      real de rede é realizada.
+- [x] `Web/ViewModels/`: `SujeitoViewModel`, `SessaoViewModel`,
+      `DiscursoViewModel`, `MemoriaViewModel`, `EventoDiscursivoViewModel`
+      e `DashboardViewModel` — projeções somente-leitura construídas a
+      partir do array devolvido pelo Cliente HTTP, nunca de uma
+      Entidade de Domínio.
+- [x] `Web/Navigation/`: `NavigationItem` e `NavigationMenu`, fonte
+      única das seis seções do menu lateral (Dashboard, Sujeitos,
+      Sessões, Discursos, Memórias, Eventos Discursivos).
+- [x] `Web/Components/`: `TableComponent` (com estado vazio automático),
+      `CardComponent`, `ButtonComponent`, `FormComponent`,
+      `ModalComponent`, `AlertComponent`, `LoadingIndicatorComponent` e
+      `EmptyStateComponent`, todos escapando HTML via `Html`.
+- [x] `Web/Errors/`: `ErrorType` (comunicação, não encontrado,
+      validação, interno), `ErrorViewModel` e `ErrorViewModelFactory` —
+      os quatro estados de erro exigidos, simulados nesta Sprint.
+- [x] `Web/Controllers/`: `DashboardController`,
+      `AbstractResourceController` (ceremonial comum às cinco páginas
+      de listagem) e suas especializações — `SujeitosController`,
+      `SessoesController`, `DiscursosController`, `MemoriasController`,
+      `EventosDiscursivosController` — além de `ErrorController`.
+      `SujeitosController::novo/store` demonstra o fluxo de validação
+      básica de entrada (campo obrigatório), permitida à Apresentação
+      pela Arquitetura em Camadas.
+- [x] `Web/Views/`: `layout.php`, `partials/header.php`,
+      `partials/sidebar.php`, uma view por seção, `carregando.php` e
+      `errors/error.php`.
+- [x] `Web/Routes.php` e `public/web/index.php`: todas as rotas
+      internas registradas e navegáveis fim a fim, cada uma funcionando
+      inteiramente com dados simulados.
+- [x] Testes em `tests/Unit/Presentation/Web/` e
+      `tests/Feature/Presentation/Web/` cobrindo renderização,
+      navegação, componentes, estado de carregamento, estados vazios e
+      as quatro mensagens de erro.
+- [x] Suíte completa executada sem regressões (246 testes, 589
+      asserções; eram 101 testes e 203 asserções ao final da Sprint 9).
+- [x] Atualização de `docs/Estrutura-de-Pastas.md`,
+      `docs/Arquitetura-Camadas.md` e do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente a estrutura da interface web —
+sem consumir a API REST, acessar SQLite, Application Services ou
+Domain, e sem autenticação ou autorização. Toda comunicação permanece
+mockada através de `MockApiHttpClient`.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
