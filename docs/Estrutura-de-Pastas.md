@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.1
+> Versão 1.2
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -16,9 +16,9 @@ psyche-ai/
 ├── app/
 │   │
 │   ├── Application/
-│   │   ├── Commands/
-│   │   ├── DTO/
-│   │   ├── Queries/
+│   │   ├── Contracts/
+│   │   ├── DTOs/
+│   │   ├── Exceptions/
 │   │   ├── Services/
 │   │   └── UseCases/
 │   │
@@ -74,6 +74,34 @@ Contém os casos de uso da aplicação.
 Responsável por coordenar o fluxo entre a interface e o domínio.
 
 Esta camada não contém regras de negócio do PsycheAI.
+
+### Contracts
+
+Interfaces de marcação da camada de Aplicação (`CommandInterface`,
+`ResultInterface`, `UseCaseInterface`, `ApplicationServiceInterface`),
+seguindo a mesma convenção de `DomainServiceInterface`.
+
+### DTOs
+
+Objetos de transferência de dados, imutáveis, que expõem uma projeção
+somente-leitura das entidades de domínio para fora da camada de Aplicação.
+
+### Exceptions
+
+Exceções da camada de Aplicação (ex.: `ComandoInvalidoException`, lançada
+quando dados primitivos de um Command não satisfazem os invariantes dos
+Value Objects do domínio).
+
+### Services
+
+Serviços de Aplicação que compõem múltiplos Use Cases em um fluxo maior
+(ex.: `CicloDeObservacaoService`, que encadeia Construir Memória
+Longitudinal → Detectar Recorrências → Gerar Observações).
+
+### UseCases
+
+Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
+e um `Result`.
 
 ---
 

@@ -1,6 +1,6 @@
 # Casos de Uso — PsycheAI
 
-> Versão 1.0
+> Versão 1.1
 
 Este documento define os casos de uso do PsycheAI.
 
@@ -111,3 +111,35 @@ O analista pode consultar os registros observacionais.
 - Casos de uso não contêm lógica de infraestrutura.
 - Casos de uso nunca realizam interpretação clínica.
 - Casos de uso preservam a integridade do domínio.
+
+---
+
+# Implementação — Sprint 6 (Camada Application)
+
+A Sprint 6 implementou os seguintes Use Cases em `app/Application/UseCases/`,
+cada um com `Command`, `Handler` e `Result`:
+
+| Use Case implementado | UC relacionado |
+|---|---|
+| `CadastrarSujeito` | pré-requisito para UC-002 (não listado explicitamente acima) |
+| `RegistrarSessao` | UC-002 — Criar Sessão |
+| `RegistrarDiscurso` | UC-001 — Registrar Discurso |
+| `RegistrarEventoDiscursivo` | pré-requisito para UC-005 (não listado explicitamente acima) |
+| `ConstruirMemoriaLongitudinal` | UC-004 — Atualizar Memória Longitudinal |
+| `DetectarRecorrencias` | UC-005 — Identificar Recorrências |
+| `GerarObservacoes` | UC-006 — Produzir Observações |
+
+`Application/Services/CicloDeObservacaoService` compõe os três últimos Use
+Cases acima em um único fluxo, refletindo as etapas finais de
+`docs/Ciclo-do-Sistema.md`.
+
+Não implementados nesta Sprint (pendências para sprints futuras):
+
+- **UC-003 — Encerrar Sessão**: `Sessao` não possui estado de
+  encerramento no domínio atual; requer decisão de design antes de ser
+  implementado (adicionar o conceito ao domínio ou modelá-lo apenas na
+  camada de Aplicação).
+- **UC-007 — Consultar Histórico** e **UC-008 — Consultar Observações**:
+  são casos de uso de consulta (query), que dependem de um mecanismo de
+  persistência/repositório ainda não implementado (fora do escopo desta
+  Sprint, que exclui infraestrutura e persistência).
