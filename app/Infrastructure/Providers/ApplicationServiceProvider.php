@@ -9,6 +9,7 @@ use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Application\Services\MemoriaApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
+use PsycheAI\Domain\Repositories\SujeitoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
 use PsycheAI\Infrastructure\Persistence\SQLite\Migrations\MigrationRunner;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
@@ -31,7 +32,8 @@ final class ApplicationServiceProvider
         private readonly SujeitoApplicationService $sujeitos,
         private readonly SessaoApplicationService $sessoes,
         private readonly DiscursoApplicationService $discursos,
-        private readonly MemoriaApplicationService $memorias
+        private readonly MemoriaApplicationService $memorias,
+        private readonly SujeitoRepository $sujeitoRepository
     ) {
     }
 
@@ -55,7 +57,8 @@ final class ApplicationServiceProvider
             new SujeitoApplicationService($sujeitoRepository),
             new SessaoApplicationService($sessaoRepository, $sujeitoRepository),
             new DiscursoApplicationService($discursoRepository, $sessaoRepository),
-            new MemoriaApplicationService($memoriaRepository)
+            new MemoriaApplicationService($memoriaRepository),
+            $sujeitoRepository
         );
     }
 
@@ -77,5 +80,16 @@ final class ApplicationServiceProvider
     public function memorias(): MemoriaApplicationService
     {
         return $this->memorias;
+    }
+
+    /**
+     * Exposto para a camada HTTP montar a entidade Sujeito exigida por
+     * MemoriaApplicationService::criar()/atualizar() (ver
+     * ApplicationServiceProviderTest) — continua sendo o contrato de
+     * Domínio, nunca a implementação concreta SQLite.
+     */
+    public function sujeitoRepository(): SujeitoRepository
+    {
+        return $this->sujeitoRepository;
     }
 }

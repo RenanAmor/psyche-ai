@@ -44,6 +44,11 @@ final class DiscursoMapper
             ]);
         }
 
+        $deleteEventosStatement = $pdo->prepare(
+            'DELETE FROM eventos_discursivos WHERE discurso_id = :discurso_id'
+        );
+        $deleteEventosStatement->execute(['discurso_id' => $discurso->id()->valor()]);
+
         foreach ($discurso->eventos() as $evento) {
             EventoDiscursivoMapper::save($pdo, $evento, $discurso->id()->valor());
         }

@@ -6,16 +6,19 @@ namespace PsycheAI\Application\Services;
 
 use PsycheAI\Application\Contracts\ApplicationServiceInterface;
 use PsycheAI\Application\DTOs\DiscursoDTO;
+use PsycheAI\Application\DTOs\EventoDiscursivoDTO;
 use PsycheAI\Application\Exceptions\RecursoNaoEncontradoException;
 use PsycheAI\Application\UseCases\RegistrarDiscurso\RegistrarDiscursoCommand;
 use PsycheAI\Application\UseCases\RegistrarDiscurso\RegistrarDiscursoHandler;
 use PsycheAI\Application\UseCases\RegistrarEventoDiscursivo\RegistrarEventoDiscursivoCommand;
 use PsycheAI\Application\UseCases\RegistrarEventoDiscursivo\RegistrarEventoDiscursivoHandler;
 use PsycheAI\Domain\Entities\Discurso;
+use PsycheAI\Domain\Entities\EventoDiscursivo;
 use PsycheAI\Domain\Repositories\DiscursoRepository;
 use PsycheAI\Domain\Repositories\SessaoRepository;
 use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
 use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Posicao;
 
 /**
  * Orquestra o ciclo de vida completo de Discurso. A criação exige o
@@ -83,6 +86,72 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
         return DiscursoDTO::fromEntity($discurso);
     }
 
+    /**
+     * @return EventoDiscursivoDTO[]
+     */
+    public function listarEventos(): array
+    {
+        $itens = [];
+
+        foreach ($this->discursoRepository->findAll() as $discurso) {
+            foreach ($discurso->eventos() as $evento) {
+                $itens[] = EventoDiscursivoDTO::fromEntity($evento, $discurso->id()->valor());
+            }
+        }
+
+        return $itens;
+    }
+
+    public function buscarEvento(string $eventoId): ?EventoDiscursivoDTO
+    {
+        foreach ($this->discursoRepository->findAll() as $discurso) {
+            foreach ($discurso->eventos() as $evento) {
+                if ($evento->id()->valor() === $eventoId) {
+                    return EventoDiscursivoDTO::fromEntity($evento, $discurso->id()->valor());
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public function atualizarEvento(string $eventoId, string $novoConteudo, int $novaPosicao): EventoDiscursivoDTO
+    {
+        $discurso = $this->buscarDiscursoDoEvento($eventoId);
+
+        $atualizado = new Discurso($discurso->id(), $discurso->conteudo());
+        $eventoAtualizado = new EventoDiscursivo(
+            new Identificador($eventoId),
+            new ConteudoDiscursivo($novoConteudo),
+            new Posicao($novaPosicao)
+        );
+
+        foreach ($discurso->eventos() as $evento) {
+            $atualizado->adicionarEvento(
+                $evento->id()->valor() === $eventoId ? $eventoAtualizado : $evento
+            );
+        }
+
+        $this->discursoRepository->save($atualizado);
+
+        return EventoDiscursivoDTO::fromEntity($eventoAtualizado, $discurso->id()->valor());
+    }
+
+    public function removerEvento(string $eventoId): void
+    {
+        $discurso = $this->buscarDiscursoDoEvento($eventoId);
+
+        $atualizado = new Discurso($discurso->id(), $discurso->conteudo());
+
+        foreach ($discurso->eventos() as $evento) {
+            if ($evento->id()->valor() !== $eventoId) {
+                $atualizado->adicionarEvento($evento);
+            }
+        }
+
+        $this->discursoRepository->save($atualizado);
+    }
+
     public function excluir(string $id): void
     {
         $this->discursoRepository->remove($this->buscarEntidadePorId($id));
@@ -115,5 +184,23 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
         }
 
         return $discurso;
+    }
+
+    /**
+     * Localiza o Discurso que contém o EventoDiscursivo informado.
+     * EventoDiscursivo não possui repositório próprio (não é raiz de
+     * agregado), por isso "buscar por id" percorre os Discursos.
+     */
+    private function buscarDiscursoDoEvento(string $eventoId): Discurso
+    {
+        foreach ($this->discursoRepository->findAll() as $discurso) {
+            foreach ($discurso->eventos() as $evento) {
+                if ($evento->id()->valor() === $eventoId) {
+                    return $discurso;
+                }
+            }
+        }
+
+        throw RecursoNaoEncontradoException::paraId('EventoDiscursivo', $eventoId);
     }
 }

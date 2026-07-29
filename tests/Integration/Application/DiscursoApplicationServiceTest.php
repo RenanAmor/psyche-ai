@@ -99,4 +99,75 @@ final class DiscursoApplicationServiceTest extends SQLiteTestCase
 
         self::assertCount(2, $this->service->listar());
     }
+
+    public function testListarEventosRetornaTodosComODiscursoIdAssociado(): void
+    {
+        $this->service->criar('sessao-1', 'discurso-1', 'Conteúdo');
+        $this->service->adicionarEvento('discurso-1', 'evento-1', 'Lapso', 3);
+        $this->service->adicionarEvento('discurso-1', 'evento-2', 'Chiste', 7);
+
+        $eventos = $this->service->listarEventos();
+
+        self::assertCount(2, $eventos);
+        self::assertSame('discurso-1', $eventos[0]->discursoId);
+    }
+
+    public function testBuscarEventoRetornaNuloQuandoNaoEncontrado(): void
+    {
+        self::assertNull($this->service->buscarEvento('inexistente'));
+    }
+
+    public function testBuscarEventoRetornaODtoComODiscursoId(): void
+    {
+        $this->service->criar('sessao-1', 'discurso-1', 'Conteúdo');
+        $this->service->adicionarEvento('discurso-1', 'evento-1', 'Lapso', 3);
+
+        $encontrado = $this->service->buscarEvento('evento-1');
+
+        self::assertNotNull($encontrado);
+        self::assertSame('discurso-1', $encontrado->discursoId);
+        self::assertSame('Lapso', $encontrado->conteudo);
+    }
+
+    public function testAtualizarEventoLancaExcecaoQuandoNaoEncontrado(): void
+    {
+        $this->expectException(RecursoNaoEncontradoException::class);
+
+        $this->service->atualizarEvento('inexistente', 'Novo conteúdo', 1);
+    }
+
+    public function testAtualizarEventoPreservaOsDemaisEventosDoDiscurso(): void
+    {
+        $this->service->criar('sessao-1', 'discurso-1', 'Conteúdo');
+        $this->service->adicionarEvento('discurso-1', 'evento-1', 'Lapso', 3);
+        $this->service->adicionarEvento('discurso-1', 'evento-2', 'Chiste', 7);
+
+        $atualizado = $this->service->atualizarEvento('evento-1', 'Lapso revisado', 5);
+
+        self::assertSame('Lapso revisado', $atualizado->conteudo);
+        self::assertSame(5, $atualizado->posicao);
+
+        $discursoRecuperado = $this->service->buscarPorId('discurso-1');
+        self::assertSame(2, $discursoRecuperado->quantidadeDeEventos);
+    }
+
+    public function testRemoverEventoLancaExcecaoQuandoNaoEncontrado(): void
+    {
+        $this->expectException(RecursoNaoEncontradoException::class);
+
+        $this->service->removerEvento('inexistente');
+    }
+
+    public function testRemoverEventoExcluiApenasOEventoInformado(): void
+    {
+        $this->service->criar('sessao-1', 'discurso-1', 'Conteúdo');
+        $this->service->adicionarEvento('discurso-1', 'evento-1', 'Lapso', 3);
+        $this->service->adicionarEvento('discurso-1', 'evento-2', 'Chiste', 7);
+
+        $this->service->removerEvento('evento-1');
+
+        self::assertNull($this->service->buscarEvento('evento-1'));
+        self::assertNotNull($this->service->buscarEvento('evento-2'));
+        self::assertSame(1, $this->service->buscarPorId('discurso-1')->quantidadeDeEventos);
+    }
 }
