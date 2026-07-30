@@ -15,11 +15,14 @@ use PsycheAI\Presentation\Web\ViewModels\RecorrenciaViewModel;
 use PsycheAI\Presentation\Web\ViewModels\SujeitoViewModel;
 
 /**
- * Tela do Discourse Engine (Sprint 14): mostra o Sujeito e as
- * Recorrências/Observações recalculadas a cada consulta pela API
- * (GET /subjects/{id}, GET /subjects/{id}/observations) — sem nenhuma
- * hipótese, interpretação ou diagnóstico, apenas o que se repete no
- * discurso registrado. Não estende AbstractResourceController/
+ * Tela do Discourse Engine (Sprint 14) + Motor Freud (Sprint 15) + Motor
+ * Lacan (Sprint 16): mostra o Sujeito e as Recorrências/Observações
+ * recalculadas a cada consulta pela API (GET /subjects/{id},
+ * GET /subjects/{id}/observations?vocabulario=lacan) lado a lado com o
+ * rótulo lacaniano — absorve o que seria um "Observador Clínico" próprio,
+ * já que essa combinação é o suficiente, sem nenhuma hipótese,
+ * interpretação ou diagnóstico além do que se repete no discurso
+ * registrado. Não estende AbstractResourceController/
  * AbstractCrudResourceController pelo mesmo motivo de
  * HistoricoSujeitoController: o ceremonial genérico de listagem/CRUD não
  * se aplica a uma página que combina duas respostas de uma vez.
@@ -43,7 +46,10 @@ final class ObservacoesSujeitoController
             return ErrorController::renderizar($this->erroDe($sujeitoResposta), $this->viewRenderer, $rota);
         }
 
-        $observacoesResposta = $this->httpClient->get('subjects/' . $sujeitoId . '/observations');
+        $observacoesResposta = $this->httpClient->get(
+            'subjects/' . $sujeitoId . '/observations',
+            ['vocabulario' => 'lacan']
+        );
 
         if (!$observacoesResposta->sucesso) {
             return ErrorController::renderizar($this->erroDe($observacoesResposta), $this->viewRenderer, $rota);

@@ -22,7 +22,12 @@ final class ObservacoesSujeitoControllerTest extends TestCase
     {
         $fake = new ObservacoesHttpClientFake(
             self::SUJEITOS_PADRAO,
-            [['id' => '1', 'descricao' => 'lapso', 'frequencia' => 2]],
+            [[
+                'id' => '1',
+                'descricao' => 'lapso',
+                'frequencia' => 2,
+                'rotuloLacaniano' => 'Estrutura candidata: deslize metonímico.',
+            ]],
             [['id' => '1', 'texto' => 'Recorrência observada: lapso (2 ocorrência(s)).']]
         );
 
@@ -33,6 +38,7 @@ final class ObservacoesSujeitoControllerTest extends TestCase
         $this->assertStringContainsString('Sujeito A', $resposta->corpo);
         $this->assertStringContainsString('lapso', $resposta->corpo);
         $this->assertStringContainsString('Recorrência observada: lapso (2 ocorrência(s)).', $resposta->corpo);
+        $this->assertStringContainsString('Estrutura candidata: deslize metonímico.', $resposta->corpo);
     }
 
     public function testExibeErroDeNaoEncontradoQuandoOSujeitoNaoExiste(): void

@@ -13,7 +13,10 @@ use PsycheAI\Application\DTOs\RecorrenciaDTO;
  * campo "data" do envelope JSON da API. Nunca inclui hipótese, diagnóstico
  * ou qualquer leitura de sentido — apenas a descrição literal do que se
  * repete (Recorrencia) e o texto registral gerado a partir dela
- * (Observacao), conforme docs/Regras-Dominio.md.
+ * (Observacao), conforme docs/Regras-Dominio.md. `rotuloLacaniano` (Sprint
+ * 16) é null a menos que `vocabulario=lacan` tenha sido pedido — quando
+ * presente, é sempre uma reclassificação da mesma Recorrencia, nunca um
+ * dado novo.
  */
 final class ObservacaoResponse
 {
@@ -39,6 +42,7 @@ final class ObservacaoResponse
                     'id' => $recorrencia->id,
                     'descricao' => $recorrencia->descricao,
                     'frequencia' => $recorrencia->frequencia,
+                    'rotuloLacaniano' => $recorrencia->rotuloLacaniano,
                 ],
                 $this->dto->recorrencias
             ),

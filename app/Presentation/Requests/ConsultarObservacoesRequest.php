@@ -10,11 +10,16 @@ namespace PsycheAI\Presentation\Requests;
  * ausência do filtro simplesmente significa "usar o mínimo padrão do
  * detector de recorrências" (RecorrenciaMinimaSpecification), nunca um
  * erro.
+ *
+ * `vocabulario=lacan` (Sprint 16) é igualmente opcional: sua ausência
+ * significa devolver só a leitura do Motor Freud, sem o rótulo do Motor
+ * Lacan ao lado.
  */
 final class ConsultarObservacoesRequest extends HttpRequestData
 {
     private function __construct(
-        public readonly ?int $minimoDeRecorrencia
+        public readonly ?int $minimoDeRecorrencia,
+        public readonly bool $comLeituraLacaniana
     ) {
     }
 
@@ -24,11 +29,12 @@ final class ConsultarObservacoesRequest extends HttpRequestData
     public static function fromArray(array $dados): self
     {
         $valor = $dados['minimoDeRecorrencia'] ?? null;
+        $minimo = ($valor === null || $valor === '')
+            ? null
+            : self::exigirInteiro(['minimoDeRecorrencia' => $valor], 'minimoDeRecorrencia');
 
-        if ($valor === null || $valor === '') {
-            return new self(null);
-        }
+        $comLeituraLacaniana = ($dados['vocabulario'] ?? null) === 'lacan';
 
-        return new self(self::exigirInteiro(['minimoDeRecorrencia' => $valor], 'minimoDeRecorrencia'));
+        return new self($minimo, $comLeituraLacaniana);
     }
 }

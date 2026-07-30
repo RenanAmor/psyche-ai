@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.15 — Sprint 15 (Motor Freud)
+> Versão 0.16 — Sprint 16 (Motor Lacan)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -527,15 +527,56 @@ identificação de significante, NLP, similaridade semântica ou IA
 generativa. `docs/Ontologia-Freud.md` não foi alterado (permanece
 somente vocabulário conceitual).
 
-## Sprint 16 — Motor Lacan (planejada)
+## Sprint 16 — Motor Lacan (concluída)
 
-Reclassificar as mesmas `Recorrencia`/`Observacao` trazidas pelo Motor
-Freud com vocabulário lacaniano (ex.: metáfora/metonímia, conforme
-[Ontologia-Lacan.md (4)](Ontologia-Lacan.md#4-relações-conceituais)) — sem
-acrescentar leitura de sentido nem afirmar estatuto de significante
-confirmado ([Ontologia-Lacan.md (5)](Ontologia-Lacan.md#5-limites)). A
-tela combinada (base do Freud + rótulos do Lacan) absorve o que seria um
-"Observador Clínico" — não há sprint própria para isso.
+- [x] `Domain/Services/ReclassificadorLacaniano`: novo Domain Service que
+      recebe as mesmas `Recorrencia[]` já produzidas pelo Motor Freud
+      (Sprint 15) e devolve um rótulo lacaniano por id de Recorrencia —
+      nenhum dado novo é criado, apenas uma reclassificação. Como o
+      detector só reconhece repetição de conteúdo (normalizado desde a
+      Sprint 15), sem nenhuma substituição entre conteúdos distintos, a
+      releitura estrutural correspondente da tabela de
+      [Ontologia-Lacan.md (4)](Ontologia-Lacan.md#4-relações-conceituais)
+      é sempre a de deslocamento/metonímia — nunca condensação/metáfora,
+      que pressuporia dois significantes distintos em substituição, algo
+      que este detector não captura. O rótulo devolvido
+      ("Estrutura candidata: deslize metonímico.") ecoa literalmente o
+      vocabulário de "estrutura candidata" de
+      [Ontologia-Lacan.md (5)](Ontologia-Lacan.md#5-limites): nunca afirma
+      o estatuto de significante confirmado — só o sujeito, no processo
+      analítico, confirma esse estatuto.
+- [x] `Application/DTOs/RecorrenciaDTO` + `ObservacaoApplicationService::consultar()`:
+      novo parâmetro opcional `$comLeituraLacaniana` (padrão `false`,
+      preservando o contrato da Sprint 14/15) — quando `true`, aplica
+      `ReclassificadorLacaniano` sobre as Recorrencias do Motor Freud e
+      preenche `rotuloLacaniano` em cada `RecorrenciaDTO`; quando ausente,
+      o campo permanece `null`.
+- [x] `GET /subjects/{id}/observations?vocabulario=lacan` (mesmo endpoint
+      da Sprint 14, sem endpoint novo): `ConsultarObservacoesRequest` passa
+      a aceitar o parâmetro de query opcional `vocabulario`, repassado por
+      `ObservacaoController` ao Application Service. `ObservacaoResponse`
+      inclui `rotuloLacaniano` (null por padrão) ao lado de cada
+      recorrência.
+- [x] Tela combinada (absorve o "Observador Clínico" — não há sprint
+      própria para isso): `Web/Controllers/ObservacoesSujeitoController`
+      passa a consultar sempre com `vocabulario=lacan`, e
+      `Web/Views/observacoes/mostrar.php` ganha a coluna "Leitura
+      Lacaniana" lado a lado com Descrição/Frequência do Motor Freud —
+      uma única tela, sem endpoint nem tela nova.
+- [x] Testes: `ReclassificadorLacanianoTest` (`tests/Unit/`, cobrindo o
+      rótulo uniforme, a lista vazia e que os dados originais da
+      Recorrencia não são alterados), novos casos em
+      `ObservacaoApplicationServiceTest` (com/sem leitura lacaniana),
+      `ObservacaoEndpointsTest` (com/sem `?vocabulario=lacan`) e
+      `ObservacoesSujeitoControllerTest` (rótulo lacaniano renderizado na
+      tela). Suíte completa executada sem regressões (379 testes, 952
+      asserções; eram 372 testes e 936 asserções ao final da Sprint 15).
+- [x] Atualização do Roadmap.
+
+Escopo desta sprint é exclusivamente reclassificação de vocabulário sobre
+dados já produzidos pelo Motor Freud — sem significante, sem leitura de
+sentido, sem hipótese, sem diagnóstico, sem endpoint ou tela nova além da
+extensão já prevista desde a Sprint 14.
 
 ## Sprint 17 — Interface Conversacional (escopo alto nível)
 

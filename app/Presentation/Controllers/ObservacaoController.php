@@ -22,7 +22,11 @@ final class ObservacaoController extends Controller
     {
         $filtro = ConsultarObservacoesRequest::fromArray($request->queries());
 
-        $resultado = $this->observacoes->consultar($params['id'], $filtro->minimoDeRecorrencia);
+        $resultado = $this->observacoes->consultar(
+            $params['id'],
+            $filtro->minimoDeRecorrencia,
+            $filtro->comLeituraLacaniana
+        );
 
         return $this->sucesso(ObservacaoResponse::fromDTO($resultado)->toArray());
     }

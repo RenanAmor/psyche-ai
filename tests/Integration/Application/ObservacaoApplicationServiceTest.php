@@ -88,4 +88,23 @@ final class ObservacaoApplicationServiceTest extends SQLiteTestCase
 
         self::assertSame(['chiste', 'lapso'], $descricoes);
     }
+
+    public function testConsultarSemLeituraLacanianaDevolveRotuloNulo(): void
+    {
+        $resultado = $this->service->consultar('sujeito-1');
+
+        self::assertNull($resultado->recorrencias[0]->rotuloLacaniano);
+    }
+
+    public function testConsultarComLeituraLacanianaRotulaAsRecorrenciasDoFreud(): void
+    {
+        $resultado = $this->service->consultar('sujeito-1', null, true);
+
+        self::assertCount(1, $resultado->recorrencias);
+        self::assertSame('lapso', $resultado->recorrencias[0]->descricao);
+        self::assertSame(
+            'Estrutura candidata: deslize metonímico.',
+            $resultado->recorrencias[0]->rotuloLacaniano
+        );
+    }
 }

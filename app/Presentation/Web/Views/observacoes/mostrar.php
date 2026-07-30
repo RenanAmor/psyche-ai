@@ -13,6 +13,7 @@ $linhasRecorrencias = array_map(
     static fn ($recorrencia) => [
         'descricao' => $recorrencia->descricao,
         'frequencia' => (string) $recorrencia->frequencia,
+        'rotuloLacaniano' => $recorrencia->rotuloLacaniano ?? '',
     ],
     $recorrencias
 );
@@ -27,12 +28,14 @@ $linhasObservacoes = array_map(
     <p class="texto-auxiliar">
         Discourse Engine: o que se repete no discurso registrado deste sujeito, sem
         hipótese, interpretação ou diagnóstico — apenas atenção flutuante sobre a
-        recorrência.
+        recorrência (Motor Freud) e sua reclassificação em vocabulário lacaniano
+        (Motor Lacan), sempre como estrutura candidata — nunca um significante
+        confirmado.
     </p>
 
     <h3>Recorrências</h3>
     <?= TableComponent::render(
-        ['descricao' => 'Descrição', 'frequencia' => 'Frequência'],
+        ['descricao' => 'Descrição', 'frequencia' => 'Frequência', 'rotuloLacaniano' => 'Leitura Lacaniana'],
         $linhasRecorrencias,
         'Nenhuma recorrência encontrada no discurso deste sujeito.'
     ) ?>

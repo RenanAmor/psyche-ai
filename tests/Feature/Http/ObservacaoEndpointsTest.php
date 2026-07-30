@@ -63,4 +63,28 @@ final class ObservacaoEndpointsTest extends HttpTestCase
 
         self::assertSame(400, $response->status());
     }
+
+    public function testGetObservationsSemVocabularioNaoDevolveRotuloLacaniano(): void
+    {
+        $response = $this->despachar('GET', '/subjects/sujeito-1/observations');
+
+        $corpo = $this->decodificar($response);
+
+        self::assertSame(200, $response->status());
+        self::assertNull($corpo['data']['recorrencias'][0]['rotuloLacaniano']);
+    }
+
+    public function testGetObservationsComVocabularioLacanDevolveORotuloAoLadoDaRecorrencia(): void
+    {
+        $response = $this->despachar('GET', '/subjects/sujeito-1/observations', [], ['vocabulario' => 'lacan']);
+
+        $corpo = $this->decodificar($response);
+
+        self::assertSame(200, $response->status());
+        self::assertSame('lapso', $corpo['data']['recorrencias'][0]['descricao']);
+        self::assertSame(
+            'Estrutura candidata: deslize metonímico.',
+            $corpo['data']['recorrencias'][0]['rotuloLacaniano']
+        );
+    }
 }
