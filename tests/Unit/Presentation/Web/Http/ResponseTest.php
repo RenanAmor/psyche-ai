@@ -25,4 +25,13 @@ final class ResponseTest extends TestCase
         $this->assertSame('<p>ola</p>', $response->corpo);
         $this->assertSame('text/html; charset=utf-8', $response->headers['Content-Type']);
     }
+
+    public function testRedirecionarDevolve302ComLocation(): void
+    {
+        $response = Response::redirecionar('/entrar');
+
+        $this->assertSame(302, $response->status);
+        $this->assertSame('/entrar', $response->headers['Location']);
+        $this->assertSame('', $response->corpo);
+    }
 }

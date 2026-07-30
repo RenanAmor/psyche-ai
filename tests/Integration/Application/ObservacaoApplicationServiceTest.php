@@ -107,4 +107,50 @@ final class ObservacaoApplicationServiceTest extends SQLiteTestCase
             $resultado->recorrencias[0]->rotuloLacaniano
         );
     }
+
+    public function testConsultarCircuitoLancaExcecaoQuandoSujeitoNaoExiste(): void
+    {
+        $this->expectException(RecursoNaoEncontradoException::class);
+
+        $this->service->consultarCircuito('inexistente');
+    }
+
+    public function testConsultarCircuitoDevolveOTrajetoDaRecorrenciaAtravesDasSessoes(): void
+    {
+        $resultado = $this->service->consultarCircuito('sujeito-1');
+
+        self::assertSame('sujeito-1', $resultado->sujeitoId);
+        self::assertCount(1, $resultado->circuitos);
+
+        $circuito = $resultado->circuitos[0];
+        self::assertSame('lapso', $circuito->descricao);
+        self::assertSame(2, $circuito->frequencia);
+        self::assertCount(2, $circuito->ocorrencias);
+        self::assertSame('sessao-1', $circuito->ocorrencias[0]->sessaoId);
+        self::assertSame('sessao-2', $circuito->ocorrencias[1]->sessaoId);
+    }
+
+    public function testConsultarCircuitoNaoVazaEntreSujeitos(): void
+    {
+        $resultado = $this->service->consultarCircuito('sujeito-2');
+
+        self::assertSame([], $resultado->circuitos);
+    }
+
+    public function testConsultarCircuitoSemLeituraLacanianaDevolveRotuloNulo(): void
+    {
+        $resultado = $this->service->consultarCircuito('sujeito-1');
+
+        self::assertNull($resultado->circuitos[0]->rotuloLacaniano);
+    }
+
+    public function testConsultarCircuitoComLeituraLacanianaRotulaComoCircuitoQuandoAtravessaSessoes(): void
+    {
+        $resultado = $this->service->consultarCircuito('sujeito-1', null, true);
+
+        self::assertSame(
+            'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
+            $resultado->circuitos[0]->rotuloLacaniano
+        );
+    }
 }

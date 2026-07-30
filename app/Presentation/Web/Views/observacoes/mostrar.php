@@ -3,9 +3,11 @@
  * @var \PsycheAI\Presentation\Web\ViewModels\SujeitoViewModel $sujeito
  * @var \PsycheAI\Presentation\Web\ViewModels\RecorrenciaViewModel[] $recorrencias
  * @var \PsycheAI\Presentation\Web\ViewModels\ObservacaoViewModel[] $observacoes
+ * @var \PsycheAI\Presentation\Web\ViewModels\CircuitoRecorrenciaViewModel[] $circuitos
  */
 
 use PsycheAI\Presentation\Web\Components\ButtonComponent;
+use PsycheAI\Presentation\Web\Components\CircuitoTrajetoComponent;
 use PsycheAI\Presentation\Web\Components\Html;
 use PsycheAI\Presentation\Web\Components\TableComponent;
 
@@ -45,6 +47,17 @@ $linhasObservacoes = array_map(
         ['texto' => 'Texto'],
         $linhasObservacoes,
         'Nenhuma observação gerada para este sujeito.'
+    ) ?>
+
+    <h3>Circuito / Trajeto</h3>
+    <p class="texto-auxiliar">
+        Quando/onde cada recorrência reaparece ao longo do tempo — o
+        trajeto de sessões em que o mesmo tema retorna, sem hipótese sobre
+        o que esse retorno significaria.
+    </p>
+    <?= CircuitoTrajetoComponent::render(
+        $circuitos,
+        'Nenhum circuito encontrado no discurso deste sujeito.'
     ) ?>
 
     <div class="pagina-detalhe-acoes">

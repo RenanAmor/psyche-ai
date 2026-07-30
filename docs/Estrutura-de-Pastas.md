@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.9
+> Versão 1.10
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -56,6 +56,7 @@ psyche-ai/
 │           ├── Errors/
 │           ├── Http/
 │           ├── Navigation/
+│           ├── Security/
 │           ├── ViewModels/
 │           ├── Views/
 │           └── Routes.php
@@ -157,6 +158,16 @@ da Sprint 7 e inalterado por esta Sprint. Mesmo padrão de recálculo em
 memória de `LinhaDoTempoApplicationService`/`ConsolidacaoApplicationService`
 — nenhuma `Recorrencia`/`Observacao` é gravada em repositório.
 
+Desde a revisão pós-Sprint 16 (docs/Roadmap.md), `ObservacaoApplicationService::consultarCircuito()`
+expõe o circuito/trajeto de cada Recorrencia: usa o resultado já
+filtrado (limiar ≥2) de `CicloDeObservacaoService::executar()` como
+única fonte de quais Recorrencias existem, cruzando com
+`DetectorRecorrencias::detectarCircuito()` através da nova tríade de
+Use Case `UseCases/DetectarCircuitoRecorrencia/` (`Command`, `Handler`,
+`Result`) — o `Result` expõe `array<string, OcorrenciaRecorrencia[]>`
+por id de Recorrencia, mesmo formato já usado por
+`ReclassificadorLacaniano::reclassificar()`.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -231,6 +242,12 @@ Regras reutilizáveis de validação e consulta do domínio.
 ### ValueObjects
 
 Objetos imutáveis definidos exclusivamente por seus valores.
+
+Desde a revisão pós-Sprint 16, `OcorrenciaRecorrencia` (`sessaoId`,
+`discursoId`, `eventoId`, `momento`, `posicao`) representa uma única
+ocorrência de um conteúdo normalizado dentro da Memória Longitudinal —
+usado por `DetectorRecorrencias::detectarCircuito()` para reconstruir o
+circuito/trajeto de uma Recorrencia através das Sessões.
 
 ---
 
@@ -386,7 +403,9 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   isolada e, opcionalmente, a encaixa no layout principal). Desde a
   Sprint 17, `Response::json()` devolve uma variante JSON (usada só pelo
   fetch() de atualização incremental da Conversa) ao lado da `Response`
-  HTML padrão.
+  HTML padrão. Desde a revisão pós-Sprint 16, `Response::redirecionar()`
+  devolve um 302 com o cabeçalho `Location`, usado pelo Portão do
+  Analista.
 - `Client/`: `HttpClientInterface` — porta de comunicação com a API
   REST (Sprint 10) — e `ApiHttpClient`, sua implementação de produção
   desde a Sprint 11B, que fala HTTP de verdade (cURL) com a API REST e
@@ -412,6 +431,14 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   sete seções do menu lateral (Dashboard, Conversa, Sujeitos, Sessões,
   Discursos, Memórias, Eventos Discursivos), compartilhada entre a
   Sidebar e `Routes.php`.
+- `Security/`: desde a revisão pós-Sprint 16, `PortaoDeAnalista` —
+  `estaAutenticado()`, `autenticar(string $senha)` (compara com
+  `getenv('PSYCHEAI_SENHA_ANALISTA')` via `hash_equals()`), `sair()` e
+  `proteger(callable $handler): Closure`, que embrulha um handler para
+  redirecionar (302) a `/entrar` quando a sessão
+  (`psyche_analista_autenticado`) não está autenticada. Sem entidade de
+  Domínio nem persistência própria — descartável sem dívida quando a
+  Sprint 18 (Plataforma) substituí-lo por contas reais.
 - `Components/`: componentes reutilizáveis orientados a dados —
   `TableComponent` (com estado vazio automático via
   `EmptyStateComponent`), `CardComponent`, `ButtonComponent`,
@@ -420,7 +447,9 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   utilitário `Html`. Desde a Sprint 17, `ConversaAreaComponent` combina
   `AlertComponent` + `TableComponent` no bloco de alerta/histórico da
   Conversa, para que o mesmo HTML sirva tanto a página cheia quanto o
-  fragmento JSON de `POST /conversa/mensagens`.
+  fragmento JSON de `POST /conversa/mensagens`. Desde a revisão
+  pós-Sprint 16, `CircuitoTrajetoComponent` lista, por Recorrencia, o
+  trajeto cronológico "Sessão {data} → Sessão {data} → …".
 - `Errors/`: `ErrorType` (enum fechado com os tipos exigidos: comunicação,
   não encontrado, validação, interno e, desde a Sprint 13, timeout),
   `ErrorViewModel` e `ErrorViewModelFactory`. `ApiHttpClient` distingue
@@ -469,7 +498,14 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   combina `GET /subjects/{id}` e `GET /subjects/{id}/observations` em uma
   página própria (não embutida na de Histórico) — separação deliberada
   porque a Sprint 16 vai estendê-la com os rótulos do Motor Lacan lado a
-  lado, evitando reabrir `HistoricoSujeitoController` para isso.
+  lado, evitando reabrir `HistoricoSujeitoController` para isso. Desde a
+  revisão pós-Sprint 16, o mesmo Controller também combina
+  `GET /subjects/{id}/observations/circuito`, exibindo o circuito/trajeto
+  de cada Recorrencia. Também desde essa revisão,
+  `AutenticacaoAnalistaController` (novo) implementa a tela de
+  entrada/saída do Portão do Analista (`GET/POST /entrar`,
+  `POST /sair`) — não protegida por `PortaoDeAnalista::proteger()`, por
+  ser justamente a porta de acesso a ele.
 - `Views/`: `layout.php` (com `partials/header.php` e
   `partials/sidebar.php`), uma view por seção, `carregando.php`,
   `errors/error.php` e, desde a Sprint 12, `conversa/index.php` — monta
@@ -497,9 +533,16 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   `sujeitos/mostrar.php`. Desde a Sprint 14, `observacoes/mostrar.php`
   lista as Recorrências e Observações do Discourse Engine em duas
   `TableComponent`, com um link "Ver Observações" adicionado em
-  `historico/mostrar.php`.
+  `historico/mostrar.php`. Desde a revisão pós-Sprint 16, a mesma view
+  ganha uma terceira seção com `CircuitoTrajetoComponent`. Também desde
+  essa revisão, `autenticacao/entrar.php` monta o formulário de senha do
+  Portão do Analista com `FormComponent`/`AlertComponent`.
 - `Routes.php`: registra todas as rotas internas sobre um `Router`,
-  reaproveitando os mesmos caminhos do `NavigationMenu`.
+  reaproveitando os mesmos caminhos do `NavigationMenu`. Desde a revisão
+  pós-Sprint 16, todo handler de coleta/análise (`/`, `/sujeitos*`,
+  `/sessoes*`, `/discursos*`, `/memorias*`, `/eventos-discursivos`) é
+  envolvido por `Security\PortaoDeAnalista::proteger()` no momento do
+  registro; `/conversa*`, `/erros/*`, `/entrar` e `/sair` ficam de fora.
 - `public/web/index.php`: front controller da interface web,
   independente de `public/index.php` (API REST). Desde a Sprint 12,
   chama `session_start()` antes de despachar a requisição, para que

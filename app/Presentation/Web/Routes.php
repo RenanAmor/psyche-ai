@@ -6,6 +6,7 @@ namespace PsycheAI\Presentation\Web;
 
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
 use PsycheAI\Presentation\Web\Controllers\AbstractCrudResourceController;
+use PsycheAI\Presentation\Web\Controllers\AutenticacaoAnalistaController;
 use PsycheAI\Presentation\Web\Controllers\ConversaController;
 use PsycheAI\Presentation\Web\Controllers\DashboardController;
 use PsycheAI\Presentation\Web\Controllers\DiscursosController;
@@ -17,6 +18,7 @@ use PsycheAI\Presentation\Web\Controllers\ObservacoesSujeitoController;
 use PsycheAI\Presentation\Web\Controllers\SessoesController;
 use PsycheAI\Presentation\Web\Controllers\SujeitosController;
 use PsycheAI\Presentation\Web\Http\Router;
+use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
 
 /**
  * Registra todas as rotas internas da interface web sobre um Router já
@@ -31,6 +33,12 @@ use PsycheAI\Presentation\Web\Http\Router;
  * REST. As rotas estáticas (".../novo", ".../{id}/editar") são registradas
  * antes das dinâmicas (".../{id}") para que "novo" não seja capturado
  * como id.
+ *
+ * Desde a revisão pós-Sprint 16 (docs/Roadmap.md), toda rota de
+ * coleta/análise de dados (`/`, CRUDs, histórico, observações, eventos
+ * discursivos) passa por `PortaoDeAnalista::proteger()`. `/conversa*`
+ * (superfície do Sujeito) e `/entrar`/`/sair`/`/erros/*` permanecem
+ * deliberadamente fora do Portão.
  */
 final class Routes
 {
@@ -46,21 +54,26 @@ final class Routes
         $historico = new HistoricoSujeitoController($httpClient);
         $observacoes = new ObservacoesSujeitoController($httpClient);
         $erros = new ErrorController();
+        $autenticacao = new AutenticacaoAnalistaController();
 
-        $router->get('/', $dashboard->index(...));
+        $router->get('/', PortaoDeAnalista::proteger($dashboard->index(...)));
 
         self::registrarCrud($router, '/sujeitos', $sujeitos);
-        $router->get('/sujeitos/{id}/historico', $historico->mostrar(...));
-        $router->get('/sujeitos/{id}/observacoes', $observacoes->mostrar(...));
+        $router->get('/sujeitos/{id}/historico', PortaoDeAnalista::proteger($historico->mostrar(...)));
+        $router->get('/sujeitos/{id}/observacoes', PortaoDeAnalista::proteger($observacoes->mostrar(...)));
         self::registrarCrud($router, '/sessoes', $sessoes);
         self::registrarCrud($router, '/discursos', $discursos);
         self::registrarCrud($router, '/memorias', $memorias);
 
-        $router->get('/eventos-discursivos', $eventosDiscursivos->index(...));
+        $router->get('/eventos-discursivos', PortaoDeAnalista::proteger($eventosDiscursivos->index(...)));
 
         $router->get('/conversa', $conversa->iniciar(...));
         $router->post('/conversa/enviar', $conversa->enviar(...));
         $router->post('/conversa/mensagens', $conversa->mensagens(...));
+
+        $router->get('/entrar', $autenticacao->entrar(...));
+        $router->post('/entrar', $autenticacao->autenticar(...));
+        $router->post('/sair', $autenticacao->sair(...));
 
         $router->get('/erros/comunicacao', $erros->comunicacao(...));
         $router->get('/erros/validacao', $erros->validacao(...));
@@ -72,12 +85,12 @@ final class Routes
 
     private static function registrarCrud(Router $router, string $prefixo, AbstractCrudResourceController $controller): void
     {
-        $router->get($prefixo, $controller->index(...));
-        $router->get($prefixo . '/novo', $controller->novo(...));
-        $router->post($prefixo, $controller->store(...));
-        $router->get($prefixo . '/{id}/editar', $controller->editar(...));
-        $router->post($prefixo . '/{id}/excluir', $controller->excluir(...));
-        $router->post($prefixo . '/{id}', $controller->atualizar(...));
-        $router->get($prefixo . '/{id}', $controller->mostrar(...));
+        $router->get($prefixo, PortaoDeAnalista::proteger($controller->index(...)));
+        $router->get($prefixo . '/novo', PortaoDeAnalista::proteger($controller->novo(...)));
+        $router->post($prefixo, PortaoDeAnalista::proteger($controller->store(...)));
+        $router->get($prefixo . '/{id}/editar', PortaoDeAnalista::proteger($controller->editar(...)));
+        $router->post($prefixo . '/{id}/excluir', PortaoDeAnalista::proteger($controller->excluir(...)));
+        $router->post($prefixo . '/{id}', PortaoDeAnalista::proteger($controller->atualizar(...)));
+        $router->get($prefixo . '/{id}', PortaoDeAnalista::proteger($controller->mostrar(...)));
     }
 }

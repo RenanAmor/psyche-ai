@@ -41,6 +41,48 @@ final class ObservacoesSujeitoControllerTest extends TestCase
         $this->assertStringContainsString('Estrutura candidata: deslize metonímico.', $resposta->corpo);
     }
 
+    public function testExibeOTrajetoDoCircuitoDaRecorrencia(): void
+    {
+        $fake = new ObservacoesHttpClientFake(
+            recursos: self::SUJEITOS_PADRAO,
+            recorrencias: [['id' => '1', 'descricao' => 'lapso', 'frequencia' => 2]],
+            circuitos: [[
+                'id' => '1',
+                'descricao' => 'lapso',
+                'frequencia' => 2,
+                'rotuloLacaniano' => 'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
+                'ocorrencias' => [
+                    ['sessaoId' => 'sessao-1', 'discursoId' => 'discurso-1', 'eventoId' => 'evento-1', 'momento' => '2026-01-10 10:00:00', 'posicao' => 0],
+                    ['sessaoId' => 'sessao-2', 'discursoId' => 'discurso-2', 'eventoId' => 'evento-2', 'momento' => '2026-01-20 10:00:00', 'posicao' => 0],
+                ],
+            ]]
+        );
+
+        $controller = new ObservacoesSujeitoController($fake);
+        $resposta = $controller->mostrar(Request::criar('GET', '/sujeitos/sub-001/observacoes')->comRouteParams(['id' => 'sub-001']));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('Sessão 2026-01-10 10:00:00 → Sessão 2026-01-20 10:00:00', $resposta->corpo);
+        $this->assertStringContainsString(
+            'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
+            $resposta->corpo
+        );
+    }
+
+    public function testExibeErroDeComunicacaoQuandoOCircuitoFalha(): void
+    {
+        $fake = new ObservacoesHttpClientFake(
+            recursos: self::SUJEITOS_PADRAO,
+            falhaNoCircuito: ErrorType::COMUNICACAO
+        );
+
+        $controller = new ObservacoesSujeitoController($fake);
+        $resposta = $controller->mostrar(Request::criar('GET', '/sujeitos/sub-001/observacoes')->comRouteParams(['id' => 'sub-001']));
+
+        $this->assertSame(502, $resposta->status);
+        $this->assertStringContainsString('Falha de comunicação', $resposta->corpo);
+    }
+
     public function testExibeErroDeNaoEncontradoQuandoOSujeitoNaoExiste(): void
     {
         $fake = new ObservacoesHttpClientFake(['subjects' => []]);
@@ -76,5 +118,6 @@ final class ObservacoesSujeitoControllerTest extends TestCase
         $this->assertSame(200, $resposta->status);
         $this->assertStringContainsString('Nenhuma recorrência encontrada', $resposta->corpo);
         $this->assertStringContainsString('Nenhuma observação gerada', $resposta->corpo);
+        $this->assertStringContainsString('Nenhum circuito encontrado', $resposta->corpo);
     }
 }

@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.16 — Sprint 16 (Motor Lacan)
+> Versão 0.17 — Revisão das Sprints 15-16 (pós-implementação)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -661,14 +661,137 @@ incremental, identidade por navegador) e refletir repetições já
 detectadas pelo Motor Freud — sem significante, sem leitura lacaniana na
 conversa, sem hipótese, sem diagnóstico, sem autenticação real.
 
+## Revisão das Sprints 15-16 (2026-07-30 — pós-implementação)
+
+As Sprints 14-16 foram implementadas e commitadas exatamente como
+planejado (379 testes/952 asserções ao final da Sprint 16). Uma conversa
+posterior com o usuário aprofundou o que "mapear a pulsão, todo o
+caminho" e "Lacan é a linguagem" significam de verdade, motivando esta
+revisão aditiva — nenhum contrato das Sprints 14-17 muda; tudo abaixo é
+extensão.
+
+Três decisões do usuário fecharam o escopo: (1) dois públicos, duas
+regras — o Sujeito que fala em `/conversa` nunca vê os motores (já
+garantido desde a Sprint 14); o analista/administrador é para quem os
+motores trabalham de verdade, e "toda interpretação pertence ao
+analista" (Regra 10) não exige que o sistema seja conservador com o
+próprio analista; (2) "mapear a pulsão, todo o caminho" é o
+circuito/trajeto de uma recorrência ao longo do tempo (quando/onde ela
+reaparece através das Sessões), não só a contagem pontual já existente;
+(3) "Lacan é a linguagem" pede a transcrição do aparato formal/notação
+lacaniano como gramática sobre o material do Freud — nunca uma
+interpretação de sentido.
+
+**Achado, adiado explicitamente**: os quatro discursos (Seminário 17)
+não têm base hoje — nem ontológica ([Ontologia-Lacan.md §3](Ontologia-Lacan.md#3-conceitos-fundamentais)
+documenta onze conceitos, não os quatro discursos) nem estrutural
+(`EventoDiscursivo` não modela interlocutor, papel de enunciação ou laço
+social). Mapeá-los exigiria uma sprint própria de ontologia antes de
+qualquer código — ver "Sprints futuras" abaixo.
+
+- [x] **Peça A — Papel do Analista.** Sem entidade nova de Domínio
+      (`Sujeito` continua significando "quem é observado"; um
+      `Analista` com conta duplicaria a Sprint 18, que será totalmente
+      greenfield em auth) — a separação é só na Apresentação Web, e
+      descartável sem dívida quando a Sprint 18 chegar:
+      `Presentation/Web/Security/PortaoDeAnalista.php` (novo:
+      `estaAutenticado()`, `autenticar(string $senha)` — compara com
+      `getenv('PSYCHEAI_SENHA_ANALISTA')` via `hash_equals()` —, `sair()`,
+      `proteger(callable $handler): Closure`);
+      `Presentation/Web/Http/Response::redirecionar()` (302, novo);
+      `Presentation/Web/Controllers/AutenticacaoAnalistaController` (novo,
+      rotas `GET/POST /entrar` e `POST /sair`) + view
+      `autenticacao/entrar.php`, reaproveitando `FormComponent`/
+      `AlertComponent`. Em `Web/Routes.php`, todo handler de
+      coleta/análise (`/`, `/sujeitos*`, `/sessoes*`, `/discursos*`,
+      `/memorias*`, `/eventos-discursivos`) passa a ser envolvido por
+      `PortaoDeAnalista::proteger()` no momento do registro —
+      `/conversa*` (superfície do Sujeito), `/erros/*`, `/entrar` e
+      `/sair` permanecem deliberadamente fora do Portão. A API REST
+      (`Presentation/Routes.php`) não é protegida nesta passada — só é
+      chamada servidor-a-servidor por `ApiHttpClient`, nunca direto pelo
+      navegador na topologia atual; se a API algum dia for exposta
+      direto, precisa de firewall próprio. Chave de sessão deliberadamente
+      `psyche_analista_autenticado` (distinta de `psyche_pessoa_id`/
+      `psyche_conversa_sessao_id`, do Sujeito), para a Sprint 18 poder
+      apagar `PortaoDeAnalista`/`AutenticacaoAnalistaController` inteiros
+      sem dívida ao construir contas reais.
+- [x] **Peça B — Circuito/Trajeto Pulsional.** Extensão aditiva do Motor
+      Freud, sem tocar a assinatura de `DetectorRecorrencias::detectar()`
+      (usada por 9 arquivos já existentes, incluindo
+      `RespostaEcoRecorrenciaService` da Sprint 17): novo VO
+      `Domain/ValueObjects/OcorrenciaRecorrencia` (`sessaoId`,
+      `discursoId`, `eventoId`, `momento`, `posicao`; `momento` é a data
+      da Sessão, mesma ancoragem estrutural do tempo da Sprint 13, não o
+      timestamp técnico do Evento); novo método
+      `DetectorRecorrencias::detectarCircuito(MemoriaLongitudinal): array<string, OcorrenciaRecorrencia[]>`
+      (mesma `normalizar()` de `detectar()`, para que "mesma recorrência"
+      nunca divirja entre contagem e circuito); nova tríade
+      `Application/UseCases/DetectarCircuitoRecorrencia/{Command,Handler,Result}`
+      + DTOs `OcorrenciaCircuitoDTO`/`CircuitoRecorrenciaDTO`/
+      `CircuitoResultadoDTO`; `ObservacaoApplicationService::consultarCircuito()`
+      (novo método, mesmo Application Service) usa o resultado já
+      filtrado (limiar ≥2) de `CicloDeObservacaoService::executar()` como
+      única fonte de quais Recorrencias existem, cruzando com
+      `detectarCircuito()`; endpoint
+      `GET /subjects/{id}/observations/circuito`
+      (`ObservacaoController::circuito()`, `Responses/CircuitoResponse`);
+      tela estendida (não bifurcada) —
+      `ObservacoesSujeitoController`/`observacoes/mostrar.php` ganham
+      `Components/CircuitoTrajetoComponent`, que lista por Recorrencia o
+      trajeto "Sessão {data} → Sessão {data} → …".
+- [x] **Peça C — Motor Lacan: rótulo estrutural de circuito.**
+      `ReclassificadorLacaniano::reclassificar()` fica congelado
+      (assinatura e saída intocadas, protegendo todos os consumidores da
+      Sprint 16). Método novo e aditivo,
+      `reclassificarComTrajeto(array $recorrencias, array $circuitos): array`:
+      quando as ocorrências de uma Recorrencia cobrem ≥2 `sessaoId`
+      distintos, novo rótulo ("Estrutura candidata: circuito — o tema
+      retorna ao mesmo ponto através de sessões distintas."); senão, o
+      mesmo rótulo de sempre ("deslize metonímico"). Constatação
+      estrutural contável (mesmo conteúdo normalizado em ≥2 registros de
+      sessão), nunca leitura de sentido — mesmo tipo de afirmação que o
+      rótulo da Sprint 16 já fazia; fundamentado em
+      [Ontologia-Lacan.md §3.7/§4](Ontologia-Lacan.md#37-registro-real)
+      (Repetição → Real) e na compulsão à repetição freudiana. Wire só em
+      `consultarCircuito(..., $comLeituraLacaniana)` →
+      `CircuitoRecorrenciaDTO::$rotuloLacaniano`; o endpoint/resposta
+      antigos (`GET /subjects/{id}/observations`) ficam inalterados.
+- [x] Testes, tudo aditivo (nenhuma asserção existente mudou): novos
+      casos em `DetectorRecorrenciasTest` (`detectarCircuito`),
+      `ReclassificadorLacanianoTest` (`reclassificarComTrajeto`), novo
+      `DetectarCircuitoRecorrenciaHandlerTest`, casos novos em
+      `ObservacaoApplicationServiceTest` e `ObservacaoEndpointsTest`
+      (`consultarCircuito`/`GET .../observations/circuito`), casos novos
+      em `ObservacoesSujeitoControllerTest` e `ViewModelsTest`, novo
+      `CircuitoTrajetoComponentTest`, novo `PortaoDeAnalistaTest`,
+      `AutenticacaoAnalistaControllerTest`, caso novo em `ResponseTest`
+      (`redirecionar()`), e `RoutesTest` passa a autenticar a "sessão" de
+      testes antes de iterar as rotas protegidas, com um caso novo
+      confirmando que uma rota protegida sem sessão redireciona para
+      `/entrar`. Suíte completa executada sem regressões (436 testes,
+      1102 asserções; eram 393 testes e 980 asserções ao final da Sprint
+      17).
+- [x] Atualização do Roadmap, `Arquitetura-Camadas.md` e
+      `Estrutura-de-Pastas.md`.
+
+Escopo desta revisão é exclusivamente as três peças acima — sem os
+quatro discursos (adiados, ver acima), sem significante, sem hipótese,
+sem diagnóstico, sem autenticação real (o Portão é descartável, não uma
+antecipação da Sprint 18).
+
 ## Sprint 18 — Plataforma (escopo alto nível)
 
 Autenticação real (substitui o Sujeito "visitante" fixo), usuários,
 permissões, administração e publicação — totalmente greenfield, sem
-nenhum código de auth/usuário/permissão hoje.
+nenhum código de auth/usuário/permissão hoje. Deve substituir
+`Presentation/Web/Security/PortaoDeAnalista` (revisão pós-Sprint 16,
+acima) por contas reais — ele foi desenhado deliberadamente para ser
+descartável sem dívida de migração nesse momento.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
+- Os quatro discursos lacanianos (mestre/universitário/histérica/analista, Seminário 17) — adiados na revisão das Sprints 15-16 acima por falta de base ontológica e estrutural; exigem uma sprint própria de ontologia (nos moldes das Sprints 2-3) antes de qualquer código.
 - Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura), a partir do Modelo Computacional do Discurso.
 - Especificação técnica do Evento Discursivo (formato de registro, granularidade, critérios de segmentação) — ver [Modelo-Computacional-Discurso.md (3.2)](Modelo-Computacional-Discurso.md#32-por-que-uma-unidade-própria).
 - Consolidação da bibliografia freudiana estruturada em [Ontologia-Freud.md (6)](Ontologia-Freud.md#6-referências) e da bibliografia lacaniana estruturada em [Ontologia-Lacan.md (6)](Ontologia-Lacan.md#6-referências).

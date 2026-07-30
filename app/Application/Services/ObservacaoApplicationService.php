@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace PsycheAI\Application\Services;
 
 use PsycheAI\Application\Contracts\ApplicationServiceInterface;
+use PsycheAI\Application\DTOs\CircuitoRecorrenciaDTO;
+use PsycheAI\Application\DTOs\CircuitoResultadoDTO;
 use PsycheAI\Application\DTOs\ObservacaoDTO;
 use PsycheAI\Application\DTOs\ObservacaoResultadoDTO;
 use PsycheAI\Application\DTOs\RecorrenciaDTO;
 use PsycheAI\Application\Exceptions\RecursoNaoEncontradoException;
+use PsycheAI\Application\UseCases\DetectarCircuitoRecorrencia\DetectarCircuitoRecorrenciaCommand;
+use PsycheAI\Application\UseCases\DetectarCircuitoRecorrencia\DetectarCircuitoRecorrenciaHandler;
 use PsycheAI\Domain\Entities\Observacao;
 use PsycheAI\Domain\Entities\Recorrencia;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
@@ -29,13 +33,23 @@ use PsycheAI\Domain\Services\ReclassificadorLacaniano;
  * as mesmas Recorrencias com vocabulário lacaniano (ReclassificadorLacaniano)
  * — nenhum dado novo é produzido, apenas um rótulo ao lado do que o Motor
  * Freud já trouxe.
+ *
+ * Desde a revisão pós-Sprint 16, consultarCircuito() expõe o "mapear a
+ * pulsão, todo o caminho": usa o mesmo resultado já filtrado (limiar ≥2)
+ * de CicloDeObservacaoService::executar() como única fonte de quais
+ * Recorrencias existem, cruzando com
+ * DetectorRecorrencias::detectarCircuito() (via
+ * DetectarCircuitoRecorrenciaHandler) para expor quando/onde cada uma
+ * reaparece através das Sessões — sem introduzir nenhuma Recorrencia que
+ * o Motor Freud não tenha trazido.
  */
 final class ObservacaoApplicationService implements ApplicationServiceInterface
 {
     public function __construct(
         private readonly SujeitoRepository $sujeitoRepository,
         private readonly CicloDeObservacaoService $cicloDeObservacao = new CicloDeObservacaoService(),
-        private readonly ReclassificadorLacaniano $reclassificadorLacaniano = new ReclassificadorLacaniano()
+        private readonly ReclassificadorLacaniano $reclassificadorLacaniano = new ReclassificadorLacaniano(),
+        private readonly DetectarCircuitoRecorrenciaHandler $detectarCircuitoRecorrencia = new DetectarCircuitoRecorrenciaHandler()
     ) {
     }
 
@@ -68,6 +82,40 @@ final class ObservacaoApplicationService implements ApplicationServiceInterface
             observacoes: array_map(
                 static fn (Observacao $observacao): ObservacaoDTO => ObservacaoDTO::fromEntity($observacao),
                 $resultado->observacoes()
+            )
+        );
+    }
+
+    public function consultarCircuito(
+        string $sujeitoId,
+        ?int $minimoDeRecorrencia = null,
+        bool $comLeituraLacaniana = false
+    ): CircuitoResultadoDTO {
+        $sujeito = $this->sujeitoRepository->findById($sujeitoId);
+
+        if ($sujeito === null) {
+            throw RecursoNaoEncontradoException::paraId('Sujeito', $sujeitoId);
+        }
+
+        $resultado = $this->cicloDeObservacao->executar($sujeito, $sujeitoId, $minimoDeRecorrencia);
+
+        $circuitosPorRecorrencia = $this->detectarCircuitoRecorrencia
+            ->handle(new DetectarCircuitoRecorrenciaCommand($resultado->memoria(), $resultado->recorrencias()))
+            ->circuitosPorRecorrencia();
+
+        $rotulosLacanianos = $comLeituraLacaniana
+            ? $this->reclassificadorLacaniano->reclassificarComTrajeto($resultado->recorrencias(), $circuitosPorRecorrencia)
+            : [];
+
+        return new CircuitoResultadoDTO(
+            sujeitoId: $sujeitoId,
+            circuitos: array_map(
+                static fn (Recorrencia $recorrencia): CircuitoRecorrenciaDTO => CircuitoRecorrenciaDTO::fromRecorrencia(
+                    $recorrencia,
+                    $circuitosPorRecorrencia[$recorrencia->id()->valor()] ?? [],
+                    $rotulosLacanianos[$recorrencia->id()->valor()] ?? null
+                ),
+                $resultado->recorrencias()
             )
         );
     }

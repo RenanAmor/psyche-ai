@@ -1,6 +1,6 @@
 # Arquitetura em Camadas — PsycheAI
 
-> Versão 1.5
+> Versão 1.6
 
 Este documento define a arquitetura em camadas do PsycheAI.
 
@@ -158,6 +158,11 @@ nunca era consultável de fora de um teste.
   API — a Sprint 16 (Motor Lacan) vai estender exatamente esta tela com
   os rótulos lacanianos lado a lado, e antecipar essa separação evita
   reabrir `HistoricoSujeitoController` quando isso acontecer.
+- **Circuito/trajeto (revisão pós-Sprint 16).** A mesma tela — e o mesmo
+  `ObservacaoApplicationService` — ganham
+  `GET /subjects/{id}/observations/circuito`: onde/quando cada
+  Recorrencia do Motor Freud reaparece através das Sessões, ver seção
+  própria abaixo.
 - **Motores continuam fora da conversa.** Esta Sprint não altera
   `RespostaAutomaticaInterface`/`ConversaController`, que seguem com
   `RespostaFixaService` — a integração dos motores com a conversa
@@ -217,6 +222,65 @@ nenhuma implementação.
   bundler, sem framework front-end). `POST /conversa/enviar` (a rota
   clássica da Sprint 12) continua existindo e funcional: se `fetch()`
   falhar ou JavaScript estiver desabilitado, o formulário recai nela.
+
+---
+
+## Revisão das Sprints 15-16 — Portão do Analista e Circuito/Trajeto (pós-Sprint 16)
+
+Uma conversa posterior à conclusão das Sprints 14-17 aprofundou "mapear a
+pulsão, todo o caminho" e "Lacan é a linguagem", motivando uma revisão
+aditiva — nenhum contrato publicado nas Sprints 14-17 muda.
+
+- **Dois públicos, duas regras.** O Sujeito que fala em `/conversa` nunca
+  vê os motores (já garantido desde a Sprint 14, reafirmado aqui). O
+  analista/administrador é para quem os motores trabalham de verdade —
+  a Regra 10 ("toda interpretação pertence ao analista",
+  [Regras-Dominio.md](Regras-Dominio.md)) não exige conservadorismo com o
+  próprio analista, só que a interpretação final seja sempre dele.
+- **Portão de sessão, não conta de usuário.** `Presentation/Web/Security/PortaoDeAnalista`
+  é deliberadamente simples: compara a senha recebida com
+  `getenv('PSYCHEAI_SENHA_ANALISTA')` via `hash_equals()` e marca
+  `$_SESSION['psyche_analista_autenticado']` — sem entidade de Domínio,
+  sem persistência própria. `proteger(callable $handler): Closure`
+  envolve cada handler no momento do registro em `Web/Routes.php`
+  (`/`, `/sujeitos*`, `/sessoes*`, `/discursos*`, `/memorias*`,
+  `/eventos-discursivos`); redireciona (302) para `/entrar` quando não
+  autenticado. `/conversa*`, `/erros/*`, `/entrar` e `/sair` ficam fora
+  do Portão. A chave de sessão é deliberadamente distinta de
+  `psyche_pessoa_id`/`psyche_conversa_sessao_id` (identidade do Sujeito),
+  para que a Sprint 18 possa apagar `PortaoDeAnalista` e
+  `AutenticacaoAnalistaController` inteiros, sem dívida de migração, ao
+  substituí-los por contas reais. A API REST não é protegida nesta
+  passada — só é chamada servidor-a-servidor por `ApiHttpClient`.
+- **Circuito, não uma nova classe de resultado.** "Mapear a pulsão, todo
+  o caminho" = o circuito/trajeto de uma Recorrencia ao longo do tempo
+  (quando/onde ela reaparece através das Sessões), não uma nova
+  interpretação. `DetectorRecorrencias::detectarCircuito()` vive na
+  mesma classe de `detectar()` (mesma `normalizar()`, para que "mesma
+  recorrência" nunca divirja entre contagem e circuito) e devolve
+  `array<string, OcorrenciaRecorrencia[]>` — `OcorrenciaRecorrencia`
+  (novo Value Object) ancora `momento` na data da Sessão, não no
+  timestamp técnico do Evento, mesma ancoragem estrutural do tempo já
+  adotada desde a Sprint 13. `ObservacaoApplicationService::consultarCircuito()`
+  usa o resultado já filtrado (limiar ≥2) de
+  `CicloDeObservacaoService::executar()` como única fonte de quais
+  Recorrencias existem — o circuito nunca introduz uma Recorrencia que o
+  Motor Freud não tenha trazido.
+- **Lacan como gramática sobre o circuito, não interpretação nova.**
+  "Lacan é a linguagem" pede a transcrição do aparato formal lacaniano
+  como notação sobre o material do Freud — nunca uma leitura de sentido.
+  `ReclassificadorLacaniano::reclassificar()` (Sprint 16) fica congelado;
+  o método aditivo `reclassificarComTrajeto()` apenas diferencia, com o
+  mesmo tipo de constatação estrutural contável do rótulo original, duas
+  situações: a recorrência atravessa ≥2 Sessões distintas (rótulo de
+  circuito) ou não (mesmo rótulo de sempre, deslize metonímico).
+- **Os quatro discursos ficam de fora, explicitamente.** Os quatro
+  discursos lacanianos (Seminário 17) não têm base ontológica
+  ([Ontologia-Lacan.md §3](Ontologia-Lacan.md#3-conceitos-fundamentais)
+  não os documenta) nem estrutural (`EventoDiscursivo` não modela
+  interlocutor, papel de enunciação ou laço social) — mapeá-los exige
+  uma sprint própria de ontologia antes de qualquer código
+  (docs/Roadmap.md, "Sprints futuras").
 
 ---
 

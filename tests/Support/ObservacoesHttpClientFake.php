@@ -13,9 +13,10 @@ use PsycheAI\Presentation\Web\Errors\ErrorViewModelFactory;
 /**
  * Decora HttpClientStub para testar ObservacoesSujeitoController: delega
  * "subjects/{id}" (busca do Sujeito) ao duplo genérico, mas responde
- * "subjects/{id}/observations" com valores fixos configuráveis —
+ * "subjects/{id}/observations" e, desde a revisão pós-Sprint 16,
+ * "subjects/{id}/observations/circuito" com valores fixos configuráveis —
  * HttpClientStub, sendo genérico e baseado em "recurso/id", não modela
- * recursos aninhados de três segmentos como este endpoint da Sprint 14.
+ * recursos aninhados de três ou quatro segmentos como estes endpoints.
  */
 final class ObservacoesHttpClientFake implements HttpClientInterface
 {
@@ -25,12 +26,15 @@ final class ObservacoesHttpClientFake implements HttpClientInterface
      * @param array<string, array<int, array<string, mixed>>> $recursos
      * @param array<int, array<string, mixed>> $recorrencias
      * @param array<int, array<string, mixed>> $observacoes
+     * @param array<int, array<string, mixed>> $circuitos
      */
     public function __construct(
         array $recursos = [],
         private readonly array $recorrencias = [],
         private readonly array $observacoes = [],
-        private readonly ?ErrorType $falhaNasObservacoes = null
+        private readonly ?ErrorType $falhaNasObservacoes = null,
+        private readonly array $circuitos = [],
+        private readonly ?ErrorType $falhaNoCircuito = null
     ) {
         $this->delegado = new HttpClientStub($recursos);
     }
@@ -41,6 +45,17 @@ final class ObservacoesHttpClientFake implements HttpClientInterface
     public function get(string $recurso, array $parametros = []): ApiResponse
     {
         $caminho = trim($recurso, '/');
+
+        if (preg_match('#^subjects/[^/]+/observations/circuito$#', $caminho) === 1) {
+            if ($this->falhaNoCircuito !== null) {
+                return ApiResponse::falha($this->erroPara($this->falhaNoCircuito, 'circuito'));
+            }
+
+            return ApiResponse::sucesso([
+                'sujeitoId' => explode('/', $caminho)[1],
+                'circuitos' => $this->circuitos,
+            ]);
+        }
 
         if (preg_match('#^subjects/[^/]+/observations$#', $caminho) === 1) {
             if ($this->falhaNasObservacoes !== null) {

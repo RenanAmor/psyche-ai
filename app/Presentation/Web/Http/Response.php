@@ -44,6 +44,15 @@ final class Response
         );
     }
 
+    /**
+     * Redirecionamento 302 usado pelo Portão do Analista (revisão
+     * pós-Sprint 16): sem corpo, apenas o cabeçalho Location.
+     */
+    public static function redirecionar(string $local): self
+    {
+        return new self('', 302, ['Location' => $local]);
+    }
+
     public static function naoEncontrado(string $corpo): self
     {
         return new self($corpo, 404);

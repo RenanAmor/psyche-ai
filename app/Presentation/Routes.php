@@ -43,6 +43,7 @@ final class Routes
         $router->get('/subjects/{id}/timeline', [$linhaDoTempo, 'timeline']);
         $router->get('/subjects/{id}/consolidation', [$linhaDoTempo, 'consolidacao']);
         $router->get('/subjects/{id}/observations', [$observacoes, 'observar']);
+        $router->get('/subjects/{id}/observations/circuito', [$observacoes, 'circuito']);
 
         $router->post('/sessions', [$sessoes, 'criar']);
         $router->get('/sessions', [$sessoes, 'listar']);

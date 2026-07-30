@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Unit\Presentation\Web\ViewModels;
 
 use PHPUnit\Framework\TestCase;
+use PsycheAI\Presentation\Web\ViewModels\CircuitoRecorrenciaViewModel;
 use PsycheAI\Presentation\Web\ViewModels\ConsolidacaoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\DashboardViewModel;
 use PsycheAI\Presentation\Web\ViewModels\DiscursoViewModel;
@@ -12,6 +13,7 @@ use PsycheAI\Presentation\Web\ViewModels\EventoDiscursivoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\LinhaDoTempoItemViewModel;
 use PsycheAI\Presentation\Web\ViewModels\MemoriaViewModel;
 use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
+use PsycheAI\Presentation\Web\ViewModels\OcorrenciaCircuitoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\SessaoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\SujeitoViewModel;
 
@@ -194,5 +196,64 @@ final class ViewModelsTest extends TestCase
         $this->assertSame(0, $dashboard->totalDiscursos);
         $this->assertSame(3, $dashboard->totalMemorias);
         $this->assertSame(0, $dashboard->totalEventosDiscursivos);
+    }
+
+    public function testOcorrenciaCircuitoViewModelFromArray(): void
+    {
+        $vm = OcorrenciaCircuitoViewModel::fromArray([
+            'sessaoId' => 'sessao-1',
+            'discursoId' => 'discurso-1',
+            'eventoId' => 'evento-1',
+            'momento' => '2026-01-10 10:00:00',
+            'posicao' => 0,
+        ]);
+
+        $this->assertSame('sessao-1', $vm->sessaoId);
+        $this->assertSame('discurso-1', $vm->discursoId);
+        $this->assertSame('evento-1', $vm->eventoId);
+        $this->assertSame('2026-01-10 10:00:00', $vm->momento);
+        $this->assertSame(0, $vm->posicao);
+    }
+
+    public function testCircuitoRecorrenciaViewModelFromArrayMontaOTrajeto(): void
+    {
+        $vm = CircuitoRecorrenciaViewModel::fromArray([
+            'id' => '1',
+            'descricao' => 'lapso',
+            'frequencia' => 2,
+            'rotuloLacaniano' => 'Estrutura candidata: circuito.',
+            'ocorrencias' => [
+                ['sessaoId' => 'sessao-1', 'discursoId' => 'd1', 'eventoId' => 'e1', 'momento' => '2026-01-10 10:00:00', 'posicao' => 0],
+                ['sessaoId' => 'sessao-2', 'discursoId' => 'd2', 'eventoId' => 'e2', 'momento' => '2026-01-20 10:00:00', 'posicao' => 0],
+            ],
+        ]);
+
+        $this->assertSame('lapso', $vm->descricao);
+        $this->assertSame(2, $vm->frequencia);
+        $this->assertSame('Estrutura candidata: circuito.', $vm->rotuloLacaniano);
+        $this->assertCount(2, $vm->ocorrencias);
+        $this->assertSame('Sessão 2026-01-10 10:00:00 → Sessão 2026-01-20 10:00:00', $vm->trajeto());
+    }
+
+    public function testCircuitoRecorrenciaViewModelFromArrayAplicaPadroesParaCamposAusentes(): void
+    {
+        $vm = CircuitoRecorrenciaViewModel::fromArray([]);
+
+        $this->assertSame('', $vm->id);
+        $this->assertSame('', $vm->descricao);
+        $this->assertSame(0, $vm->frequencia);
+        $this->assertSame([], $vm->ocorrencias);
+        $this->assertNull($vm->rotuloLacaniano);
+        $this->assertSame('', $vm->trajeto());
+    }
+
+    public function testCircuitoRecorrenciaViewModelFromArrayList(): void
+    {
+        $lista = CircuitoRecorrenciaViewModel::fromArrayList([
+            ['id' => '1', 'descricao' => 'lapso', 'frequencia' => 2, 'ocorrencias' => []],
+        ]);
+
+        $this->assertCount(1, $lista);
+        $this->assertSame('lapso', $lista[0]->descricao);
     }
 }

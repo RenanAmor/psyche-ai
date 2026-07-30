@@ -87,4 +87,52 @@ final class ObservacaoEndpointsTest extends HttpTestCase
             $corpo['data']['recorrencias'][0]['rotuloLacaniano']
         );
     }
+
+    public function testGetObservationsCircuitoDevolveOTrajetoDaRecorrenciaAtravesDasSessoes(): void
+    {
+        $response = $this->despachar('GET', '/subjects/sujeito-1/observations/circuito');
+
+        $corpo = $this->decodificar($response);
+
+        self::assertSame(200, $response->status());
+        self::assertSame('sujeito-1', $corpo['data']['sujeitoId']);
+        self::assertCount(1, $corpo['data']['circuitos']);
+
+        $circuito = $corpo['data']['circuitos'][0];
+        self::assertSame('lapso', $circuito['descricao']);
+        self::assertSame(2, $circuito['frequencia']);
+        self::assertCount(2, $circuito['ocorrencias']);
+        self::assertSame('sessao-1', $circuito['ocorrencias'][0]['sessaoId']);
+        self::assertSame('discurso-1', $circuito['ocorrencias'][0]['discursoId']);
+        self::assertSame('evento-1', $circuito['ocorrencias'][0]['eventoId']);
+        self::assertSame('sessao-2', $circuito['ocorrencias'][1]['sessaoId']);
+    }
+
+    public function testGetObservationsCircuitoComSujeitoInexistenteRetorna404(): void
+    {
+        $response = $this->despachar('GET', '/subjects/inexistente/observations/circuito');
+
+        self::assertSame(404, $response->status());
+    }
+
+    public function testGetObservationsCircuitoSemVocabularioNaoDevolveRotuloLacaniano(): void
+    {
+        $response = $this->despachar('GET', '/subjects/sujeito-1/observations/circuito');
+
+        $corpo = $this->decodificar($response);
+
+        self::assertNull($corpo['data']['circuitos'][0]['rotuloLacaniano']);
+    }
+
+    public function testGetObservationsCircuitoComVocabularioLacanRotulaComoCircuito(): void
+    {
+        $response = $this->despachar('GET', '/subjects/sujeito-1/observations/circuito', [], ['vocabulario' => 'lacan']);
+
+        $corpo = $this->decodificar($response);
+
+        self::assertSame(
+            'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
+            $corpo['data']['circuitos'][0]['rotuloLacaniano']
+        );
+    }
 }

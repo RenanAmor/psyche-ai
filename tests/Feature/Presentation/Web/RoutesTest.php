@@ -9,6 +9,7 @@ use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Router;
 use PsycheAI\Presentation\Web\Navigation\NavigationMenu;
 use PsycheAI\Presentation\Web\Routes;
+use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
 use PsycheAI\Tests\Support\HttpClientStub;
 
 /**
@@ -16,11 +17,26 @@ use PsycheAI\Tests\Support\HttpClientStub;
  * menu lateral resolve para uma página 200 através do Router real, e
  * uma rota inexistente cai no handler de "não encontrado" em vez de
  * lançar um erro fatal.
+ *
+ * Desde a revisão pós-Sprint 16, as rotas do menu ficam atrás de
+ * `PortaoDeAnalista` — por isso setUp() autentica a "sessão" de testes
+ * antes de exercitar a navegação. `testRotaProtegidaSemSessaoRedirecionaParaEntrar`
+ * cobre o caso sem autenticação.
  */
 final class RoutesTest extends TestCase
 {
+    private const SENHA_TESTE = 'senha-de-teste';
+
     protected function setUp(): void
     {
+        $_SESSION = [];
+        putenv('PSYCHEAI_SENHA_ANALISTA=' . self::SENHA_TESTE);
+        PortaoDeAnalista::autenticar(self::SENHA_TESTE);
+    }
+
+    protected function tearDown(): void
+    {
+        putenv('PSYCHEAI_SENHA_ANALISTA');
         $_SESSION = [];
     }
 
@@ -106,5 +122,49 @@ final class RoutesTest extends TestCase
 
         $this->assertSame(404, $resposta->status);
         $this->assertStringContainsString('Recurso não encontrado', $resposta->corpo);
+    }
+
+    public function testRotaProtegidaSemSessaoRedirecionaParaEntrar(): void
+    {
+        $_SESSION = [];
+
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/'));
+
+        $this->assertSame(302, $resposta->status);
+        $this->assertSame('/entrar', $resposta->headers['Location']);
+    }
+
+    public function testRotaDeEntrarNaoEProtegida(): void
+    {
+        $_SESSION = [];
+
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/entrar'));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('<form', $resposta->corpo);
+    }
+
+    public function testFluxoDeAutenticacaoDoAnalistaFuncionalAtravesDasRotas(): void
+    {
+        $_SESSION = [];
+        $router = $this->criarRouter();
+
+        $comSenhaErrada = $router->despachar(
+            Request::criar('POST', '/entrar', [], ['senha' => 'errada'])
+        );
+        $this->assertSame(422, $comSenhaErrada->status);
+        $this->assertFalse(PortaoDeAnalista::estaAutenticado());
+
+        $comSenhaCerta = $router->despachar(
+            Request::criar('POST', '/entrar', [], ['senha' => self::SENHA_TESTE])
+        );
+        $this->assertSame(302, $comSenhaCerta->status);
+        $this->assertSame('/', $comSenhaCerta->headers['Location']);
+        $this->assertTrue(PortaoDeAnalista::estaAutenticado());
+
+        $sair = $router->despachar(Request::criar('POST', '/sair'));
+        $this->assertSame(302, $sair->status);
+        $this->assertSame('/entrar', $sair->headers['Location']);
+        $this->assertFalse(PortaoDeAnalista::estaAutenticado());
     }
 }
