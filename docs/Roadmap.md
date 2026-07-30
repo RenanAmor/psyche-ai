@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.17 — Revisão das Sprints 15-16 (pós-implementação)
+> Versão 0.18 — Revisão do Motor Freud: classificação estrutural via LLM (pós-implementação)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -779,6 +779,88 @@ Escopo desta revisão é exclusivamente as três peças acima — sem os
 quatro discursos (adiados, ver acima), sem significante, sem hipótese,
 sem diagnóstico, sem autenticação real (o Portão é descartável, não uma
 antecipação da Sprint 18).
+
+## Revisão do Motor Freud — classificação estrutural via LLM (2026-07-30)
+
+Uma conversa posterior com o usuário aprofundou o que "atenção
+flutuante" exige na prática: para reconhecer, na forma de um conteúdo
+discursivo, qual das espécies de formação de compromisso (ou a
+repetição) de [Ontologia-Freud.md §3](Ontologia-Freud.md#3-conceitos-fundamentais)
+ele mais se assemelha, o Motor Freud precisa de conhecimento conceitual
+— algo que a comparação literal de string de `DetectorRecorrencias`
+nunca poderia fornecer. Isso **reverte uma decisão de escopo anterior**
+("sem LLM/IA generativa nos motores Freud/Lacan", fechada durante o
+planejamento das Sprints 14-16), reaberta explicitamente pelo usuário
+ao constatar que a restrição original vinha de um entendimento
+equivocado sobre o que o método socrático do sistema — provocar
+associação livre sem nunca interpretar, ver
+[Documento-Mestre.md §6.7](Documento-Mestre.md#67-modo-de-enunciação-o-método-socrático)
+— realmente exige, e não de uma limitação do domínio.
+
+**Achado que simplificou o escopo:** o Motor Lacan não precisa de LLM
+algum. `ReclassificadorLacaniano` sempre foi "não analisa dado novo,
+só reclassifica com vocabulário lacaniano" — uma vez que o Motor Freud
+produza um rótulo mais rico, o Motor Lacan só precisa de uma tabela de
+lookup determinística sobre esse rótulo, já documentada em
+[Ontologia-Lacan.md §4](Ontologia-Lacan.md#4-relações-conceituais).
+Isso resolve o problema de o Motor Lacan estar preso a um único rótulo
+fixo (`ROTULO`) sem estender a superfície de LLM a um segundo motor.
+
+O guardrail contra "classificar forma" virar "interpretar conteúdo"
+(Documento-Mestre.md §6.5; Regra 7) é de sistema, não de prompt: a
+chamada usa `output_config.format` com um JSON Schema cujo único campo
+é um enum fechado de 6 strings — nenhum campo de "justificativa" existe
+no schema. A resposta bruta do LLM nunca é confiada: é validada contra
+um enum PHP nativo (`TipoFormacaoFreudiana::tryFrom()`); qualquer coisa
+fora do esperado cai em `NaoClassificado`, nunca um valor solto ou texto
+livre passa adiante.
+
+- [x] `Domain/ValueObjects/TipoFormacaoFreudiana` (novo): enum fechado —
+      `AtoFalho`, `Chiste`, `Sonho`, `Repeticao`,
+      `FormacaoDeCompromisso`, `NaoClassificado` (fallback
+      determinístico).
+- [x] `Infrastructure/Contracts/ClassificadorEstruturalInterface` (novo):
+      `classificar(string): TipoFormacaoFreudiana` — o contrato que a
+      Application conhece, nunca a implementação concreta.
+- [x] `Infrastructure/AI/AnthropicLLMService` (novo): **primeira
+      implementação concreta de `LLMInterface`** no projeto (a interface
+      existe desde a Sprint 1, sem implementação até aqui). Usa o SDK
+      oficial `anthropic-ai/sdk` (primeira dependência de runtime do
+      projeto — até aqui `composer.json` só listava `php`), modelo
+      `claude-haiku-4-5` (classificação fechada em categorias é tarefa
+      simples; mais barato e rápido que um modelo de raciocínio
+      profundo). Lê a API key via `getenv('ANTHROPIC_API_KEY')` — mesmo
+      padrão de `getenv('PSYCHEAI_SENHA_ANALISTA')` da Peça A.
+- [x] `Infrastructure/AI/ClassificadorFreudianoLLM` (novo): monta o
+      prompt grounded em Ontologia-Freud.md §3, valida a saída contra o
+      enum fechado, aplica o guardrail acima.
+- [x] Nova tríade `Application/UseCases/ClassificarFormacaoFreudiana/{Command,Handler,Result}`,
+      mesmo padrão de `DetectarRecorrencias`. Sem valor default para o
+      classificador no construtor do Handler (ao contrário de
+      `DetectorRecorrenciasHandler`, que instancia um Domain Service
+      puro por padrão) — instanciar `AnthropicLLMService` implicitamente
+      esconderia a dependência de credencial externa.
+- [x] `ReclassificadorLacaniano::reclassificarPorTipoFreudiano(TipoFormacaoFreudiana): string`
+      (novo, aditivo): tabela de lookup determinística — Chiste/Sonho
+      (condensação) → metáfora; Ato falho/Repetição (deslocamento) →
+      deslize metonímico; Formação de compromisso → indeterminado entre
+      as duas. `reclassificar()`/`reclassificarComTrajeto()` continuam
+      congelados.
+- [x] `.env.example`: nova entrada `ANTHROPIC_API_KEY=`.
+- [x] Testes, tudo aditivo: novo `TipoFormacaoFreudianaTest`, novo
+      `ClassificadorFreudianoLLMTest` (o teste que prova o guardrail —
+      JSON válido, tipo fora do enum, texto livre não-JSON, JSON sem
+      campo esperado, e falha de rede/API simulada: todos os casos caem
+      em `NaoClassificado`, nenhum lança exceção para fora do adapter),
+      novo `ClassificarFormacaoFreudianaHandlerTest`, casos novos em
+      `ReclassificadorLacanianoTest`. 449 testes, 1124 asserções (eram
+      436/1102 ao final da revisão anterior) — zero regressão.
+
+**Explicitamente fora de escopo nesta passada** (ver
+[Sprints futuras](#sprints-futuras-não-planejadas-em-detalhe-nesta-fase)):
+nenhum endpoint ou tela expõe o rótulo do Motor Freud ainda — fica para
+depois, quando a Application Service Provider ganhar o wiring completo;
+nenhuma chamada de LLM entra no Motor Lacan.
 
 ## Sprint 18 — Plataforma (escopo alto nível)
 

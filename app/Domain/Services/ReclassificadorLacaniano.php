@@ -7,6 +7,7 @@ namespace PsycheAI\Domain\Services;
 use PsycheAI\Domain\Contracts\DomainServiceInterface;
 use PsycheAI\Domain\Entities\Recorrencia;
 use PsycheAI\Domain\ValueObjects\OcorrenciaRecorrencia;
+use PsycheAI\Domain\ValueObjects\TipoFormacaoFreudiana;
 
 /**
  * Motor Lacan (Sprint 16): não analisa dado novo algum — apenas reclassifica,
@@ -27,6 +28,8 @@ final class ReclassificadorLacaniano implements DomainServiceInterface
 {
     private const ROTULO = 'Estrutura candidata: deslize metonímico.';
     private const ROTULO_CIRCUITO = 'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.';
+    private const ROTULO_METAFORA = 'Estrutura candidata: metáfora — condensação.';
+    private const ROTULO_FORMACAO_DE_COMPROMISSO = 'Estrutura candidata: formação de compromisso — a determinar entre metáfora e metonímia.';
 
     /**
      * @param Recorrencia[] $recorrencias
@@ -82,5 +85,31 @@ final class ReclassificadorLacaniano implements DomainServiceInterface
         }
 
         return $rotulos;
+    }
+
+    /**
+     * Extensão aditiva (revisão pós-Sprint 17, classificação estrutural via
+     * LLM no Motor Freud): traduz o TipoFormacaoFreudiana já classificado
+     * por outra parte do sistema (nunca por este método — ele não analisa
+     * dado novo, mesmo princípio de reclassificar()) para o vocabulário
+     * lacaniano, seguindo a tabela de correspondência já documentada em
+     * Ontologia-Lacan.md §4: Chiste e Sonhos são as vias em que Freud
+     * localiza a condensação, relida por Lacan como metáfora; Ato falho e
+     * Repetição são vias de deslocamento, relido como metonímia. Formação
+     * de compromisso, por ser a categoria geral (Ontologia-Freud.md §3.5),
+     * não permite decidir entre as duas sem mais informação — o rótulo
+     * reflete essa indeterminação, nunca a resolve por conta própria.
+     *
+     * Puramente uma tabela de lookup determinística — nenhuma chamada a
+     * LLM entra no Lacan Engine.
+     */
+    public function reclassificarPorTipoFreudiano(TipoFormacaoFreudiana $tipo): string
+    {
+        return match ($tipo) {
+            TipoFormacaoFreudiana::Chiste, TipoFormacaoFreudiana::Sonho => self::ROTULO_METAFORA,
+            TipoFormacaoFreudiana::AtoFalho, TipoFormacaoFreudiana::Repeticao => self::ROTULO,
+            TipoFormacaoFreudiana::FormacaoDeCompromisso => self::ROTULO_FORMACAO_DE_COMPROMISSO,
+            TipoFormacaoFreudiana::NaoClassificado => self::ROTULO,
+        };
     }
 }

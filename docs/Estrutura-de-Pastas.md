@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.10
+> Versão 1.11
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -168,6 +168,17 @@ Use Case `UseCases/DetectarCircuitoRecorrencia/` (`Command`, `Handler`,
 por id de Recorrencia, mesmo formato já usado por
 `ReclassificadorLacaniano::reclassificar()`.
 
+Desde a revisão do Motor Freud (2026-07-30, docs/Roadmap.md), a nova
+tríade `UseCases/ClassificarFormacaoFreudiana/` (`Command`, `Handler`,
+`Result`) expõe a classificação estrutural de um conteúdo discursivo em
+`TipoFormacaoFreudiana`. Diferente dos demais Handlers desta pasta, o
+construtor de `ClassificarFormacaoFreudianaHandler` não tem valor
+default para `ClassificadorEstruturalInterface` — a implementação
+concreta fala com uma API externa e precisa de credencial, então
+instanciá-la implicitamente esconderia essa dependência. Ainda sem
+wiring em `ApplicationServiceProvider`/endpoint — ver Infrastructure
+abaixo.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -249,6 +260,14 @@ ocorrência de um conteúdo normalizado dentro da Memória Longitudinal —
 usado por `DetectorRecorrencias::detectarCircuito()` para reconstruir o
 circuito/trajeto de uma Recorrencia através das Sessões.
 
+Desde a revisão do Motor Freud (2026-07-30), `TipoFormacaoFreudiana` é
+um enum nativo (`^8.2`) — vocabulário fechado de
+[Ontologia-Freud.md §3](Ontologia-Freud.md#3-conceitos-fundamentais):
+`AtoFalho`, `Chiste`, `Sonho`, `Repeticao`, `FormacaoDeCompromisso` e
+`NaoClassificado` (fallback determinístico). Puro vocabulário, sem
+lógica nem dependência — mesmo precedente de `Presentation/Web/Errors/ErrorType`,
+mas o primeiro enum na camada de Domínio.
+
 ---
 
 ## Infrastructure
@@ -282,9 +301,16 @@ tecnologia correspondente for integrada. A Sprint 12 acrescentou
 `RespostaAutomaticaInterface`, porta dedicada à resposta automática do
 sistema numa conversa (`responder(string $mensagemUsuario): string`),
 propositalmente separada de `LLMInterface` — que pressupõe negociação
-real com um provedor de LLM, ainda não implementada — para que sua única
-implementação desta Sprint seja honestamente descrita como uma resposta
-fixa temporária, e não uma chamada de IA.
+real com um provedor de LLM, ainda não implementada até a Sprint 17 —
+para que sua única implementação desta Sprint fosse honestamente
+descrita como uma resposta fixa temporária, e não uma chamada de IA.
+
+Desde a revisão do Motor Freud (2026-07-30), `LLMInterface` deixa de
+estar sem implementação (ver `AI/AnthropicLLMService` abaixo) e uma
+nova porta é acrescentada: `ClassificadorEstruturalInterface`
+(`classificar(string): TipoFormacaoFreudiana`) — o contrato que a
+Application conhece para classificação estrutural, nunca a
+implementação concreta.
 
 ### Persistence
 
@@ -349,6 +375,21 @@ passou a ocupar:
 - `UUID/RandomUuidGenerator.php`: implementação de
   `UuidGeneratorInterface` via UUID v4 aleatório (`random_bytes`), sem
   dependências externas.
+- `AI/AnthropicLLMService.php`: desde a revisão do Motor Freud
+  (2026-07-30), **primeira implementação concreta de `LLMInterface`**
+  no projeto (a interface existe desde a Sprint 1). Usa o SDK oficial
+  `anthropic-ai/sdk` (primeira dependência de runtime do `composer.json`
+  — até aqui só listava `php`) e o modelo `claude-haiku-4-5`. Adapter
+  fino: só fala com a API e devolve o texto bruto da resposta — não
+  valida contra nenhum vocabulário de domínio.
+- `AI/ClassificadorFreudianoLLM.php`: implementação de
+  `ClassificadorEstruturalInterface` desde a mesma revisão. Monta o
+  prompt grounded em `Ontologia-Freud.md §3`, chama `LLMInterface` com
+  `output_config.format` restrito a um enum fechado de 6 strings (sem
+  campo de "justificativa" no schema), e valida a resposta contra
+  `TipoFormacaoFreudiana::tryFrom()` — qualquer coisa fora do esperado
+  (JSON inválido, valor desconhecido, falha de rede/API) cai em
+  `NaoClassificado`, nunca um valor solto.
 
 ---
 

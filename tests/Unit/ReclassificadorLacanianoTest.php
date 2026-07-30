@@ -12,6 +12,7 @@ use PsycheAI\Domain\ValueObjects\Frequencia;
 use PsycheAI\Domain\ValueObjects\Identificador;
 use PsycheAI\Domain\ValueObjects\OcorrenciaRecorrencia;
 use PsycheAI\Domain\ValueObjects\Texto;
+use PsycheAI\Domain\ValueObjects\TipoFormacaoFreudiana;
 
 final class ReclassificadorLacanianoTest extends TestCase
 {
@@ -110,5 +111,52 @@ final class ReclassificadorLacanianoTest extends TestCase
             ['r1' => 'Estrutura candidata: deslize metonímico.'],
             $rotulosSemTrajeto
         );
+    }
+
+    public function testReclassificarPorTipoFreudianoRotulaChisteESonhoComoMetafora(): void
+    {
+        $reclassificador = new ReclassificadorLacaniano();
+
+        $this->assertSame(
+            'Estrutura candidata: metáfora — condensação.',
+            $reclassificador->reclassificarPorTipoFreudiano(TipoFormacaoFreudiana::Chiste)
+        );
+        $this->assertSame(
+            'Estrutura candidata: metáfora — condensação.',
+            $reclassificador->reclassificarPorTipoFreudiano(TipoFormacaoFreudiana::Sonho)
+        );
+    }
+
+    public function testReclassificarPorTipoFreudianoRotulaAtoFalhoERepeticaoComoDeslizeMetonimico(): void
+    {
+        $reclassificador = new ReclassificadorLacaniano();
+
+        $this->assertSame(
+            'Estrutura candidata: deslize metonímico.',
+            $reclassificador->reclassificarPorTipoFreudiano(TipoFormacaoFreudiana::AtoFalho)
+        );
+        $this->assertSame(
+            'Estrutura candidata: deslize metonímico.',
+            $reclassificador->reclassificarPorTipoFreudiano(TipoFormacaoFreudiana::Repeticao)
+        );
+    }
+
+    public function testReclassificarPorTipoFreudianoRotulaFormacaoDeCompromissoComoIndeterminadoEntreAsDuas(): void
+    {
+        $rotulo = (new ReclassificadorLacaniano())
+            ->reclassificarPorTipoFreudiano(TipoFormacaoFreudiana::FormacaoDeCompromisso);
+
+        $this->assertSame(
+            'Estrutura candidata: formação de compromisso — a determinar entre metáfora e metonímia.',
+            $rotulo
+        );
+    }
+
+    public function testReclassificarPorTipoFreudianoRotulaNaoClassificadoComoDeslizeMetonimico(): void
+    {
+        $rotulo = (new ReclassificadorLacaniano())
+            ->reclassificarPorTipoFreudiano(TipoFormacaoFreudiana::NaoClassificado);
+
+        $this->assertSame('Estrutura candidata: deslize metonímico.', $rotulo);
     }
 }

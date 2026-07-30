@@ -1,6 +1,6 @@
 # Arquitetura em Camadas — PsycheAI
 
-> Versão 1.6
+> Versão 1.7
 
 Este documento define a arquitetura em camadas do PsycheAI.
 
@@ -176,8 +176,9 @@ nunca era consultável de fora de um teste.
 Referência de produto confirmada com o usuário: "algo como o ChatGPT" só
 na experiência (streaming/atualização incremental, sensação de
 fluidez) — não na inteligência por trás. A decisão de "sem LLM" que
-vale desde a Sprint 1 não é reaberta: `LLMInterface` continua sem
-nenhuma implementação.
+vale desde a Sprint 1 não é reaberta nesta Sprint: `LLMInterface`
+continua sem nenhuma implementação (essa decisão viria a ser revertida
+só na revisão do Motor Freud, ver seção própria abaixo).
 
 - **Motores passam a tocar a conversa.** Decisão fechada com o usuário
   ao planejar esta Sprint: `RespostaAutomaticaInterface` ganha um novo
@@ -281,6 +282,53 @@ aditiva — nenhum contrato publicado nas Sprints 14-17 muda.
   interlocutor, papel de enunciação ou laço social) — mapeá-los exige
   uma sprint própria de ontologia antes de qualquer código
   (docs/Roadmap.md, "Sprints futuras").
+
+## Revisão do Motor Freud — classificação estrutural via LLM (2026-07-30)
+
+Reverte a decisão de "sem LLM" que vinha desde a Sprint 1 (reafirmada na
+Sprint 17, seção acima) — o usuário constatou que a restrição vinha de
+um entendimento equivocado sobre o método socrático do sistema
+([Documento-Mestre.md §6.7](Documento-Mestre.md#67-modo-de-enunciação-o-método-socrático)),
+não de uma limitação real: reconhecer a forma de ato falho/chiste/sonho/
+formação de compromisso num conteúdo discursivo exige conhecimento
+conceitual que a comparação literal de string de `DetectorRecorrencias`
+não fornece.
+
+- **Primeira implementação concreta de `LLMInterface`.**
+  `Infrastructure/AI/AnthropicLLMService` usa o SDK oficial
+  `anthropic-ai/sdk` (primeira dependência de runtime do projeto —
+  `composer.json` só listava `php` até aqui) e o modelo
+  `claude-haiku-4-5`. A interface em si (`complete(LLMRequestDTO):
+  LLMResponseDTO`) não muda — só ganha, pela primeira vez, quem a
+  implementa de verdade.
+- **O guardrail é de sistema, não de prompt.** A chamada usa
+  `output_config.format` com um JSON Schema cujo único campo é um enum
+  fechado de 6 strings (`Domain/ValueObjects/TipoFormacaoFreudiana`) —
+  não há onde o modelo colocar interpretação. A resposta bruta nunca é
+  confiada: `Infrastructure/AI/ClassificadorFreudianoLLM` valida contra
+  `TipoFormacaoFreudiana::tryFrom()`; qualquer coisa fora do vocabulário
+  fechado (JSON inválido, valor desconhecido, falha de rede/API) cai em
+  `NaoClassificado`, nunca um valor solto ou texto livre.
+- **Nova porta, não reaproveitamento direto de `RespostaAutomaticaInterface`.**
+  `Infrastructure/Contracts/ClassificadorEstruturalInterface` é o
+  contrato que a Application conhece — a Application nunca importa
+  `AnthropicLLMService` nem `ClassificadorFreudianoLLM` diretamente,
+  mesmo padrão de isolamento já usado para `RespostaAutomaticaInterface`/
+  `RespostaEcoRecorrenciaService` desde a Sprint 17.
+- **Motor Lacan continua sem LLM algum.** `ReclassificadorLacaniano`
+  sempre foi "não analisa dado novo, só reclassifica com vocabulário
+  lacaniano" — o método aditivo `reclassificarPorTipoFreudiano()` é uma
+  tabela de lookup determinística sobre o `TipoFormacaoFreudiana` já
+  classificado por outra camada (Chiste/Sonho → metáfora; Ato
+  falho/Repetição → deslize metonímico; Formação de compromisso →
+  indeterminado entre as duas), fiel a
+  [Ontologia-Lacan.md §4](Ontologia-Lacan.md#4-relações-conceituais).
+  Nenhuma chamada a modelo entra no Motor Lacan.
+- **Sem endpoint/tela ainda.** Esta revisão fica em
+  Domain/Infrastructure/Application — a exposição via API/tela é
+  deliberadamente adiada para não colidir com o trabalho simultâneo da
+  revisão anterior (Portão do Analista/Circuito), ver
+  docs/Roadmap.md.
 
 ---
 
