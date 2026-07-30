@@ -11,6 +11,7 @@ use PsycheAI\Presentation\Web\Controllers\DashboardController;
 use PsycheAI\Presentation\Web\Controllers\DiscursosController;
 use PsycheAI\Presentation\Web\Controllers\ErrorController;
 use PsycheAI\Presentation\Web\Controllers\EventosDiscursivosController;
+use PsycheAI\Presentation\Web\Controllers\HistoricoSujeitoController;
 use PsycheAI\Presentation\Web\Controllers\MemoriasController;
 use PsycheAI\Presentation\Web\Controllers\SessoesController;
 use PsycheAI\Presentation\Web\Controllers\SujeitosController;
@@ -41,11 +42,13 @@ final class Routes
         $memorias = new MemoriasController($httpClient);
         $eventosDiscursivos = new EventosDiscursivosController($httpClient);
         $conversa = new ConversaController($httpClient);
+        $historico = new HistoricoSujeitoController($httpClient);
         $erros = new ErrorController();
 
         $router->get('/', $dashboard->index(...));
 
         self::registrarCrud($router, '/sujeitos', $sujeitos);
+        $router->get('/sujeitos/{id}/historico', $historico->mostrar(...));
         self::registrarCrud($router, '/sessoes', $sessoes);
         self::registrarCrud($router, '/discursos', $discursos);
         self::registrarCrud($router, '/memorias', $memorias);
@@ -58,6 +61,7 @@ final class Routes
         $router->get('/erros/comunicacao', $erros->comunicacao(...));
         $router->get('/erros/validacao', $erros->validacao(...));
         $router->get('/erros/interno', $erros->interno(...));
+        $router->get('/erros/timeout', $erros->timeout(...));
 
         $router->naoEncontradoHandler($erros->naoEncontrado(...));
     }

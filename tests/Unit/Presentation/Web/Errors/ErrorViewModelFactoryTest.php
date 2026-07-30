@@ -44,4 +44,13 @@ final class ErrorViewModelFactoryTest extends TestCase
         $this->assertSame(ErrorType::INTERNO, $erro->tipo);
         $this->assertSame(500, $erro->statusHttp());
     }
+
+    public function testTimeout(): void
+    {
+        $erro = ErrorViewModelFactory::timeout('timeline');
+
+        $this->assertSame(ErrorType::TIMEOUT, $erro->tipo);
+        $this->assertSame(504, $erro->statusHttp());
+        $this->assertStringContainsString('timeline', $erro->mensagem);
+    }
 }

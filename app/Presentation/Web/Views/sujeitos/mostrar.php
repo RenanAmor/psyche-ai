@@ -17,6 +17,7 @@ $linhas = [[
         $linhas
     ) ?>
     <div class="pagina-detalhe-acoes">
+        <?= ButtonComponent::link('Ver Histórico', '/sujeitos/' . $sujeito->id . '/historico', 'secundario') ?>
         <?= ButtonComponent::link('Editar', '/sujeitos/' . $sujeito->id . '/editar') ?>
         <form class="formulario-exclusao" action="<?= Html::e('/sujeitos/' . $sujeito->id . '/excluir') ?>" method="POST">
             <?= ButtonComponent::submit('Excluir', 'perigo') ?>

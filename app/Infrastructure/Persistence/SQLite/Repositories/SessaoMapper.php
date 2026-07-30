@@ -93,6 +93,20 @@ final class SessaoMapper
         );
     }
 
+    public static function sujeitoIdDe(PDO $pdo, string $sessaoId): ?string
+    {
+        $statement = $pdo->prepare('SELECT sujeito_id FROM sessoes WHERE id = :id');
+        $statement->execute(['id' => $sessaoId]);
+
+        $linha = $statement->fetch();
+
+        if ($linha === false || $linha['sujeito_id'] === null) {
+            return null;
+        }
+
+        return (string) $linha['sujeito_id'];
+    }
+
     /**
      * @param array<string, mixed> $linha
      */

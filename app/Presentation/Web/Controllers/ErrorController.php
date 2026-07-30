@@ -51,4 +51,9 @@ final class ErrorController
     {
         return self::renderizar(ErrorViewModelFactory::interno(), $this->viewRenderer, $request->path);
     }
+
+    public function timeout(Request $request): Response
+    {
+        return self::renderizar(ErrorViewModelFactory::timeout('api'), $this->viewRenderer, $request->path);
+    }
 }

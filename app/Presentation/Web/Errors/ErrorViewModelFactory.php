@@ -50,4 +50,13 @@ final class ErrorViewModelFactory
             'Ocorreu um erro inesperado ao processar sua solicitação.'
         );
     }
+
+    public static function timeout(string $recurso): ErrorViewModel
+    {
+        return new ErrorViewModel(
+            ErrorType::TIMEOUT,
+            'Tempo de espera esgotado',
+            sprintf('A resposta de "%s" demorou demais e a solicitação foi cancelada. Tente novamente.', $recurso)
+        );
+    }
 }

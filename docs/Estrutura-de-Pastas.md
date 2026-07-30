@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.7
+> Versão 1.8
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -137,6 +137,18 @@ já existentes. Depende de `UuidGeneratorInterface` e da nova porta
 apenas por interface, mantendo-se alheia à implementação concreta
 injetada.
 
+Desde a Sprint 13, `LinhaDoTempoApplicationService` e
+`ConsolidacaoApplicationService` expõem as duas consultas somente-leitura
+da Memória Discursiva Longitudinal: a Linha do Tempo (Sessões, Discursos,
+Eventos Discursivos e Memórias de um Sujeito, ordenados
+cronologicamente, com filtro por tipo/período/texto e paginação) e a
+Consolidação (contagem pura desses quatro tipos por Sujeito). Nenhum dos
+dois interpreta o conteúdo do discurso nem toca
+`DetectarRecorrencias`/`GerarObservacoes` — apenas registram e organizam
+o que já existe. Ambos dependem de `SujeitoRepository`, `MemoriaRepository`
+e `SessaoRepository` (este último pela nova ponte
+`sujeitoIdDaSessao()`), nunca de uma implementação concreta.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -270,7 +282,12 @@ Contém a primeira implementação concreta de persistência do sistema, em
   Domínio usando PDO puro. `SessaoMapper`, `DiscursoMapper` e
   `EventoDiscursivoMapper` são hidratadores internos, compartilhados entre
   os repositórios para persistir/carregar os agregados em cascata
-  (Sujeito → Sessão → Discurso → Evento Discursivo).
+  (Sujeito → Sessão → Discurso → Evento Discursivo). Desde a Sprint 13,
+  `SessaoRepository::sujeitoIdDaSessao()` (via `SessaoMapper::sujeitoIdDe()`)
+  expõe o vínculo persistido Sessao → Sujeito, no mesmo padrão de
+  `DiscursoRepository::sessaoIdDoDiscurso()` (Sprint 11B) — necessário para
+  localizar as Memórias Longitudinais de um Sujeito, já que
+  `MemoriaLongitudinal` só guarda as sessões que consolida.
 
 ### Providers
 
@@ -319,6 +336,18 @@ porque "enviar mensagem" (registrar a fala do usuário e devolver a
 resposta automática numa única chamada) é um caso de uso que não existia
 como composição dos endpoints CRUD já publicados.
 
+Desde a Sprint 13, `LinhaDoTempoController` expõe os dois únicos
+endpoints novos desta Sprint — `GET /subjects/{id}/timeline` (com
+`ConsultarLinhaDoTempoRequest`, que valida os parâmetros de query string
+sempre opcionais: `tipo`, `de`, `ate`, `q`, `pagina`, `porPagina`) e
+`GET /subjects/{id}/consolidation` — sobre `LinhaDoTempoApplicationService`
+e `ConsolidacaoApplicationService`. `Presentation\Http\Request::queries()`
+foi acrescentado para expor a query string inteira aos Requests de
+leitura, e `HttpRequestData` ganhou variantes opcionais
+(`opcionalString`, `opcionalData`, `opcionalInteiroPositivo`) para
+parâmetros que, ao contrário do corpo de escrita, nunca são
+obrigatórios.
+
 ### Web
 
 Interface web (HTML) do PsycheAI, construída na Sprint 11A de forma
@@ -343,7 +372,12 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   Entidade de Domínio. `MensagemViewModel` também expõe
   `historicoDaSessao()`, que filtra e ordena os eventos de `GET /events`
   por `sessaoId`/`posicao` para montar o histórico de uma conversa sem
-  exigir um endpoint dedicado só para leitura.
+  exigir um endpoint dedicado só para leitura. Desde a Sprint 13,
+  `LinhaDoTempoItemViewModel` (com `rotulo()`, `resumo()` e
+  `rotaDetalhe()`, todos derivados apenas da estrutura — tipo e
+  contagens — nunca de uma leitura sobre o conteúdo) e
+  `ConsolidacaoViewModel` projetam as respostas de
+  `GET /subjects/{id}/timeline` e `GET /subjects/{id}/consolidation`.
 - `Navigation/`: `NavigationItem` e `NavigationMenu`, fonte única das
   sete seções do menu lateral (Dashboard, Conversa, Sujeitos, Sessões,
   Discursos, Memórias, Eventos Discursivos), compartilhada entre a
@@ -354,9 +388,15 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   `FormComponent`, `ModalComponent`, `AlertComponent` e
   `LoadingIndicatorComponent` — todos escapando HTML através do
   utilitário `Html`.
-- `Errors/`: `ErrorType` (enum fechado com os quatro tipos exigidos:
-  comunicação, não encontrado, validação, interno), `ErrorViewModel` e
-  `ErrorViewModelFactory`.
+- `Errors/`: `ErrorType` (enum fechado com os tipos exigidos: comunicação,
+  não encontrado, validação, interno e, desde a Sprint 13, timeout),
+  `ErrorViewModel` e `ErrorViewModelFactory`. `ApiHttpClient` distingue
+  timeout de falha de conexão por `CURLINFO_CONNECT_TIME`: maior que
+  zero significa que o servidor aceitou a conexão e só demorou a
+  responder (`ErrorType::TIMEOUT`, HTTP 504); igual a zero significa que
+  a conexão em si falhou (`ErrorType::COMUNICACAO`, como antes) — ambos
+  os casos disparam `curl_errno() === CURLE_OPERATION_TIMEDOUT`, por
+  isso não bastava olhar apenas o código de erro do cURL.
 - `Controllers/`: `DashboardController`, `AbstractResourceController`
   (ceremonial comum às cinco páginas de listagem) e suas cinco
   especializações (`SujeitosController`, `SessoesController`,
@@ -370,7 +410,15 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   mantém seu id em `$_SESSION` nativa do PHP entre requisições da mesma
   aba, envia mensagens através de `POST /sessions/{id}/messages` e se
   recupera sozinho quando a Sessao referenciada não existe mais
-  (recria uma nova e reenvia a mensagem uma única vez).
+  (recria uma nova e reenvia a mensagem uma única vez). Desde a Sprint
+  13, `HistoricoSujeitoController` implementa a tela de Histórico do
+  Sujeito: combina `GET /subjects/{id}`, `GET /subjects/{id}/timeline` e
+  `GET /subjects/{id}/consolidation` em uma única página — Linha do
+  Tempo com filtro por tipo/período/texto e paginação, mais a
+  Consolidação. Também não estende `AbstractResourceController`/
+  `AbstractCrudResourceController`, pelo mesmo motivo de
+  `ConversaController`: o ceremonial genérico não cobre uma página que
+  combina três respostas de uma vez.
 - `Views/`: `layout.php` (com `partials/header.php` e
   `partials/sidebar.php`), uma view por seção, `carregando.php`,
   `errors/error.php` e, desde a Sprint 12, `conversa/index.php` — monta
@@ -381,7 +429,12 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   histórico até a última mensagem ao carregar a página — não há
   WebSocket nem polling, a atualização acontece porque a própria
   resposta ao POST de envio já é a página recarregada com o histórico
-  atualizado.
+  atualizado. Desde a Sprint 13, `historico/mostrar.php` monta a tela de
+  Histórico do Sujeito com `CardComponent` (contagens da Consolidação),
+  um formulário de filtro (tipo/período/texto, GET) e `TableComponent`
+  com paginação anterior/próxima — reaproveitando os Componentes já
+  existentes, com um link "Ver Histórico" adicionado em
+  `sujeitos/mostrar.php`.
 - `Routes.php`: registra todas as rotas internas sobre um `Router`,
   reaproveitando os mesmos caminhos do `NavigationMenu`.
 - `public/web/index.php`: front controller da interface web,

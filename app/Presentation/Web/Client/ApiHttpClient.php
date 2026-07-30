@@ -82,10 +82,22 @@ final class ApiHttpClient implements HttpClientInterface
         curl_setopt_array($handle, $opcoes);
 
         $corpoResposta = curl_exec($handle);
-        $erroCurl = curl_errno($handle) !== 0;
+        $codigoErroCurl = curl_errno($handle);
         $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
 
-        if ($erroCurl || $corpoResposta === false) {
+        // CURLE_OPERATION_TIMEDOUT (28) cobre tanto "não conseguiu conectar
+        // dentro do prazo" quanto "conectou, mas a resposta demorou demais"
+        // — só o segundo caso é um timeout de verdade. CONNECT_TIME > 0
+        // confirma que o handshake TCP aconteceu antes do estouro do prazo.
+        if ($codigoErroCurl === CURLE_OPERATION_TIMEDOUT) {
+            $conectou = (float) curl_getinfo($handle, CURLINFO_CONNECT_TIME) > 0.0;
+
+            return ApiResponse::falha(
+                $conectou ? ErrorViewModelFactory::timeout($recurso) : ErrorViewModelFactory::comunicacao($recurso)
+            );
+        }
+
+        if ($codigoErroCurl !== 0 || $corpoResposta === false) {
             return ApiResponse::falha(ErrorViewModelFactory::comunicacao($recurso));
         }
 

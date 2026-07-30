@@ -36,10 +36,11 @@ abstract class HttpTestCase extends TestCase
 
     /**
      * @param array<string, mixed> $corpo
+     * @param array<string, mixed> $query
      */
-    protected function despachar(string $metodo, string $path, array $corpo = []): JsonResponse
+    protected function despachar(string $metodo, string $path, array $corpo = [], array $query = []): JsonResponse
     {
-        $request = Request::criar($metodo, $path, $corpo);
+        $request = Request::criar($metodo, $path, $corpo, $query);
 
         try {
             $response = $this->router->despachar($request);

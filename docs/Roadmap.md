@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.12 — Sprint 12 (Primeiro Diálogo)
+> Versão 0.13 — Sprint 13 (Memória Discursiva Longitudinal)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -342,6 +342,92 @@ Escopo desta sprint é exclusivamente o primeiro diálogo funcional — sem
 Freud Engine, Lacan Engine, interpretação clínica, detecção de
 recorrências, memória longitudinal aplicada à conversa, observador
 clínico, IA generativa ou autenticação.
+
+## Sprint 13 — Memória Discursiva Longitudinal (concluída)
+
+- [x] `Application/Services/LinhaDoTempoApplicationService`: consulta
+      somente-leitura da Linha do Tempo Discursiva de um Sujeito —
+      Sessões, Discursos, Eventos Discursivos e Memórias Longitudinais já
+      registrados, projetados em `LinhaDoTempoItemDTO` e ordenados
+      cronologicamente. `Discurso` e `MemoriaLongitudinal` não têm
+      timestamp próprio no Domínio (só `Sessao::data()` e
+      `EventoDiscursivo::criadoEm()` têm) — cada Discurso é ancorado na
+      data da Sessao que o contém, e cada Memória na data da última
+      Sessao que consolida. Suporta filtro por tipo, período (`de`/`ate`),
+      texto (`q`) e paginação — tudo resolvido em memória sobre o grafo
+      já hidratado do Sujeito, sem nenhuma leitura sobre o conteúdo além
+      de correspondência literal de substring.
+- [x] `Application/Services/ConsolidacaoApplicationService`: consolida
+      automaticamente a quantidade de Sessões, Discursos, Eventos
+      Discursivos e Memórias de um Sujeito — contagem pura, sem comparar
+      sessões nem identificar recorrências.
+- [x] `Domain/Repositories/SessaoRepository::sujeitoIdDaSessao()` (+
+      `SessaoMapper::sujeitoIdDe()`): mesmo padrão de
+      `DiscursoRepository::sessaoIdDoDiscurso()` (Sprint 11B) — expõe o
+      vínculo persistido Sessao → Sujeito, que a Entidade não carrega.
+      Necessário porque `MemoriaLongitudinal` só guarda as sessões que
+      consolida, não o id do Sujeito a quem pertence; localizar as
+      Memórias de um Sujeito exige essa ponte.
+- [x] `GET /subjects/{id}/timeline` e `GET /subjects/{id}/consolidation`
+      (`LinhaDoTempoController` + `ConsultarLinhaDoTempoRequest` +
+      `LinhaDoTempoResponse`/`ConsolidacaoResponse`): os dois únicos
+      endpoints novos desta Sprint, ambos somente-leitura, satisfazendo a
+      exigência de criar apenas o estritamente necessário para consulta
+      longitudinal. `Presentation\Http\Request::queries()` e os
+      auxiliares opcionais de `HttpRequestData` (`opcionalString`,
+      `opcionalData`, `opcionalInteiroPositivo`) foram acrescentados para
+      validar parâmetros de query string opcionais — distintos dos
+      campos sempre obrigatórios do corpo de escrita.
+- [x] Tela de Histórico do Sujeito (`Web/Controllers/HistoricoSujeitoController`
+      + `Web/Views/historico/mostrar.php`, rota `GET /sujeitos/{id}/historico`,
+      link "Ver Histórico" em `sujeitos/mostrar.php`): reúne Sujeito,
+      Linha do Tempo (com formulário de filtro por tipo/período/texto e
+      paginação anterior/próxima) e Consolidação em uma única página,
+      compondo as três consultas somente-leitura já existentes da API.
+      Não estende `AbstractResourceController`/`AbstractCrudResourceController`
+      — nenhum dos dois ceremoniais genéricos cobre uma página que
+      combina três respostas de uma vez.
+- [x] `ErrorType::TIMEOUT` (+ `ErrorViewModelFactory::timeout()`,
+      `ErrorViewModel::statusHttp()` → 504, rota de demonstração
+      `/erros/timeout`): a Sprint 13 exige tratar falha de conexão e
+      timeout como cenários distintos. `ApiHttpClient` já usava
+      `CURLOPT_TIMEOUT`, mas `curl_errno() === CURLE_OPERATION_TIMEDOUT`
+      também é disparado quando a conexão nunca chega a ser aberta dentro
+      do prazo — por isso a distinção real é feita por
+      `CURLINFO_CONNECT_TIME`: maior que zero significa que o servidor
+      aceitou a conexão e só demorou a responder (timeout de verdade);
+      igual a zero significa que a conexão em si falhou (mapeado para
+      `ErrorType::COMUNICACAO`, como já acontecia).
+- [x] Testes: `SQLiteSessaoRepositoryTest` (novos casos de
+      `sujeitoIdDaSessao`), `LinhaDoTempoApplicationServiceTest` e
+      `ConsolidacaoApplicationServiceTest`
+      (`tests/Integration/Application/`, incluindo isolamento entre
+      Sujeitos diferentes), `LinhaDoTempoEndpointsTest`
+      (`tests/Feature/Http/`, ponta a ponta Router → Application →
+      SQLite, cobrindo filtros, paginação e erros HTTP 400/404),
+      `HistoricoSujeitoControllerTest` (`tests/Feature/Presentation/Web/`,
+      com o novo duplo `Tests\Support\HistoricoHttpClientFake`, cobrindo
+      sucesso, repasse de filtros e as quatro falhas —
+      comunicação/não encontrado/timeout/interno), casos novos em
+      `ViewModelsTest`, `ErrorViewModelFactoryTest`, `ErrorControllerTest`
+      e `RoutesTest`, e um teste de integração real
+      (`ApiHttpClientTest::testRespostaLentaEMapeadaParaTimeout`, via
+      nova rota `/lento` em `fixtures/fake-status-server.php`) que
+      distingue timeout de falha de conexão sem nenhum mock. Suíte
+      completa executada sem regressões (358 testes, 896 asserções; eram
+      319 testes e 787 asserções ao final da Sprint 12).
+- [x] Atualização de `docs/Estrutura-de-Pastas.md`,
+      `docs/Arquitetura-Camadas.md`, `docs/Casos-de-Uso.md` (UC-007 —
+      Consultar Histórico, marcado como implementado) e do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente registro e organização
+cronológica do que já foi produzido — sem Freud Engine, Lacan Engine,
+interpretação clínica, detecção de recorrências, identificação de
+significantes ou cadeia significante, associação livre automática ou
+IA generativa. `DetectarRecorrencias`/`GerarObservacoes` (já existentes
+desde antes da Sprint 7) não foram tocados nem estendidos por esta
+Sprint.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

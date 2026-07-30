@@ -66,4 +66,21 @@ final class ApiHttpClientTest extends FakeApiServerTestCase
         self::assertFalse($resposta->sucesso);
         self::assertSame(ErrorType::COMUNICACAO, $resposta->erro?->tipo);
     }
+
+    /**
+     * Diferente da falha de conexão acima (porta fechada, nunca conecta),
+     * aqui o servidor de teste aceita a conexão normalmente e só demora a
+     * responder (fixtures/fake-status-server.php, rota "/lento") — o
+     * cenário real que ErrorType::TIMEOUT deve distinguir de uma falha de
+     * comunicação.
+     */
+    public function testRespostaLentaEMapeadaParaTimeout(): void
+    {
+        $cliente = new ApiHttpClient(self::$baseUrl, 1);
+
+        $resposta = $cliente->get('lento');
+
+        self::assertFalse($resposta->sucesso);
+        self::assertSame(ErrorType::TIMEOUT, $resposta->erro?->tipo);
+    }
 }

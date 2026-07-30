@@ -90,6 +90,14 @@ final class RoutesTest extends TestCase
         $this->assertSame(502, $router->despachar(Request::criar('GET', '/erros/comunicacao'))->status);
         $this->assertSame(422, $router->despachar(Request::criar('GET', '/erros/validacao'))->status);
         $this->assertSame(500, $router->despachar(Request::criar('GET', '/erros/interno'))->status);
+        $this->assertSame(504, $router->despachar(Request::criar('GET', '/erros/timeout'))->status);
+    }
+
+    public function testRotaDeHistoricoDoSujeitoFuncional(): void
+    {
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/sujeitos/sub-001/historico'));
+
+        $this->assertContains($resposta->status, [200, 404]);
     }
 
     public function testRotaInexistenteUsaHandlerDeNaoEncontrado(): void

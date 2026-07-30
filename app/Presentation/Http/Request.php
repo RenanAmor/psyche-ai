@@ -90,4 +90,12 @@ final class Request
     {
         return $this->query[$chave] ?? $default;
     }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function queries(): array
+    {
+        return $this->query;
+    }
 }

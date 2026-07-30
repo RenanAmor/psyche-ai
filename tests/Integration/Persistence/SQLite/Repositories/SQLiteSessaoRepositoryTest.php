@@ -76,4 +76,27 @@ final class SQLiteSessaoRepositoryTest extends SQLiteTestCase
         self::assertNull($repositorio->findById('sessao-1'));
         self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM discursos')->fetchColumn());
     }
+
+    public function testSujeitoIdDaSessaoDevolveOIdDoSujeitoVinculado(): void
+    {
+        $sujeito = new Sujeito(new Identificador('sujeito-1'), new NomeSujeito('Sujeito Um'));
+        $sujeito->adicionarSessao(
+            new Sessao(new Identificador('sessao-1'), new DataSessao(new DateTimeImmutable('2026-02-01 09:00:00')))
+        );
+
+        (new SQLiteSujeitoRepository($this->pdo))->save($sujeito);
+
+        $repositorio = new SQLiteSessaoRepository($this->pdo);
+
+        self::assertSame('sujeito-1', $repositorio->sujeitoIdDaSessao('sessao-1'));
+    }
+
+    public function testSujeitoIdDaSessaoDevolveNuloQuandoASessaoNaoTemSujeitoOuNaoExiste(): void
+    {
+        $repositorio = new SQLiteSessaoRepository($this->pdo);
+        $repositorio->save(new Sessao(new Identificador('sessao-avulsa'), new DataSessao(new DateTimeImmutable('2026-02-01 09:00:00'))));
+
+        self::assertNull($repositorio->sujeitoIdDaSessao('sessao-avulsa'));
+        self::assertNull($repositorio->sujeitoIdDaSessao('inexistente'));
+    }
 }

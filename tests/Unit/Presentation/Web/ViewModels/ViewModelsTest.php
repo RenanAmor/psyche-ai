@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Unit\Presentation\Web\ViewModels;
 
 use PHPUnit\Framework\TestCase;
+use PsycheAI\Presentation\Web\ViewModels\ConsolidacaoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\DashboardViewModel;
 use PsycheAI\Presentation\Web\ViewModels\DiscursoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\EventoDiscursivoViewModel;
+use PsycheAI\Presentation\Web\ViewModels\LinhaDoTempoItemViewModel;
 use PsycheAI\Presentation\Web\ViewModels\MemoriaViewModel;
 use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
 use PsycheAI\Presentation\Web\ViewModels\SessaoViewModel;
@@ -102,6 +104,79 @@ final class ViewModelsTest extends TestCase
 
         $this->assertCount(3, $historico);
         $this->assertSame(['evt-1', 'evt-2', 'evt-3'], array_map(static fn ($m) => $m->id, $historico));
+    }
+
+    public function testLinhaDoTempoItemViewModelFromArraySessao(): void
+    {
+        $vm = LinhaDoTempoItemViewModel::fromArray([
+            'tipo' => 'sessao',
+            'id' => 'ses-1',
+            'timestamp' => '2026-01-10 10:00:00',
+            'dados' => ['id' => 'ses-1', 'data' => '2026-01-10 10:00:00', 'quantidadeDeDiscursos' => 2],
+        ]);
+
+        $this->assertSame('sessao', $vm->tipo);
+        $this->assertSame('ses-1', $vm->id);
+        $this->assertSame('Sessão', $vm->rotulo());
+        $this->assertSame('2 discurso(s) registrado(s).', $vm->resumo());
+        $this->assertSame('/sessoes/ses-1', $vm->rotaDetalhe());
+    }
+
+    public function testLinhaDoTempoItemViewModelFromArrayEvento(): void
+    {
+        $vm = LinhaDoTempoItemViewModel::fromArray([
+            'tipo' => 'evento',
+            'id' => 'evt-1',
+            'timestamp' => '2026-01-10 10:05:00',
+            'dados' => ['conteudo' => 'Lapso'],
+        ]);
+
+        $this->assertSame('Evento Discursivo', $vm->rotulo());
+        $this->assertSame('Lapso', $vm->resumo());
+        $this->assertNull($vm->rotaDetalhe());
+    }
+
+    public function testLinhaDoTempoItemViewModelFromArrayMemoria(): void
+    {
+        $vm = LinhaDoTempoItemViewModel::fromArray([
+            'tipo' => 'memoria',
+            'id' => 'mem-1',
+            'timestamp' => '2026-01-20 10:00:00',
+            'dados' => ['quantidadeDeSessoes' => 3],
+        ]);
+
+        $this->assertSame('Memória Longitudinal', $vm->rotulo());
+        $this->assertSame('Consolida 3 sessão(ões).', $vm->resumo());
+        $this->assertSame('/memorias/mem-1', $vm->rotaDetalhe());
+    }
+
+    public function testLinhaDoTempoItemViewModelFromArrayList(): void
+    {
+        $lista = LinhaDoTempoItemViewModel::fromArrayList([
+            ['tipo' => 'sessao', 'id' => 'ses-1', 'timestamp' => '2026-01-10', 'dados' => []],
+            ['tipo' => 'discurso', 'id' => 'dsc-1', 'timestamp' => '2026-01-10', 'dados' => ['conteudo' => 'texto']],
+        ]);
+
+        $this->assertCount(2, $lista);
+        $this->assertSame('dsc-1', $lista[1]->id);
+        $this->assertSame('/discursos/dsc-1', $lista[1]->rotaDetalhe());
+    }
+
+    public function testConsolidacaoViewModelFromArray(): void
+    {
+        $vm = ConsolidacaoViewModel::fromArray([
+            'sujeitoId' => 'sub-1',
+            'quantidadeDeSessoes' => 2,
+            'quantidadeDeDiscursos' => 3,
+            'quantidadeDeEventosDiscursivos' => 5,
+            'quantidadeDeMemorias' => 1,
+        ]);
+
+        $this->assertSame('sub-1', $vm->sujeitoId);
+        $this->assertSame(2, $vm->quantidadeDeSessoes);
+        $this->assertSame(3, $vm->quantidadeDeDiscursos);
+        $this->assertSame(5, $vm->quantidadeDeEventosDiscursivos);
+        $this->assertSame(1, $vm->quantidadeDeMemorias);
     }
 
     public function testDashboardViewModelContaCadaLista(): void

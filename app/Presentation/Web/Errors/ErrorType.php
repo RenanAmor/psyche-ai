@@ -16,4 +16,5 @@ enum ErrorType: string
     case NAO_ENCONTRADO = 'nao_encontrado';
     case VALIDACAO = 'validacao';
     case INTERNO = 'interno';
+    case TIMEOUT = 'timeout';
 }

@@ -37,4 +37,9 @@ final class SQLiteSessaoRepository implements SessaoRepository
         $statement = $this->pdo->prepare('DELETE FROM sessoes WHERE id = :id');
         $statement->execute(['id' => $sessao->id()->valor()]);
     }
+
+    public function sujeitoIdDaSessao(string $sessaoId): ?string
+    {
+        return SessaoMapper::sujeitoIdDe($this->pdo, $sessaoId);
+    }
 }

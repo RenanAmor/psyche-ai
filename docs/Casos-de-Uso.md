@@ -1,6 +1,6 @@
 # Casos de Uso — PsycheAI
 
-> Versão 1.1
+> Versão 1.2
 
 Este documento define os casos de uso do PsycheAI.
 
@@ -143,3 +143,22 @@ Não implementados nesta Sprint (pendências para sprints futuras):
   são casos de uso de consulta (query), que dependem de um mecanismo de
   persistência/repositório ainda não implementado (fora do escopo desta
   Sprint, que exclui infraestrutura e persistência).
+
+---
+
+# Implementação — Sprint 13 (Memória Discursiva Longitudinal)
+
+A Sprint 13 implementou **UC-007 — Consultar Histórico**:
+`LinhaDoTempoApplicationService` (exposto via `GET /subjects/{id}/timeline`
+e a tela de Histórico do Sujeito) devolve Sessões, Discursos, Eventos
+Discursivos e Memórias Longitudinais de um Sujeito em ordem cronológica,
+com filtro por tipo/período/texto e paginação. `ConsolidacaoApplicationService`
+(`GET /subjects/{id}/consolidation`) acrescenta uma consolidação
+puramente quantitativa — não fazia parte do UC-007 original, mas atende
+ao requisito de "consolidar automaticamente" da Sprint 13 sem introduzir
+um novo caso de uso no catálogo acima.
+
+**UC-008 — Consultar Observações** permanece não implementado: depende
+de persistência para `Recorrencia`/`Observacao` (ainda inexistente) e
+está fora do escopo desta Sprint, que exclui explicitamente qualquer
+tratamento de recorrências.

@@ -61,4 +61,67 @@ abstract class HttpRequestData
             throw HttpException::badRequest(sprintf('O campo "%s" deve ser uma data válida.', $campo));
         }
     }
+
+    /**
+     * Variante opcional de exigirString: ausente ou vazio devolve null em
+     * vez de lançar exceção — usada em parâmetros de consulta (query
+     * string), que ao contrário do corpo de escrita nunca são
+     * obrigatórios.
+     *
+     * @param array<string, mixed> $dados
+     */
+    protected static function opcionalString(array $dados, string $campo): ?string
+    {
+        $valor = $dados[$campo] ?? null;
+
+        if ($valor === null || (is_string($valor) && trim($valor) === '')) {
+            return null;
+        }
+
+        if (!is_string($valor)) {
+            throw HttpException::badRequest(sprintf('O campo "%s" deve ser um texto.', $campo));
+        }
+
+        return $valor;
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     */
+    protected static function opcionalData(array $dados, string $campo): ?DateTimeImmutable
+    {
+        $valor = self::opcionalString($dados, $campo);
+
+        if ($valor === null) {
+            return null;
+        }
+
+        try {
+            return new DateTimeImmutable($valor);
+        } catch (Exception) {
+            throw HttpException::badRequest(sprintf('O campo "%s" deve ser uma data válida.', $campo));
+        }
+    }
+
+    /**
+     * @param array<string, mixed> $dados
+     */
+    protected static function opcionalInteiroPositivo(array $dados, string $campo, int $padrao): int
+    {
+        $valor = $dados[$campo] ?? null;
+
+        if ($valor === null || $valor === '') {
+            return $padrao;
+        }
+
+        if (is_string($valor) && ctype_digit($valor)) {
+            $valor = (int) $valor;
+        }
+
+        if (!is_int($valor) || $valor < 1) {
+            throw HttpException::badRequest(sprintf('O campo "%s" deve ser um número inteiro maior que zero.', $campo));
+        }
+
+        return $valor;
+    }
 }

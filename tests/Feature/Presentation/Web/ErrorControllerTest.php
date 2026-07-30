@@ -42,4 +42,12 @@ final class ErrorControllerTest extends TestCase
         $this->assertSame(500, $resposta->status);
         $this->assertStringContainsString('Erro interno', $resposta->corpo);
     }
+
+    public function testTimeout(): void
+    {
+        $resposta = (new ErrorController())->timeout(Request::criar('GET', '/erros/timeout'));
+
+        $this->assertSame(504, $resposta->status);
+        $this->assertStringContainsString('Tempo de espera esgotado', $resposta->corpo);
+    }
 }

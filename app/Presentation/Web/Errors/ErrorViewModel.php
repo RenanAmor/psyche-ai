@@ -28,6 +28,7 @@ final class ErrorViewModel
             ErrorType::NAO_ENCONTRADO => 404,
             ErrorType::VALIDACAO => 422,
             ErrorType::INTERNO => 500,
+            ErrorType::TIMEOUT => 504,
         };
     }
 }

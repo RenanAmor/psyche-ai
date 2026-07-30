@@ -9,6 +9,7 @@ $tipoParaAlerta = [
     'nao_encontrado' => 'aviso',
     'validacao' => 'erro',
     'interno' => 'erro',
+    'timeout' => 'erro',
 ];
 ?>
 <section class="pagina-erro" data-tipo-erro="<?= Html::e($erro->tipo->value) ?>">

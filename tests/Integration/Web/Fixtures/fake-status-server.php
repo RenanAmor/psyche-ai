@@ -27,6 +27,11 @@ match ($path) {
     '/sem-conteudo' => (function (): void {
         http_response_code(204);
     })(),
+    '/lento' => (function (): void {
+        usleep(1_500_000);
+        http_response_code(200);
+        echo json_encode(['success' => true, 'data' => []]);
+    })(),
     default => (function (): void {
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Rota de teste desconhecida.']);

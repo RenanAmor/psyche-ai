@@ -1,6 +1,6 @@
 # Arquitetura em Camadas — PsycheAI
 
-> Versão 1.3
+> Versão 1.4
 
 Este documento define a arquitetura em camadas do PsycheAI.
 
@@ -87,6 +87,41 @@ Domínio:
   `ConversaController` garante um Sujeito fixo ("visitante") sob
   demanda via os endpoints `/subjects` já existentes, em vez de propor
   autenticação ou um vínculo de Domínio novo.
+
+## Memória Discursiva Longitudinal (Sprint 13)
+
+A Sprint 13 transforma o sistema em um observador longitudinal do
+discurso: registra e organiza cronologicamente tudo o que já foi
+produzido por um Sujeito, sem realizar nenhuma interpretação clínica.
+
+- **Consulta, não interpretação.** `LinhaDoTempoApplicationService` e
+  `ConsolidacaoApplicationService` apenas projetam e contam o que já
+  existe — nenhuma comparação entre sessões, identificação de
+  recorrência, significante ou associação livre automática.
+  `DetectarRecorrencias`/`GerarObservacoes` (existentes desde antes da
+  Sprint 7) permanecem intocados; a Consolidação desta Sprint é uma
+  contagem estritamente aritmética.
+- **Ancoragem estrutural do tempo, não inferência.** `Discurso` e
+  `MemoriaLongitudinal` não têm timestamp próprio no Domínio. Em vez de
+  acrescentar um campo novo só para a Linha do Tempo, cada Discurso é
+  ancorado na data da Sessao que o contém, e cada Memória na data da
+  última Sessao que consolida — uma decisão estrutural sobre dados já
+  existentes, não uma leitura sobre o conteúdo do discurso.
+- **Dois endpoints, e apenas dois.** `GET /subjects/{id}/timeline` e
+  `GET /subjects/{id}/consolidation` são os únicos endpoints REST novos
+  — "utilizar exclusivamente a API existente" significa que toda a
+  consulta longitudinal é composta sobre os Repositórios de Domínio já
+  publicados (`SujeitoRepository`, `SessaoRepository`,
+  `MemoriaRepository`), acrescidos apenas da ponte
+  `SessaoRepository::sujeitoIdDaSessao()` — necessária porque
+  `MemoriaLongitudinal` não guarda o id do Sujeito a quem pertence.
+- **Timeout como falha distinta de falha de conexão.** A exigência de
+  tratar timeout separadamente expôs que `curl_errno() ===
+  CURLE_OPERATION_TIMEDOUT` cobre tanto "nunca conectou" quanto "conectou
+  e demorou a responder". `ApiHttpClient` agora usa
+  `CURLINFO_CONNECT_TIME` para diferenciar os dois casos antes de
+  escolher entre `ErrorType::TIMEOUT` (504) e `ErrorType::COMUNICACAO`
+  (502).
 
 ---
 

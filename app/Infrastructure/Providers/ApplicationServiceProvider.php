@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace PsycheAI\Infrastructure\Providers;
 
 use PDO;
+use PsycheAI\Application\Services\ConsolidacaoApplicationService;
 use PsycheAI\Application\Services\DiscursoApplicationService;
+use PsycheAI\Application\Services\LinhaDoTempoApplicationService;
 use PsycheAI\Application\Services\MemoriaApplicationService;
 use PsycheAI\Application\Services\MensagemApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
@@ -39,6 +41,8 @@ final class ApplicationServiceProvider
         private readonly DiscursoApplicationService $discursos,
         private readonly MemoriaApplicationService $memorias,
         private readonly MensagemApplicationService $mensagens,
+        private readonly LinhaDoTempoApplicationService $linhaDoTempo,
+        private readonly ConsolidacaoApplicationService $consolidacao,
         private readonly SujeitoRepository $sujeitoRepository
     ) {
     }
@@ -72,6 +76,8 @@ final class ApplicationServiceProvider
                 $uuidGenerator ?? new RandomUuidGenerator(),
                 $respostaAutomatica ?? new RespostaFixaService()
             ),
+            new LinhaDoTempoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
+            new ConsolidacaoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
             $sujeitoRepository
         );
     }
@@ -99,6 +105,16 @@ final class ApplicationServiceProvider
     public function mensagens(): MensagemApplicationService
     {
         return $this->mensagens;
+    }
+
+    public function linhaDoTempo(): LinhaDoTempoApplicationService
+    {
+        return $this->linhaDoTempo;
+    }
+
+    public function consolidacao(): ConsolidacaoApplicationService
+    {
+        return $this->consolidacao;
     }
 
     /**

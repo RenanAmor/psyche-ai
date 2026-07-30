@@ -182,6 +182,7 @@ final class HttpClientStub implements HttpClientInterface
             ErrorType::NAO_ENCONTRADO => ErrorViewModelFactory::naoEncontrado($recurso),
             ErrorType::INTERNO => ErrorViewModelFactory::interno(),
             ErrorType::VALIDACAO => ErrorViewModelFactory::validacao(['recurso' => 'Requisição inválida.']),
+            ErrorType::TIMEOUT => ErrorViewModelFactory::timeout($recurso),
         };
     }
 }
