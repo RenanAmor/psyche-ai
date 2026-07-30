@@ -1,6 +1,6 @@
 # Documento Mestre — Psyche AI
 
-> Versão 0.2 — Sprint 0 (Fundação); §6-7 reescritos na Sprint 14 para substituir as instruções editoriais pendentes por conteúdo final.
+> Versão 0.3 — Sprint 0 (Fundação); §6-7 reescritos na Sprint 14 para substituir as instruções editoriais pendentes por conteúdo final; §6.7 e modo socrático em §7 adicionados após a Sprint 17.
 > Este documento estabelece os fundamentos institucionais do projeto e o modelo teórico fundamental adotado (§6-7).
 
 ## 1. Visão
@@ -71,14 +71,25 @@ Toda leitura permanece de responsabilidade do analista ou do próprio sujeito.
 
 Como representar computacionalmente um significante sem reduzi-lo a uma simples palavra — questão que permanece central e ainda sem resposta definitiva (ver também [Ontologia-Lacan.md (5)](Ontologia-Lacan.md#5-limites)).
 
+### 6.7 Modo de enunciação: o método socrático
+
+O PsycheAI não fala como quem sabe. Fala como quem pergunta.
+
+A referência adotada para o modo de enunciação da inteligência do sistema é Sócrates — não como figura histórica, mas como método: a maiêutica, a provocação da associação livre no próprio sujeito, sem jamais entregar conteúdo, causa ou sentido no lugar dele.
+
+O Freud Engine e o Lacan Engine (§7) fornecem a base conceitual — respectivamente, a obra de Freud e sua releitura estrutural por Lacan — que orienta *onde* dirigir a atenção flutuante (o que se repete, que forma de formação de compromisso, que estrutura de linguagem). Essa base é usada exclusivamente para saber o que observar, nunca para compor uma resposta interpretativa. O que o sistema devolve ao sujeito é sempre pergunta, nunca afirmação — o mesmo limite já estabelecido na Regra 7 ([Regras-Dominio.md](Regras-Dominio.md#regra-7): "o sistema registra recorrências, não interpreta recorrências").
+
+Esse modo de enunciação já está em prática desde a Sprint 17 — ver [RespostaEcoRecorrenciaService](../app/Infrastructure/AI/RespostaEcoRecorrenciaService.php), que, ao detectar uma repetição, devolve "Você voltou a falar em '%s'. O que vem à mente sobre isso?" em vez de qualquer afirmação sobre a repetição.
+
 ## 7. Arquitetura Conceitual
 
 A arquitetura técnica detalhada (camadas, componentes, dependências) é definida em [Arquitetura.md](Arquitetura.md) e [Arquitetura-Camadas.md](Arquitetura-Camadas.md), atualizados a cada sprint.
 
-Do ponto de vista conceitual, o sistema é composto por três motores:
+Do ponto de vista conceitual, o sistema é composto por três motores e um modo de enunciação:
 
 - **Discourse Engine**: organiza o discurso e expõe as recorrências detectadas ao longo do tempo, sem hierarquizar importância nem interpretar conteúdo — implementado desde a Sprint 14 do [Roadmap.md](Roadmap.md).
 - **Freud Engine**: aplica "atenção flutuante" sobre o que o Discourse Engine expõe, trazendo apenas o que se repete, sem hipótese — planejado para a Sprint 15.
 - **Lacan Engine**: reclassifica as mesmas recorrências trazidas pelo Freud Engine com vocabulário lacaniano, sem acrescentar leitura de sentido nem afirmar estatuto de significante confirmado — planejado para a Sprint 16.
+- **Modo socrático**: camada de enunciação que transforma o que os motores acima trazem em pergunta dirigida ao sujeito, nunca em afirmação — ver §6.7.
 
 Nenhum dos três motores produz hipótese, diagnóstico ou identifica significante automaticamente — apenas o analista ou o próprio sujeito confirma qualquer leitura (ver [Regras-Dominio.md](Regras-Dominio.md)).
