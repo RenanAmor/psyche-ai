@@ -18,7 +18,7 @@ final class DetectorRecorrencias implements DomainServiceInterface
         $recorrencias = [];
 
         foreach ($eventos as $evento) {
-            $conteudo = $evento->conteudo()->valor();
+            $conteudo = $this->normalizar($evento->conteudo()->valor());
 
             if (!isset($recorrencias[$conteudo])) {
                 $recorrencias[$conteudo] = 0;
@@ -28,5 +28,16 @@ final class DetectorRecorrencias implements DomainServiceInterface
         }
 
         return $recorrencias;
+    }
+
+    /**
+     * Atenção flutuante: variações triviais de grafia (espaços nas bordas,
+     * caixa) não podem fragmentar a mesma repetição em contagens
+     * separadas — normalização textual determinística, sem similaridade
+     * semântica nem NLP.
+     */
+    private function normalizar(string $conteudo): string
+    {
+        return mb_strtolower(trim($conteudo));
     }
 }

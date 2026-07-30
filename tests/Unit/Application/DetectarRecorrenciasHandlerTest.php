@@ -62,4 +62,25 @@ final class DetectarRecorrenciasHandlerTest extends TestCase
 
         $this->assertSame(['lapso', 'chiste'], $descricoes);
     }
+
+    public function testNormalizaVariacoesDeGrafiaComoAMesmaRecorrencia(): void
+    {
+        $discurso = new Discurso(new Identificador('d1'), new ConteudoDiscursivo('conteudo do discurso'));
+        $discurso->adicionarEvento(new EventoDiscursivo(new Identificador('e1'), new ConteudoDiscursivo('lapso'), new Posicao(0)));
+        $discurso->adicionarEvento(new EventoDiscursivo(new Identificador('e2'), new ConteudoDiscursivo(' Lapso'), new Posicao(1)));
+
+        $sessao = new Sessao(new Identificador('s1'), new DataSessao(new DateTimeImmutable()));
+        $sessao->adicionarDiscurso($discurso);
+
+        $memoria = new MemoriaLongitudinal(new Identificador('mem1'));
+        $memoria->adicionarSessao($sessao);
+
+        $handler = new DetectarRecorrenciasHandler();
+        $result = $handler->handle(new DetectarRecorrenciasCommand($memoria));
+
+        $recorrencias = $result->recorrencias();
+        $this->assertCount(1, $recorrencias);
+        $this->assertSame('lapso', $recorrencias[0]->descricao()->valor());
+        $this->assertSame(2, $recorrencias[0]->frequencia()->valor());
+    }
 }

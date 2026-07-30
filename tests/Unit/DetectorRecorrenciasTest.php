@@ -25,4 +25,18 @@ final class DetectorRecorrenciasTest extends TestCase
 
         $this->assertSame(['lapso' => 2, 'chiste' => 1], $recorrencias);
     }
+
+    public function testNormalizaEspacosEMaiusculasAoComparar(): void
+    {
+        $eventos = [
+            new EventoDiscursivo(new Identificador('e1'), new ConteudoDiscursivo('lapso'), new Posicao(0)),
+            new EventoDiscursivo(new Identificador('e2'), new ConteudoDiscursivo('Lapso '), new Posicao(1)),
+            new EventoDiscursivo(new Identificador('e3'), new ConteudoDiscursivo(' LAPSO'), new Posicao(2)),
+            new EventoDiscursivo(new Identificador('e4'), new ConteudoDiscursivo('Chiste'), new Posicao(3)),
+        ];
+
+        $recorrencias = (new DetectorRecorrencias())->detectar($eventos);
+
+        $this->assertSame(['lapso' => 3, 'chiste' => 1], $recorrencias);
+    }
 }

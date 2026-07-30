@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.14 — Sprint 14 (Discourse Engine — exposição, sem persistência)
+> Versão 0.15 — Sprint 15 (Motor Freud)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -486,13 +486,46 @@ Recorrencia/Observacao, sem mudança de comportamento do detector (isso é
 Sprint 15), sem rótulo lacaniano (Sprint 16) e sem nenhuma hipótese,
 interpretação ou diagnóstico automático.
 
-## Sprint 15 — Motor Freud (planejada)
+## Sprint 15 — Motor Freud (concluída)
 
-Aplicar "atenção flutuante" sobre o que o Discourse Engine (Sprint 14) já
-expõe: revisar `DetectorRecorrencias`/`RecorrenciaMinimaSpecification` para
-que a atenção não hierarquize importância nem descarte repetições por um
-limiar arbitrário — sem introduzir hipótese, interpretação ou NLP/
-similaridade semântica.
+- [x] `Domain/Services/DetectorRecorrencias::detectar()`: a comparação de
+      conteúdo de `EventoDiscursivo`, antes igualdade exata de string,
+      passou a normalizar espaços nas bordas e caixa (`trim` +
+      `mb_strtolower`) antes de agrupar — decisão tomada com o usuário
+      antes da implementação. "Lapso", " Lapso " e "LAPSO" passam a contar
+      como a mesma recorrência. Normalização puramente textual e
+      determinística — sem similaridade semântica, sem NLP, sem
+      interpretação de sentido.
+- [x] `Domain/Specifications/RecorrenciaMinimaSpecification`: avaliado e
+      mantido sem alteração. O limiar mínimo (2) não é um filtro de
+      "importância" a remover — é a própria definição de "repetição" (uma
+      única ocorrência não é uma recorrência). Conferido que nenhum ponto
+      do fluxo (`GeradorObservacoes`, `ObservacaoResultadoDTO`,
+      `ObservacaoResponse`, `Web/ViewModels/ObservacaoViewModel`) ordena ou
+      prioriza recorrências por frequência — a atenção flutuante (escutar
+      tudo sem hierarquizar importância) já era respeitada antes desta
+      Sprint, nada precisou ser removido.
+- [x] Nenhuma entidade nova, nenhum endpoint novo: o Motor Freud é uma
+      configuração/refinamento do `DetectorRecorrencias` já existente
+      desde antes da Sprint 7, reexposto pelos endpoints/tela da Sprint 14
+      (`GET /subjects/{id}/observations`, `sujeitos/{id}/observacoes`) sem
+      nenhuma mudança de contrato.
+- [x] Testes: `DetectorRecorrenciasTest::testNormalizaEspacosEMaiusculasAoComparar`
+      e `DetectarRecorrenciasHandlerTest::testNormalizaVariacoesDeGrafiaComoAMesmaRecorrencia`
+      cobrem a nova tolerância de grafia; os demais testes existentes
+      (`RecorrenciaMinimaSpecificationTest`, `CicloDeObservacaoServiceTest`,
+      `ObservacaoApplicationServiceTest`, `ObservacaoEndpointsTest`)
+      continuam passando sem alteração, pois usavam apenas conteúdo já
+      normalizado ("lapso", "chiste"). Suíte completa executada sem
+      regressões (372 testes, 936 asserções; eram 370 testes e 932
+      asserções ao final da Sprint 14).
+- [x] Atualização do Roadmap.
+
+Escopo desta sprint é exclusivamente o refinamento do detector de
+recorrências existente — sem hipótese, interpretação, diagnóstico,
+identificação de significante, NLP, similaridade semântica ou IA
+generativa. `docs/Ontologia-Freud.md` não foi alterado (permanece
+somente vocabulário conceitual).
 
 ## Sprint 16 — Motor Lacan (planejada)
 
