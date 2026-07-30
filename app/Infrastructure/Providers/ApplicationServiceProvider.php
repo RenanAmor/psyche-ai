@@ -10,6 +10,7 @@ use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Application\Services\LinhaDoTempoApplicationService;
 use PsycheAI\Application\Services\MemoriaApplicationService;
 use PsycheAI\Application\Services\MensagemApplicationService;
+use PsycheAI\Application\Services\ObservacaoApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
@@ -43,6 +44,7 @@ final class ApplicationServiceProvider
         private readonly MensagemApplicationService $mensagens,
         private readonly LinhaDoTempoApplicationService $linhaDoTempo,
         private readonly ConsolidacaoApplicationService $consolidacao,
+        private readonly ObservacaoApplicationService $observacoes,
         private readonly SujeitoRepository $sujeitoRepository
     ) {
     }
@@ -78,6 +80,7 @@ final class ApplicationServiceProvider
             ),
             new LinhaDoTempoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
             new ConsolidacaoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
+            new ObservacaoApplicationService($sujeitoRepository),
             $sujeitoRepository
         );
     }
@@ -115,6 +118,11 @@ final class ApplicationServiceProvider
     public function consolidacao(): ConsolidacaoApplicationService
     {
         return $this->consolidacao;
+    }
+
+    public function observacoes(): ObservacaoApplicationService
+    {
+        return $this->observacoes;
     }
 
     /**

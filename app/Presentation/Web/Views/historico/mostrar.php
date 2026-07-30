@@ -101,6 +101,7 @@ $linhas = array_map(
     </nav>
 
     <div class="pagina-detalhe-acoes">
+        <?= ButtonComponent::link('Ver Observações', '/sujeitos/' . $sujeito->id . '/observacoes', 'secundario') ?>
         <?= ButtonComponent::link('Voltar ao Sujeito', '/sujeitos/' . $sujeito->id, 'secundario') ?>
     </div>
 </section>

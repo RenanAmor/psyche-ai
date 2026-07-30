@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.8
+> Versão 1.9
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -148,6 +148,14 @@ dois interpreta o conteúdo do discurso nem toca
 o que já existe. Ambos dependem de `SujeitoRepository`, `MemoriaRepository`
 e `SessaoRepository` (este último pela nova ponte
 `sujeitoIdDaSessao()`), nunca de uma implementação concreta.
+
+Desde a Sprint 14, `ObservacaoApplicationService` expõe o Discourse
+Engine: carrega o Sujeito, monta uma `MemoriaLongitudinal` transitória
+(nunca persistida — usa o próprio id do Sujeito como identificador) e
+delega a `CicloDeObservacaoService::executar()`, já existente desde antes
+da Sprint 7 e inalterado por esta Sprint. Mesmo padrão de recálculo em
+memória de `LinhaDoTempoApplicationService`/`ConsolidacaoApplicationService`
+— nenhuma `Recorrencia`/`Observacao` é gravada em repositório.
 
 ### UseCases
 
@@ -348,6 +356,12 @@ leitura, e `HttpRequestData` ganhou variantes opcionais
 parâmetros que, ao contrário do corpo de escrita, nunca são
 obrigatórios.
 
+Desde a Sprint 14, `ObservacaoController` expõe o único endpoint novo
+desta Sprint — `GET /subjects/{id}/observations` (com
+`ConsultarObservacoesRequest`, parâmetro de query opcional
+`minimoDeRecorrencia`) — sobre `ObservacaoApplicationService`, devolvendo
+as Recorrências e Observações recalculadas via `ObservacaoResponse`.
+
 ### Web
 
 Interface web (HTML) do PsycheAI, construída na Sprint 11A de forma
@@ -378,6 +392,8 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   contagens — nunca de uma leitura sobre o conteúdo) e
   `ConsolidacaoViewModel` projetam as respostas de
   `GET /subjects/{id}/timeline` e `GET /subjects/{id}/consolidation`.
+  Desde a Sprint 14, `RecorrenciaViewModel` e `ObservacaoViewModel`
+  projetam a resposta de `GET /subjects/{id}/observations`.
 - `Navigation/`: `NavigationItem` e `NavigationMenu`, fonte única das
   sete seções do menu lateral (Dashboard, Conversa, Sujeitos, Sessões,
   Discursos, Memórias, Eventos Discursivos), compartilhada entre a
@@ -418,7 +434,12 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   Consolidação. Também não estende `AbstractResourceController`/
   `AbstractCrudResourceController`, pelo mesmo motivo de
   `ConversaController`: o ceremonial genérico não cobre uma página que
-  combina três respostas de uma vez.
+  combina três respostas de uma vez. Desde a Sprint 14,
+  `ObservacoesSujeitoController` implementa a tela do Discourse Engine:
+  combina `GET /subjects/{id}` e `GET /subjects/{id}/observations` em uma
+  página própria (não embutida na de Histórico) — separação deliberada
+  porque a Sprint 16 vai estendê-la com os rótulos do Motor Lacan lado a
+  lado, evitando reabrir `HistoricoSujeitoController` para isso.
 - `Views/`: `layout.php` (com `partials/header.php` e
   `partials/sidebar.php`), uma view por seção, `carregando.php`,
   `errors/error.php` e, desde a Sprint 12, `conversa/index.php` — monta
@@ -434,7 +455,10 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   um formulário de filtro (tipo/período/texto, GET) e `TableComponent`
   com paginação anterior/próxima — reaproveitando os Componentes já
   existentes, com um link "Ver Histórico" adicionado em
-  `sujeitos/mostrar.php`.
+  `sujeitos/mostrar.php`. Desde a Sprint 14, `observacoes/mostrar.php`
+  lista as Recorrências e Observações do Discourse Engine em duas
+  `TableComponent`, com um link "Ver Observações" adicionado em
+  `historico/mostrar.php`.
 - `Routes.php`: registra todas as rotas internas sobre um `Router`,
   reaproveitando os mesmos caminhos do `NavigationMenu`.
 - `public/web/index.php`: front controller da interface web,

@@ -1,7 +1,7 @@
 # Documento Mestre — Psyche AI
 
-> Versão 0.1 — Sprint 0 (Fundação)
-> Este documento estabelece apenas os fundamentos institucionais do projeto. Teoria psicanalítica aplicada e regras de negócio serão desenvolvidas em sprints futuras.
+> Versão 0.2 — Sprint 0 (Fundação); §6-7 reescritos na Sprint 14 para substituir as instruções editoriais pendentes por conteúdo final.
+> Este documento estabelece os fundamentos institucionais do projeto e o modelo teórico fundamental adotado (§6-7).
 
 ## 1. Visão
 
@@ -42,37 +42,43 @@ Essas frentes serão desenvolvidas em sprints subsequentes, com documentação p
 - **Responsabilidade**: decisões técnicas devem considerar o impacto potencial sobre pessoas em situação de vulnerabilidade.
 - **Rigor técnico e teórico**: qualquer aplicação de conceitos psicológicos/psicanalíticos deve ser feita com cuidado e fundamentação, evitando simplificações que distorçam o campo teórico de origem.
 
-## Seção 6.1 – Princípio fundador
+## 6. Modelo Teórico Fundamental
 
-Reescrever para definir claramente que o objeto do PsycheAI é preservar, organizar e acompanhar longitudinalmente o discurso humano.
-Remover a expressão "produzir hipóteses analíticas".
+### 6.1 Princípio fundador
 
-## Seção 6.2 – Objeto de pesquisa
-Manter que o objeto é a organização computacional do discurso.
-Acrescentar que o foco é a observação longitudinal das recorrências discursivas.
+O objeto do PsycheAI é preservar, organizar e acompanhar longitudinalmente o discurso humano.
 
-## Seção 6.3 – Hipótese central
-Reformular a hipótese para refletir o modelo atual.
-A hipótese deve tratar da possibilidade de identificar recorrências estruturais no discurso ao longo do tempo, sem afirmar representação de significantes.
+### 6.2 Objeto de pesquisa
 
-## Seção 6.4 – Objetivo científico
-Remover:
-"representar estruturas discursivas candidatas a cadeias de significantes";
-"produzir hipóteses fundamentadas";
-"apresentar essas hipóteses".
-Manter apenas objetivos compatíveis com observação, organização e rastreabilidade do discurso.
+O objeto de pesquisa é a organização computacional do discurso, com foco na observação longitudinal das recorrências discursivas.
 
-## Seção 6.5 – Limites do sistema
-Manter todos os limites atuais.
-Reforçar explicitamente:
-o sistema não interpreta;
-o sistema não atribui significado;
-o sistema não substitui a escuta clínica.
+### 6.3 Hipótese central
 
-## Seção 6.6 – Questão de pesquisa
-Não alterar.
-Ela continua válida como questão científica aberta.
+É possível identificar recorrências estruturais no discurso de um sujeito ao longo do tempo, sem que isso implique a representação ou a identificação automática de significantes — tarefa que permanece exclusiva do analista ou do próprio sujeito.
 
-## Seção 7 – Arquitetura conceitual
-Remover a referência aos três motores (Freud Engine, Lacan Engine e Discourse Engine).
-Substituir por uma referência simples ao documento Arquitetura.md, que passará a definir a arquitetura técnica nas próximas sprints.
+### 6.4 Objetivo científico
+
+Investigar como observar, organizar e tornar rastreável a produção discursiva de um sujeito ao longo do tempo, de modo auditável e tecnicamente rigoroso.
+
+### 6.5 Limites do sistema
+
+O sistema não interpreta o discurso do sujeito.
+O sistema não atribui significado.
+O sistema não substitui a escuta clínica.
+Toda leitura permanece de responsabilidade do analista ou do próprio sujeito.
+
+### 6.6 Questão de pesquisa em aberto
+
+Como representar computacionalmente um significante sem reduzi-lo a uma simples palavra — questão que permanece central e ainda sem resposta definitiva (ver também [Ontologia-Lacan.md (5)](Ontologia-Lacan.md#5-limites)).
+
+## 7. Arquitetura Conceitual
+
+A arquitetura técnica detalhada (camadas, componentes, dependências) é definida em [Arquitetura.md](Arquitetura.md) e [Arquitetura-Camadas.md](Arquitetura-Camadas.md), atualizados a cada sprint.
+
+Do ponto de vista conceitual, o sistema é composto por três motores:
+
+- **Discourse Engine**: organiza o discurso e expõe as recorrências detectadas ao longo do tempo, sem hierarquizar importância nem interpretar conteúdo — implementado desde a Sprint 14 do [Roadmap.md](Roadmap.md).
+- **Freud Engine**: aplica "atenção flutuante" sobre o que o Discourse Engine expõe, trazendo apenas o que se repete, sem hipótese — planejado para a Sprint 15.
+- **Lacan Engine**: reclassifica as mesmas recorrências trazidas pelo Freud Engine com vocabulário lacaniano, sem acrescentar leitura de sentido nem afirmar estatuto de significante confirmado — planejado para a Sprint 16.
+
+Nenhum dos três motores produz hipótese, diagnóstico ou identifica significante automaticamente — apenas o analista ou o próprio sujeito confirma qualquer leitura (ver [Regras-Dominio.md](Regras-Dominio.md)).

@@ -1,8 +1,14 @@
 # Arquitetura — Psyche AI
 
-> Versão 0.2 — Sprint 4 (Fundação Arquitetural)
+> Versão 0.3 — Sprint 4 (Fundação Arquitetural); §4 acrescentada na Sprint 14 para
+> resolver a âncora `#4-visão-arquitetural-de-longo-prazo--motores-conceituais`
+> citada por `Ontologia-Freud.md` e `Ontologia-Lacan.md` desde a Sprint 2/3, que
+> nunca existira de fato neste documento.
 
-Este documento define a arquitetura conceitual do PsycheAI. O detalhamento das camadas, componentes e implementações será realizado nas próximas sprints.
+Este documento define a arquitetura conceitual do PsycheAI. O detalhamento
+técnico das camadas, componentes e decisões por sprint vive em
+[Arquitetura-Camadas.md](Arquitetura-Camadas.md), atualizado a cada sprint —
+este documento permanece no nível conceitual.
 
 ---
 
@@ -42,7 +48,44 @@ psyche-ai/
 
 ---
 
-# 4. Arquitetura do Domínio
+# 4. Visão Arquitetural de Longo Prazo — Motores Conceituais
+
+O PsycheAI é concebido, conceitualmente, como um pipeline de três motores,
+cada um consumindo a saída do anterior sem sobrepor sua responsabilidade:
+
+```text
+Discourse Engine
+        │
+        ▼
+Freud Engine
+        │
+        ▼
+Lacan Engine
+```
+
+- **Discourse Engine**: organiza o discurso registrado (Sujeito → Sessão →
+  Discurso → Evento Discursivo → Memória Longitudinal) e expõe as
+  recorrências detectadas ao longo do tempo — implementado desde a
+  Sprint 14 do [Roadmap.md](Roadmap.md), sem persistir nenhum resultado
+  derivado (recalculado a cada consulta).
+- **Freud Engine**: aplica "atenção flutuante" sobre o que o Discourse
+  Engine expõe — escuta tudo sem hierarquizar importância e só traz o
+  que se repete, a partir da Ontologia Freud
+  ([Ontologia-Freud.md](Ontologia-Freud.md)) — planejado para a Sprint 15.
+- **Lacan Engine**: reclassifica as mesmas repetições trazidas pelo Freud
+  Engine com vocabulário lacaniano (ex.: metáfora/metonímia), a partir da
+  Ontologia Lacan ([Ontologia-Lacan.md](Ontologia-Lacan.md)) — sem
+  acrescentar leitura de sentido nem afirmar estatuto de significante
+  confirmado (ver [Ontologia-Lacan.md (5)](Ontologia-Lacan.md#5-limites))
+  — planejado para a Sprint 16.
+
+Nenhum dos três motores produz hipótese, diagnóstico ou identifica
+significante automaticamente — apenas o analista ou o próprio sujeito
+confirma qualquer leitura, conforme [Regras-Dominio.md](Regras-Dominio.md).
+
+---
+
+# 5. Arquitetura do Domínio
 
 O PsycheAI é um sistema para observação longitudinal do discurso humano.
 
@@ -112,7 +155,7 @@ Observações nunca representam interpretações.
 
 ---
 
-# 5. Princípios Arquiteturais
+# 6. Princípios Arquiteturais
 
 - O domínio do PsycheAI é o discurso.
 - O sistema preserva a história do discurso.
@@ -127,22 +170,21 @@ Observações nunca representam interpretações.
 
 ---
 
-# 6. Estado Atual
+# 7. Estado Atual
 
-Nesta fase existe apenas a fundação arquitetural do projeto.
-
-As camadas de domínio, aplicação e infraestrutura serão implementadas nas próximas sprints.
+As camadas de domínio, aplicação, infraestrutura e apresentação (API REST
+e interface web) estão implementadas — ver
+[Arquitetura-Camadas.md](Arquitetura-Camadas.md) e
+[Estrutura-de-Pastas.md](Estrutura-de-Pastas.md) para o detalhamento
+técnico atualizado a cada sprint, e [Roadmap.md](Roadmap.md) para o
+histórico completo. Do pipeline conceitual da Seção 4, o Discourse Engine
+está implementado (Sprint 14); Freud Engine e Lacan Engine estão
+planejados para as Sprints 15 e 16.
 
 ---
 
-# 7. Próximos Passos
+# 8. Próximos Passos
 
-1. Definir os objetos fundamentais do domínio.
-2. Implementar as entidades.
-3. Implementar os Value Objects.
-4. Implementar os Eventos de Domínio.
-5. Implementar os Serviços de Domínio.
-6. Implementar os Casos de Uso.
-7. Implementar a Persistência.
-8. Implementar os mecanismos computacionais de recorrência.
-9. Implementar a interface da aplicação.
+Ver as sprints planejadas em [Roadmap.md](Roadmap.md): Motor Freud
+(Sprint 15), Motor Lacan (Sprint 16), Interface Conversacional
+(Sprint 17) e Plataforma/autenticação (Sprint 18).

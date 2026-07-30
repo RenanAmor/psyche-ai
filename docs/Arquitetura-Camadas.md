@@ -1,6 +1,6 @@
 # Arquitetura em Camadas — PsycheAI
 
-> Versão 1.4
+> Versão 1.5
 
 Este documento define a arquitetura em camadas do PsycheAI.
 
@@ -122,6 +122,46 @@ produzido por um Sujeito, sem realizar nenhuma interpretação clínica.
   `CURLINFO_CONNECT_TIME` para diferenciar os dois casos antes de
   escolher entre `ErrorType::TIMEOUT` (504) e `ErrorType::COMUNICACAO`
   (502).
+
+## Discourse Engine — exposição sem persistência (Sprint 14)
+
+A Sprint 14 expõe pela primeira vez, via API e tela, a infraestrutura de
+recorrência que já existia desde antes da Sprint 7 em memória
+(`DetectorRecorrencias`, `RecorrenciaMinimaSpecification`,
+`GeradorObservacoes`, encadeados por `CicloDeObservacaoService`) mas
+nunca era consultável de fora de um teste.
+
+- **Recalcular, não persistir.** Diferente do plano original desta
+  Sprint (que previa migration e repositório para `Recorrencia`/
+  `Observacao`), a decisão final foi recalcular a cada consulta, no
+  mesmo padrão de `LinhaDoTempoApplicationService`/
+  `ConsolidacaoApplicationService` (Sprint 13). Persistir uma Recorrência
+  tende, com o tempo, a ser lida como constatação/diagnóstico armazenado
+  — na contramão das Regras 7-10 de
+  [Regras-Dominio.md](Regras-Dominio.md) — além de criar um problema de
+  invalidação: uma Recorrência gravada ficaria desatualizada se a sessão
+  de origem fosse editada ou removida depois. Na escala esperada
+  (centenas de eventos por Sujeito), recalcular a cada leitura é
+  irrelevante em custo.
+- **Nenhuma entidade nova.** `ObservacaoApplicationService` monta uma
+  `MemoriaLongitudinal` transitória (nunca persistida, usando o próprio
+  id do Sujeito como identificador) e delega inteiramente a
+  `CicloDeObservacaoService::executar()`, já existente e inalterado —
+  esta Sprint é só o Application Service e o endpoint ao redor dele, não
+  uma nova classe de resultado.
+- **Um endpoint, e apenas um.** `GET /subjects/{id}/observations` é o
+  único endpoint REST novo, seguindo exatamente o padrão de
+  `GET /subjects/{id}/timeline`.
+- **Tela própria, não embutida no Histórico.** A tela de Observações
+  (`ObservacoesSujeitoController`) foi deliberadamente separada da tela
+  de Histórico (Sprint 13), apesar de ambas combinarem duas respostas de
+  API — a Sprint 16 (Motor Lacan) vai estender exatamente esta tela com
+  os rótulos lacanianos lado a lado, e antecipar essa separação evita
+  reabrir `HistoricoSujeitoController` quando isso acontecer.
+- **Motores continuam fora da conversa.** Esta Sprint não altera
+  `RespostaAutomaticaInterface`/`ConversaController`, que seguem com
+  `RespostaFixaService` — a integração dos motores com a conversa
+  permanece reservada para a Sprint de Interface Conversacional.
 
 ---
 

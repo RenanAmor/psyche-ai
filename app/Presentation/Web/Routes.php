@@ -13,6 +13,7 @@ use PsycheAI\Presentation\Web\Controllers\ErrorController;
 use PsycheAI\Presentation\Web\Controllers\EventosDiscursivosController;
 use PsycheAI\Presentation\Web\Controllers\HistoricoSujeitoController;
 use PsycheAI\Presentation\Web\Controllers\MemoriasController;
+use PsycheAI\Presentation\Web\Controllers\ObservacoesSujeitoController;
 use PsycheAI\Presentation\Web\Controllers\SessoesController;
 use PsycheAI\Presentation\Web\Controllers\SujeitosController;
 use PsycheAI\Presentation\Web\Http\Router;
@@ -43,12 +44,14 @@ final class Routes
         $eventosDiscursivos = new EventosDiscursivosController($httpClient);
         $conversa = new ConversaController($httpClient);
         $historico = new HistoricoSujeitoController($httpClient);
+        $observacoes = new ObservacoesSujeitoController($httpClient);
         $erros = new ErrorController();
 
         $router->get('/', $dashboard->index(...));
 
         self::registrarCrud($router, '/sujeitos', $sujeitos);
         $router->get('/sujeitos/{id}/historico', $historico->mostrar(...));
+        $router->get('/sujeitos/{id}/observacoes', $observacoes->mostrar(...));
         self::registrarCrud($router, '/sessoes', $sessoes);
         self::registrarCrud($router, '/discursos', $discursos);
         self::registrarCrud($router, '/memorias', $memorias);

@@ -10,6 +10,7 @@ use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
 use PsycheAI\Presentation\Controllers\LinhaDoTempoController;
 use PsycheAI\Presentation\Controllers\MemoriaController;
 use PsycheAI\Presentation\Controllers\MensagemController;
+use PsycheAI\Presentation\Controllers\ObservacaoController;
 use PsycheAI\Presentation\Controllers\SessaoController;
 use PsycheAI\Presentation\Controllers\SujeitoController;
 use PsycheAI\Presentation\Http\Router;
@@ -32,6 +33,7 @@ final class Routes
         $memorias = new MemoriaController($provider->memorias(), $provider->sujeitoRepository());
         $mensagens = new MensagemController($provider->mensagens());
         $linhaDoTempo = new LinhaDoTempoController($provider->linhaDoTempo(), $provider->consolidacao());
+        $observacoes = new ObservacaoController($provider->observacoes());
 
         $router->post('/subjects', [$sujeitos, 'criar']);
         $router->get('/subjects', [$sujeitos, 'listar']);
@@ -40,6 +42,7 @@ final class Routes
         $router->delete('/subjects/{id}', [$sujeitos, 'excluir']);
         $router->get('/subjects/{id}/timeline', [$linhaDoTempo, 'timeline']);
         $router->get('/subjects/{id}/consolidation', [$linhaDoTempo, 'consolidacao']);
+        $router->get('/subjects/{id}/observations', [$observacoes, 'observar']);
 
         $router->post('/sessions', [$sessoes, 'criar']);
         $router->get('/sessions', [$sessoes, 'listar']);

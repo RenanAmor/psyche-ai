@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.13 — Sprint 13 (Memória Discursiva Longitudinal)
+> Versão 0.14 — Sprint 14 (Discourse Engine — exposição, sem persistência)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -429,15 +429,102 @@ IA generativa. `DetectarRecorrencias`/`GerarObservacoes` (já existentes
 desde antes da Sprint 7) não foram tocados nem estendidos por esta
 Sprint.
 
+## Sprint 14 — Discourse Engine: exposição sem persistência (concluída)
+
+- [x] Decisão arquitetural: `Recorrencia`/`Observacao` (já existentes desde
+      antes da Sprint 7, produzidas por `DetectorRecorrencias` +
+      `GeradorObservacoes` + `RecorrenciaMinimaSpecification`, encadeadas
+      por `CicloDeObservacaoService`) não ganham migration nem repositório.
+      O mesmo padrão da Sprint 13 (`LinhaDoTempoApplicationService`/
+      `ConsolidacaoApplicationService`, que nunca gravam o resultado
+      derivado no banco) é reaproveitado: recalcular a cada consulta evita
+      que uma Recorrência gravada seja lida como constatação/diagnóstico
+      armazenado — na contramão das Regras 7-10 de
+      [Regras-Dominio.md](Regras-Dominio.md) — e evita o problema de
+      invalidação caso a sessão de origem seja editada depois.
+- [x] `Application/DTOs/ObservacaoResultadoDTO` +
+      `Application/Services/ObservacaoApplicationService`: carrega o
+      Sujeito (lança `RecursoNaoEncontradoException` se não existir, como
+      nas Sprints 9/13), monta uma `MemoriaLongitudinal` transitória — usa
+      o próprio id do Sujeito como identificador, sem risco de colisão
+      pois nunca é persistida — e delega a `CicloDeObservacaoService::executar()`,
+      já existente e inalterado.
+- [x] `GET /subjects/{id}/observations` (`ObservacaoController` +
+      `ConsultarObservacoesRequest` + `ObservacaoResponse`, parâmetro de
+      query opcional `minimoDeRecorrencia`): único endpoint novo desta
+      Sprint, somente-leitura, seguindo o padrão de
+      `GET /subjects/{id}/timeline`.
+- [x] Tela própria `Web/Controllers/ObservacoesSujeitoController` +
+      `Web/Views/observacoes/mostrar.php` (rota
+      `GET /sujeitos/{id}/observacoes`, link "Ver Observações" a partir de
+      `historico/mostrar.php`): lista as Recorrências e Observações
+      recalculadas. Tela separada da de Histórico (em vez de embutida
+      nela) porque a Sprint 16 vai estendê-la com os rótulos do Motor
+      Lacan lado a lado — antecipar essa separação evita reabrir
+      `HistoricoSujeitoController` na Sprint 16.
+- [x] Testes: `ObservacaoApplicationServiceTest`
+      (`tests/Integration/Application/`, incluindo isolamento entre
+      Sujeitos e o parâmetro `minimoDeRecorrencia`), `ObservacaoEndpointsTest`
+      (`tests/Feature/Http/`, ponta a ponta Router → Application → SQLite),
+      `ObservacoesSujeitoControllerTest` (`tests/Feature/Presentation/Web/`,
+      com o novo duplo `Tests\Support\ObservacoesHttpClientFake`). Suíte
+      completa executada sem regressões (370 testes, 932 asserções; eram
+      358 testes e 896 asserções ao final da Sprint 13).
+- [x] Atualização de `docs/Estrutura-de-Pastas.md`,
+      `docs/Arquitetura-Camadas.md` e do Roadmap. Correção de referências
+      desatualizadas: a âncora `#4-visão-arquitetural-de-longo-prazo`,
+      citada por ambas as Ontologias, não existia em `Arquitetura.md`
+      (nunca atualizado desde a Sprint 4); e `Documento-Mestre.md` §7
+      ainda continha uma instrução editorial não aplicada mandando remover
+      a menção ao Discourse Engine — ambos corrigidos para refletir que o
+      Discourse Engine existe de fato desde esta Sprint.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente exposição do que já existia em
+memória — sem nova entidade de Domínio, sem persistência de
+Recorrencia/Observacao, sem mudança de comportamento do detector (isso é
+Sprint 15), sem rótulo lacaniano (Sprint 16) e sem nenhuma hipótese,
+interpretação ou diagnóstico automático.
+
+## Sprint 15 — Motor Freud (planejada)
+
+Aplicar "atenção flutuante" sobre o que o Discourse Engine (Sprint 14) já
+expõe: revisar `DetectorRecorrencias`/`RecorrenciaMinimaSpecification` para
+que a atenção não hierarquize importância nem descarte repetições por um
+limiar arbitrário — sem introduzir hipótese, interpretação ou NLP/
+similaridade semântica.
+
+## Sprint 16 — Motor Lacan (planejada)
+
+Reclassificar as mesmas `Recorrencia`/`Observacao` trazidas pelo Motor
+Freud com vocabulário lacaniano (ex.: metáfora/metonímia, conforme
+[Ontologia-Lacan.md (4)](Ontologia-Lacan.md#4-relações-conceituais)) — sem
+acrescentar leitura de sentido nem afirmar estatuto de significante
+confirmado ([Ontologia-Lacan.md (5)](Ontologia-Lacan.md#5-limites)). A
+tela combinada (base do Freud + rótulos do Lacan) absorve o que seria um
+"Observador Clínico" — não há sprint própria para isso.
+
+## Sprint 17 — Interface Conversacional (escopo alto nível)
+
+Streaming/atualização incremental do histórico da Conversa e
+gerenciamento de sessão além do único `$_SESSION['psyche_conversa_sessao_id']`
+— ainda sem autenticação real. Decisão em aberto: se
+`RespostaAutomaticaInterface` continua com `RespostaFixaService` ou passa
+a refletir as repetições observadas (sem interpretar); os motores das
+Sprints 15-16 permanecem desligados da conversa até essa decisão.
+
+## Sprint 18 — Plataforma (escopo alto nível)
+
+Autenticação real (substitui o Sujeito "visitante" fixo), usuários,
+permissões, administração e publicação — totalmente greenfield, sem
+nenhum código de auth/usuário/permissão hoje.
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
 - Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura), a partir do Modelo Computacional do Discurso.
 - Especificação técnica do Evento Discursivo (formato de registro, granularidade, critérios de segmentação) — ver [Modelo-Computacional-Discurso.md (3.2)](Modelo-Computacional-Discurso.md#32-por-que-uma-unidade-própria).
 - Consolidação da bibliografia freudiana estruturada em [Ontologia-Freud.md (6)](Ontologia-Freud.md#6-referências) e da bibliografia lacaniana estruturada em [Ontologia-Lacan.md (6)](Ontologia-Lacan.md#6-referências).
 - Investigação da questão de pesquisa central: como representar computacionalmente um significante sem reduzi-lo a uma simples palavra (ver [Documento-Mestre.md](Documento-Mestre.md#66-questão-de-pesquisa-em-aberto) e [Ontologia-Lacan.md (5)](Ontologia-Lacan.md#5-limites)).
-- Especificação e implementação do **Discourse Engine** (estruturação do discurso, estruturas discursivas recorrentes candidatas a cadeias de significantes, contexto temporal).
-- Especificação e implementação do **Freud Engine** (núcleo conceitual: inconsciente, recalque, pulsão, desejo, etc.), a partir da Ontologia Freud.
-- Especificação e implementação do **Lacan Engine** (estrutura de leitura: significante, registros RSI, objeto a, etc.), a partir da Ontologia Lacan.
 - Definição de regras de negócio.
 - Configuração de ambiente de testes automatizados.
 - Implementação das primeiras funcionalidades.
