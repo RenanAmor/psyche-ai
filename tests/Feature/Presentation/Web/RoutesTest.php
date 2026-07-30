@@ -19,6 +19,11 @@ use PsycheAI\Tests\Support\HttpClientStub;
  */
 final class RoutesTest extends TestCase
 {
+    protected function setUp(): void
+    {
+        $_SESSION = [];
+    }
+
     private function criarRouter(): Router
     {
         $router = new Router();

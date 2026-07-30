@@ -1,6 +1,6 @@
 # Arquitetura em Camadas — PsycheAI
 
-> Versão 1.2
+> Versão 1.3
 
 Este documento define a arquitetura em camadas do PsycheAI.
 
@@ -47,6 +47,46 @@ REST (Sprint 10) — nenhum mock permanece em produção. A troca confirmou
 o isolamento buscado desde a Sprint 11A: Controllers, ViewModels,
 Componentes e Views não precisaram mudar, apenas a implementação
 concreta de `HttpClientInterface` injetada em `Web/Routes.php`.
+
+## Primeiro Diálogo (Sprint 12)
+
+A Sprint 12 valida o fluxo completo Interface → API → Application →
+Domain → Persistência → Interface com a primeira conversa funcional,
+sem introduzir inteligência psicanalítica nem qualquer campo novo no
+Domínio:
+
+- **Ausência de campo "autor" no Domínio.** Nem `Discurso` nem
+  `EventoDiscursivo` sabem quem falou. Como a conversa desta Sprint
+  sempre alterna estritamente usuário → sistema a cada envio, a
+  Apresentação deriva o autor pela paridade da `Posicao` (par = usuário,
+  ímpar = sistema) em vez de propor uma mudança de Domínio para um
+  requisito que a própria estrutura de turnos já resolve.
+- **Um endpoint novo, e apenas um.** `POST /sessions/{id}/messages`
+  (`MensagemController` → `MensagemApplicationService`) é o único
+  endpoint REST criado nesta Sprint. Foi necessário porque nenhuma
+  composição dos endpoints CRUD já publicados (`/discourses`, `/events`)
+  expressava o caso de uso real — "enviar uma mensagem e receber a
+  resposta automática" —, e decidir o texto da resposta automática é
+  regra de negócio, que não pode residir na Apresentação. A leitura do
+  histórico de uma conversa, em contraste, não exigiu endpoint novo:
+  `MensagemViewModel::historicoDaSessao()` filtra `GET /events` (já
+  existente) por `sessaoId`.
+- **Resposta automática isolada por porta própria.** A nova interface
+  `RespostaAutomaticaInterface` (`Infrastructure/Contracts/`) — e não a
+  já existente `LLMInterface` — é quem `MensagemApplicationService`
+  consome. `LLMInterface` pressupõe negociação real com um provedor de
+  LLM; a única implementação desta Sprint, `RespostaFixaService`
+  (`Infrastructure/AI/`), apenas devolve uma resposta fixa, e usar o
+  contrato de LLM para isso seria descrevê-la de forma enganosa. Os
+  motores Freud e Lacan das sprints futuras substituirão
+  `RespostaFixaService` implementando o mesmo contrato, sem exigir
+  mudança em `MensagemApplicationService` nem em qualquer camada acima
+  dela.
+- **Sujeito "Visitante" padrão.** Como não há autenticação nesta fase e
+  toda Sessao exige um Sujeito já existente (`SessaoApplicationService`),
+  `ConversaController` garante um Sujeito fixo ("visitante") sob
+  demanda via os endpoints `/subjects` já existentes, em vez de propor
+  autenticação ou um vínculo de Domínio novo.
 
 ---
 

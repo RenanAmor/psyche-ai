@@ -9,6 +9,10 @@ use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Router;
 use PsycheAI\Presentation\Web\Routes;
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $apiBaseUrl = getenv('PSYCHEAI_API_BASE_URL') ?: 'http://localhost:8000';
 
 $method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');

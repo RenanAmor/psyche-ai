@@ -1,6 +1,6 @@
 # Estrutura de Pastas — PsycheAI
 
-> Versão 1.6
+> Versão 1.7
 
 Este documento define a organização física oficial do PsycheAI.
 
@@ -127,6 +127,16 @@ injetado. `EventoDiscursivo` não é raiz de agregado — seu registro é
 exposto como uma operação de `DiscursoApplicationService`
 (`adicionarEvento`), e não como um serviço próprio.
 
+Desde a Sprint 12, `MensagemApplicationService` orquestra o caso de uso
+"enviar mensagem": registra a mensagem do usuário e a resposta
+automática do sistema como dois `EventoDiscursivo` dentro do único
+`Discurso` da conversa (criado sob demanda no primeiro envio),
+reaproveitando `RegistrarDiscursoHandler`/`RegistrarEventoDiscursivoHandler`
+já existentes. Depende de `UuidGeneratorInterface` e da nova porta
+`RespostaAutomaticaInterface` (ambas em `Infrastructure/Contracts/`)
+apenas por interface, mantendo-se alheia à implementação concreta
+injetada.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -229,9 +239,15 @@ qualquer tecnologia externa concreta: `ClockInterface`, `LoggerInterface`,
 das portas de IA em `Contracts/DTOs/` (`LLMRequestDTO`, `LLMResponseDTO`,
 `TranscriptionResultDTO`).
 
-Nenhuma destas interfaces possui implementação concreta nesta fase — cada
+A maioria destas interfaces ainda não possui implementação concreta — cada
 uma será implementada por um adaptador nas pastas abaixo apenas quando a
-tecnologia correspondente for integrada.
+tecnologia correspondente for integrada. A Sprint 12 acrescentou
+`RespostaAutomaticaInterface`, porta dedicada à resposta automática do
+sistema numa conversa (`responder(string $mensagemUsuario): string`),
+propositalmente separada de `LLMInterface` — que pressupõe negociação
+real com um provedor de LLM, ainda não implementada — para que sua única
+implementação desta Sprint seja honestamente descrita como uma resposta
+fixa temporária, e não uma chamada de IA.
 
 ### Persistence
 
@@ -268,7 +284,18 @@ Application e Infrastructure simultaneamente.
 
 Pastas reservadas para as futuras implementações concretas de cada
 respectivo contrato. Permanecem vazias até que a tecnologia correspondente
-seja efetivamente integrada.
+seja efetivamente integrada — exceto `AI/` e `UUID/`, que a Sprint 12
+passou a ocupar:
+
+- `AI/RespostaFixaService.php`: implementação temporária de
+  `RespostaAutomaticaInterface` — devolve sempre a mesma resposta fixa
+  ("Recebi sua mensagem. Continue falando livremente."), independente do
+  conteúdo recebido. Isolada para substituição futura pelos motores
+  Freud e Lacan, que implementarão o mesmo contrato sem exigir mudanças
+  em `MensagemApplicationService` nem em qualquer camada acima dela.
+- `UUID/RandomUuidGenerator.php`: implementação de
+  `UuidGeneratorInterface` via UUID v4 aleatório (`random_bytes`), sem
+  dependências externas.
 
 ---
 
@@ -284,6 +311,13 @@ Contém:
 - views.
 
 Não implementa regras de negócio.
+
+Desde a Sprint 12, `MensagemController` (com `EnviarMensagemRequest` e
+`MensagemEnviadaResponse`) expõe `POST /sessions/{id}/messages` sobre
+`MensagemApplicationService` — único endpoint novo desta Sprint, criado
+porque "enviar mensagem" (registrar a fala do usuário e devolver a
+resposta automática numa única chamada) é um caso de uso que não existia
+como composição dos endpoints CRUD já publicados.
 
 ### Web
 
@@ -302,14 +336,18 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   traduz status HTTP reais para os quatro tipos de erro (`ErrorType`).
   `ApiResponse` é o envelope de retorno.
 - `ViewModels/`: `SujeitoViewModel`, `SessaoViewModel`,
-  `DiscursoViewModel`, `MemoriaViewModel`, `EventoDiscursivoViewModel` e
-  `DashboardViewModel` — projeções somente-leitura construídas a partir
-  do array devolvido pelo Cliente HTTP (`fromArray`/`fromArrayList`),
-  nunca a partir de uma Entidade de Domínio.
+  `DiscursoViewModel`, `MemoriaViewModel`, `EventoDiscursivoViewModel`,
+  `DashboardViewModel` e, desde a Sprint 12, `MensagemViewModel` —
+  projeções somente-leitura construídas a partir do array devolvido pelo
+  Cliente HTTP (`fromArray`/`fromArrayList`), nunca a partir de uma
+  Entidade de Domínio. `MensagemViewModel` também expõe
+  `historicoDaSessao()`, que filtra e ordena os eventos de `GET /events`
+  por `sessaoId`/`posicao` para montar o histórico de uma conversa sem
+  exigir um endpoint dedicado só para leitura.
 - `Navigation/`: `NavigationItem` e `NavigationMenu`, fonte única das
-  seis seções do menu lateral (Dashboard, Sujeitos, Sessões, Discursos,
-  Memórias, Eventos Discursivos), compartilhada entre a Sidebar e
-  `Routes.php`.
+  sete seções do menu lateral (Dashboard, Conversa, Sujeitos, Sessões,
+  Discursos, Memórias, Eventos Discursivos), compartilhada entre a
+  Sidebar e `Routes.php`.
 - `Components/`: componentes reutilizáveis orientados a dados —
   `TableComponent` (com estado vazio automático via
   `EmptyStateComponent`), `CardComponent`, `ButtonComponent`,
@@ -326,17 +364,35 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   `EventosDiscursivosController`), além de `ErrorController`.
   `SujeitosController` também expõe `novo`/`store`, único ponto que
   aplica validação básica de entrada (campo obrigatório), permitida
-  pela Arquitetura em Camadas.
+  pela Arquitetura em Camadas. Desde a Sprint 12, `ConversaController`
+  implementa a tela de Conversa: inicia uma Sessao automaticamente sob
+  um Sujeito "Visitante" padrão (não há autenticação nesta fase),
+  mantém seu id em `$_SESSION` nativa do PHP entre requisições da mesma
+  aba, envia mensagens através de `POST /sessions/{id}/messages` e se
+  recupera sozinho quando a Sessao referenciada não existe mais
+  (recria uma nova e reenvia a mensagem uma única vez).
 - `Views/`: `layout.php` (com `partials/header.php` e
-  `partials/sidebar.php`), uma view por seção, `carregando.php` e
-  `errors/error.php`.
+  `partials/sidebar.php`), uma view por seção, `carregando.php`,
+  `errors/error.php` e, desde a Sprint 12, `conversa/index.php` — monta
+  o histórico com `TableComponent`, a caixa de mensagem com
+  `FormComponent` (textarea) e eventuais alertas com `AlertComponent`,
+  reaproveitando exclusivamente os Componentes da Sprint 11A. O único
+  HTML fora desses Componentes é um `<script>` inline mínimo que rola o
+  histórico até a última mensagem ao carregar a página — não há
+  WebSocket nem polling, a atualização acontece porque a própria
+  resposta ao POST de envio já é a página recarregada com o histórico
+  atualizado.
 - `Routes.php`: registra todas as rotas internas sobre um `Router`,
   reaproveitando os mesmos caminhos do `NavigationMenu`.
 - `public/web/index.php`: front controller da interface web,
-  independente de `public/index.php` (API REST).
+  independente de `public/index.php` (API REST). Desde a Sprint 12,
+  chama `session_start()` antes de despachar a requisição, para que
+  `ConversaController` consiga associar uma conversa em andamento à
+  mesma aba do navegador.
 
-Nesta Sprint toda a comunicação é mockada: nenhuma rota consome a API
-REST, acessa SQLite, Application Services ou Domain.
+Desde a Sprint 11B, toda a comunicação passa por `ApiHttpClient`, que
+fala HTTP de verdade com a API REST — nenhuma rota depende de dados
+mockados.
 
 ---
 

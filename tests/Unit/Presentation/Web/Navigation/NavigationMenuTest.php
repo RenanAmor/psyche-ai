@@ -9,12 +9,12 @@ use PsycheAI\Presentation\Web\Navigation\NavigationMenu;
 
 final class NavigationMenuTest extends TestCase
 {
-    public function testContemAsSeisSecoesExigidasNaOrdem(): void
+    public function testContemAsSeteSecoesExigidasNaOrdem(): void
     {
         $rotulos = array_map(static fn ($item) => $item->rotulo, NavigationMenu::itens());
 
         $this->assertSame(
-            ['Dashboard', 'Sujeitos', 'Sessões', 'Discursos', 'Memórias', 'Eventos Discursivos'],
+            ['Dashboard', 'Conversa', 'Sujeitos', 'Sessões', 'Discursos', 'Memórias', 'Eventos Discursivos'],
             $rotulos
         );
     }

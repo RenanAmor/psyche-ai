@@ -9,6 +9,7 @@ use PsycheAI\Presentation\Web\ViewModels\DashboardViewModel;
 use PsycheAI\Presentation\Web\ViewModels\DiscursoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\EventoDiscursivoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\MemoriaViewModel;
+use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
 use PsycheAI\Presentation\Web\ViewModels\SessaoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\SujeitoViewModel;
 
@@ -77,6 +78,30 @@ final class ViewModelsTest extends TestCase
         $this->assertSame('evt-1', $vm->id);
         $this->assertSame('chiste', $vm->conteudo);
         $this->assertSame(3, $vm->posicao);
+    }
+
+    public function testMensagemViewModelMarcaPosicaoParComoAutorVoceEImparComoSistema(): void
+    {
+        $usuario = MensagemViewModel::fromArray(['id' => 'evt-1', 'conteudo' => 'Olá', 'posicao' => 0]);
+        $sistema = MensagemViewModel::fromArray(['id' => 'evt-2', 'conteudo' => 'Continue', 'posicao' => 1]);
+
+        $this->assertSame('Você', $usuario->autor);
+        $this->assertSame('Sistema', $sistema->autor);
+    }
+
+    public function testHistoricoDaSessaoFiltraPorSessaoIdEOrdenaPorPosicao(): void
+    {
+        $eventos = [
+            ['id' => 'evt-3', 'conteudo' => 'Fora de ordem', 'posicao' => 2, 'sessaoId' => 'ses-1'],
+            ['id' => 'evt-outra-sessao', 'conteudo' => 'Não deve aparecer', 'posicao' => 0, 'sessaoId' => 'ses-2'],
+            ['id' => 'evt-1', 'conteudo' => 'Primeira', 'posicao' => 0, 'sessaoId' => 'ses-1'],
+            ['id' => 'evt-2', 'conteudo' => 'Segunda', 'posicao' => 1, 'sessaoId' => 'ses-1'],
+        ];
+
+        $historico = MensagemViewModel::historicoDaSessao($eventos, 'ses-1');
+
+        $this->assertCount(3, $historico);
+        $this->assertSame(['evt-1', 'evt-2', 'evt-3'], array_map(static fn ($m) => $m->id, $historico));
     }
 
     public function testDashboardViewModelContaCadaLista(): void

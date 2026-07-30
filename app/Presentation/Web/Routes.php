@@ -6,6 +6,7 @@ namespace PsycheAI\Presentation\Web;
 
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
 use PsycheAI\Presentation\Web\Controllers\AbstractCrudResourceController;
+use PsycheAI\Presentation\Web\Controllers\ConversaController;
 use PsycheAI\Presentation\Web\Controllers\DashboardController;
 use PsycheAI\Presentation\Web\Controllers\DiscursosController;
 use PsycheAI\Presentation\Web\Controllers\ErrorController;
@@ -39,6 +40,7 @@ final class Routes
         $discursos = new DiscursosController($httpClient);
         $memorias = new MemoriasController($httpClient);
         $eventosDiscursivos = new EventosDiscursivosController($httpClient);
+        $conversa = new ConversaController($httpClient);
         $erros = new ErrorController();
 
         $router->get('/', $dashboard->index(...));
@@ -49,6 +51,9 @@ final class Routes
         self::registrarCrud($router, '/memorias', $memorias);
 
         $router->get('/eventos-discursivos', $eventosDiscursivos->index(...));
+
+        $router->get('/conversa', $conversa->iniciar(...));
+        $router->post('/conversa/enviar', $conversa->enviar(...));
 
         $router->get('/erros/comunicacao', $erros->comunicacao(...));
         $router->get('/erros/validacao', $erros->validacao(...));

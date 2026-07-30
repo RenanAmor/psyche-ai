@@ -7,15 +7,20 @@ namespace PsycheAI\Infrastructure\Providers;
 use PDO;
 use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Application\Services\MemoriaApplicationService;
+use PsycheAI\Application\Services\MensagemApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
+use PsycheAI\Infrastructure\AI\RespostaFixaService;
+use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
+use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
 use PsycheAI\Infrastructure\Persistence\SQLite\Migrations\MigrationRunner;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteMemoriaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSujeitoRepository;
+use PsycheAI\Infrastructure\UUID\RandomUuidGenerator;
 
 /**
  * Raiz de composição da aplicação: monta a conexão SQLite, aplica as
@@ -33,6 +38,7 @@ final class ApplicationServiceProvider
         private readonly SessaoApplicationService $sessoes,
         private readonly DiscursoApplicationService $discursos,
         private readonly MemoriaApplicationService $memorias,
+        private readonly MensagemApplicationService $mensagens,
         private readonly SujeitoRepository $sujeitoRepository
     ) {
     }
@@ -44,8 +50,11 @@ final class ApplicationServiceProvider
         return self::comPDO($pdo);
     }
 
-    public static function comPDO(PDO $pdo): self
-    {
+    public static function comPDO(
+        PDO $pdo,
+        ?UuidGeneratorInterface $uuidGenerator = null,
+        ?RespostaAutomaticaInterface $respostaAutomatica = null
+    ): self {
         MigrationRunner::comMigrationsPadrao($pdo)->run();
 
         $sujeitoRepository = new SQLiteSujeitoRepository($pdo);
@@ -58,6 +67,11 @@ final class ApplicationServiceProvider
             new SessaoApplicationService($sessaoRepository, $sujeitoRepository),
             new DiscursoApplicationService($discursoRepository, $sessaoRepository),
             new MemoriaApplicationService($memoriaRepository),
+            new MensagemApplicationService(
+                $sessaoRepository,
+                $uuidGenerator ?? new RandomUuidGenerator(),
+                $respostaAutomatica ?? new RespostaFixaService()
+            ),
             $sujeitoRepository
         );
     }
@@ -80,6 +94,11 @@ final class ApplicationServiceProvider
     public function memorias(): MemoriaApplicationService
     {
         return $this->memorias;
+    }
+
+    public function mensagens(): MensagemApplicationService
+    {
+        return $this->mensagens;
     }
 
     /**

@@ -8,6 +8,7 @@ use PsycheAI\Infrastructure\Providers\ApplicationServiceProvider;
 use PsycheAI\Presentation\Controllers\DiscursoController;
 use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
 use PsycheAI\Presentation\Controllers\MemoriaController;
+use PsycheAI\Presentation\Controllers\MensagemController;
 use PsycheAI\Presentation\Controllers\SessaoController;
 use PsycheAI\Presentation\Controllers\SujeitoController;
 use PsycheAI\Presentation\Http\Router;
@@ -28,6 +29,7 @@ final class Routes
         $discursos = new DiscursoController($provider->discursos());
         $eventos = new EventoDiscursivoController($provider->discursos());
         $memorias = new MemoriaController($provider->memorias(), $provider->sujeitoRepository());
+        $mensagens = new MensagemController($provider->mensagens());
 
         $router->post('/subjects', [$sujeitos, 'criar']);
         $router->get('/subjects', [$sujeitos, 'listar']);
@@ -40,6 +42,7 @@ final class Routes
         $router->get('/sessions/{id}', [$sessoes, 'buscar']);
         $router->put('/sessions/{id}', [$sessoes, 'atualizar']);
         $router->delete('/sessions/{id}', [$sessoes, 'excluir']);
+        $router->post('/sessions/{id}/messages', [$mensagens, 'enviar']);
 
         $router->post('/events', [$eventos, 'criar']);
         $router->get('/events', [$eventos, 'listar']);

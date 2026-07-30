@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.11 — Sprint 11B (Integração da Interface Web com a API REST)
+> Versão 0.12 — Sprint 12 (Primeiro Diálogo)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -266,6 +266,82 @@ mockada através de `MockApiHttpClient`.
 Escopo desta sprint é exclusivamente a integração HTTP real — sem
 autenticação, autorização, WebSocket, notificações em tempo real,
 dashboards analíticos ou identidade visual definitiva.
+
+## Sprint 12 — Primeiro Diálogo (concluída)
+
+- [x] Tela de Conversa (`Web/Views/conversa/index.php` +
+      `ConversaController`): histórico de mensagens, caixa de texto e
+      botão Enviar, todos montados exclusivamente com os Componentes já
+      existentes desde a Sprint 11A (`TableComponent`, `FormComponent`,
+      `AlertComponent`). A atualização do histórico acontece porque a
+      própria resposta ao POST de envio já é a página recarregada com
+      as mensagens atualizadas — sem WebSocket nem polling, escopo
+      explicitamente excluído desde a Sprint 11B — e um `<script>`
+      inline mínimo rola o histórico até a última mensagem.
+- [x] Sessão automática: `ConversaController` garante um Sujeito
+      "Visitante" padrão sob demanda (`GET`/`POST /subjects`, já
+      existentes) e cria uma nova Sessao (`POST /sessions`, já
+      existente) na primeira visita, mantendo seu id em `$_SESSION`
+      nativa do PHP (`session_start()` adicionado a
+      `public/web/index.php`) para persistir entre requisições da mesma
+      aba — não há autenticação, apenas continuidade de conversa.
+- [x] `POST /sessions/{id}/messages` (`MensagemController` +
+      `EnviarMensagemRequest` + `MensagemEnviadaResponse`, sobre
+      `MensagemApplicationService`): único endpoint novo desta Sprint.
+      Registra a mensagem do usuário e a resposta automática do sistema
+      como dois `EventoDiscursivo` dentro do único `Discurso` da
+      conversa (criado sob demanda no primeiro envio), reaproveitando
+      `RegistrarDiscursoHandler`/`RegistrarEventoDiscursivoHandler` já
+      existentes — nenhum campo novo no Domínio. Como nem `Discurso` nem
+      `EventoDiscursivo` guardam quem falou, a paridade da `Posicao`
+      (par = usuário, ímpar = sistema) é quem distingue o autor na
+      Apresentação, já que a conversa sempre alterna estritamente entre
+      os dois. A leitura do histórico reaproveita `GET /events` já
+      existente, filtrado por `sessaoId` em
+      `MensagemViewModel::historicoDaSessao()` — sem endpoint novo só
+      para leitura.
+- [x] `Infrastructure/Contracts/RespostaAutomaticaInterface.php` +
+      `Infrastructure/AI/RespostaFixaService.php`: porta e implementação
+      temporária da resposta automática ("Recebi sua mensagem. Continue
+      falando livremente."), deliberadamente separada da já existente
+      `LLMInterface` — que pressupõe negociação real com um provedor de
+      LLM — para não descrever de forma enganosa uma resposta fixa como
+      chamada de IA. Isolada para substituição futura pelos motores
+      Freud e Lacan, que implementarão o mesmo contrato sem exigir
+      mudanças em `MensagemApplicationService` nem em qualquer camada
+      acima dela.
+- [x] `Infrastructure/UUID/RandomUuidGenerator.php`: primeira
+      implementação concreta de `UuidGeneratorInterface` (Sprint 7) —
+      UUID v4 via `random_bytes`, sem dependências externas — usada para
+      gerar os ids de Discurso/EventoDiscursivo/Sessao desta Sprint.
+- [x] Tratamento de erros sem quebrar a interface: falha de
+      conexão/timeout e erro HTTP reexibem a conversa com um alerta
+      inline preservando o texto digitado; mensagem vazia é validada
+      antes de qualquer chamada à API; Sessao inexistente (ex.: removida
+      por outra aba via o CRUD de Sessões já existente) é recuperada
+      automaticamente — `ConversaController` cria uma nova Sessao e
+      reenvia a mensagem uma única vez, avisando o usuário.
+- [x] `NavigationMenu`: nova seção "Conversa" (`/conversa`), primeira
+      depois do Dashboard.
+- [x] Testes: `MensagemApplicationServiceTest`
+      (`tests/Integration/Application/`), `MensagemEndpointsTest`
+      (`tests/Feature/Http/`, ponta a ponta Router → Application →
+      SQLite), `ConversaControllerTest`
+      (`tests/Feature/Presentation/Web/`, cobrindo criação/reuso de
+      Sessao, envio, validação de conteúdo vazio, recuperação de Sessao
+      inexistente e falhas de comunicação/validação sem quebrar),
+      `RandomUuidGeneratorTest`, `RespostaFixaServiceTest`, além dos
+      casos de `MensagemViewModel` em `ViewModelsTest`. Suíte completa
+      executada sem regressões (319 testes, 787 asserções; eram 294
+      testes e 716 asserções ao final da Sprint 11B).
+- [x] Atualização de `docs/Estrutura-de-Pastas.md`,
+      `docs/Arquitetura-Camadas.md` e do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente o primeiro diálogo funcional — sem
+Freud Engine, Lacan Engine, interpretação clínica, detecção de
+recorrências, memória longitudinal aplicada à conversa, observador
+clínico, IA generativa ou autenticação.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

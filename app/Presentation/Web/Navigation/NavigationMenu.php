@@ -6,7 +6,7 @@ namespace PsycheAI\Presentation\Web\Navigation;
 
 /**
  * Fonte única dos itens do menu lateral. Tanto a Sidebar quanto o
- * Router/Routes desta Sprint devem apontar para as mesmas seis seções
+ * Router/Routes desta Sprint devem apontar para as mesmas sete seções
  * definidas aqui, evitando que a navegação e as rotas divirjam.
  */
 final class NavigationMenu
@@ -18,6 +18,7 @@ final class NavigationMenu
     {
         return [
             new NavigationItem('Dashboard', '/', 'grid'),
+            new NavigationItem('Conversa', '/conversa', 'message-circle'),
             new NavigationItem('Sujeitos', '/sujeitos', 'user'),
             new NavigationItem('Sessões', '/sessoes', 'calendar'),
             new NavigationItem('Discursos', '/discursos', 'message'),
