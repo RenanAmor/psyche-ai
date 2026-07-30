@@ -315,9 +315,20 @@ passou a ocupar:
 - `AI/RespostaFixaService.php`: implementação temporária de
   `RespostaAutomaticaInterface` — devolve sempre a mesma resposta fixa
   ("Recebi sua mensagem. Continue falando livremente."), independente do
-  conteúdo recebido. Isolada para substituição futura pelos motores
-  Freud e Lacan, que implementarão o mesmo contrato sem exigir mudanças
-  em `MensagemApplicationService` nem em qualquer camada acima dela.
+  conteúdo recebido. Deixou de ser o binding padrão na Sprint 17, mas
+  continua em uso como resposta de reserva de
+  `RespostaEcoRecorrenciaService`.
+- `AI/RespostaEcoRecorrenciaService.php`: binding padrão de
+  `RespostaAutomaticaInterface` desde a Sprint 17 — reaproveita
+  `ConstruirMemoriaLongitudinalHandler` + `DetectarRecorrenciasHandler`
+  (os mesmos Use Cases do Discourse Engine/Motor Freud, Sprints 14-15)
+  para checar se o conteúdo normalizado da mensagem recebida já apareceu
+  antes no histórico persistido do Sujeito; se sim, devolve uma
+  pergunta-eco que só nomeia a repetição e convida a continuar falando
+  (nunca uma afirmação ou hipótese sobre a causa — Regra 7,
+  `docs/Regras-Dominio.md`); senão, delega a `RespostaFixaService`.
+  Único ponto em que os motores das Sprints 15-16 passam a tocar a
+  conversa — decisão fechada com o usuário ao planejar a Sprint 17.
 - `UUID/RandomUuidGenerator.php`: implementação de
   `UuidGeneratorInterface` via UUID v4 aleatório (`random_bytes`), sem
   dependências externas.
@@ -372,7 +383,10 @@ Controllers/Requests/Responses/Http já existentes na raiz de
 
 - `Http/`: `Request`, `Response`, `Router` (com handler de "não
   encontrado" configurável) e `ViewRenderer` (renderiza uma view PHP
-  isolada e, opcionalmente, a encaixa no layout principal).
+  isolada e, opcionalmente, a encaixa no layout principal). Desde a
+  Sprint 17, `Response::json()` devolve uma variante JSON (usada só pelo
+  fetch() de atualização incremental da Conversa) ao lado da `Response`
+  HTML padrão.
 - `Client/`: `HttpClientInterface` — porta de comunicação com a API
   REST (Sprint 10) — e `ApiHttpClient`, sua implementação de produção
   desde a Sprint 11B, que fala HTTP de verdade (cURL) com a API REST e
@@ -403,7 +417,10 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   `EmptyStateComponent`), `CardComponent`, `ButtonComponent`,
   `FormComponent`, `ModalComponent`, `AlertComponent` e
   `LoadingIndicatorComponent` — todos escapando HTML através do
-  utilitário `Html`.
+  utilitário `Html`. Desde a Sprint 17, `ConversaAreaComponent` combina
+  `AlertComponent` + `TableComponent` no bloco de alerta/histórico da
+  Conversa, para que o mesmo HTML sirva tanto a página cheia quanto o
+  fragmento JSON de `POST /conversa/mensagens`.
 - `Errors/`: `ErrorType` (enum fechado com os tipos exigidos: comunicação,
   não encontrado, validação, interno e, desde a Sprint 13, timeout),
   `ErrorViewModel` e `ErrorViewModelFactory`. `ApiHttpClient` distingue
@@ -421,12 +438,25 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   `SujeitosController` também expõe `novo`/`store`, único ponto que
   aplica validação básica de entrada (campo obrigatório), permitida
   pela Arquitetura em Camadas. Desde a Sprint 12, `ConversaController`
-  implementa a tela de Conversa: inicia uma Sessao automaticamente sob
-  um Sujeito "Visitante" padrão (não há autenticação nesta fase),
+  implementa a tela de Conversa: inicia uma Sessao automaticamente,
   mantém seu id em `$_SESSION` nativa do PHP entre requisições da mesma
   aba, envia mensagens através de `POST /sessions/{id}/messages` e se
   recupera sozinho quando a Sessao referenciada não existe mais
-  (recria uma nova e reenvia a mensagem uma única vez). Desde a Sprint
+  (recria uma nova e reenvia a mensagem uma única vez). A Sprint 17
+  substitui o Sujeito "visitante" fixo compartilhado por todo mundo por
+  uma identidade pseudônima por navegador: um cookie de longa duração
+  (`psyche_pessoa_id`, 1 ano, `HttpOnly`) é gerado na primeira vez que
+  uma nova Sessao precisa ser criada e reaproveitado nas visitas
+  seguintes, mesmo depois que `$_SESSION` expira — ou seja, cada
+  navegador acumula seu próprio Sujeito ao longo de várias Sessões
+  (visitas), isolado dos demais, sem exigir login (isso continua
+  reservado para a Sprint 18). A Sprint 17 também acrescenta o método
+  `mensagens()` (rota `POST /conversa/mensagens`): mesma lógica de
+  `enviar()`, mas devolve só o fragmento HTML de
+  `ConversaAreaComponent` em JSON, para o fetch() de
+  `conversa/index.php` atualizar o histórico sem recarregar a página —
+  `enviar()`/`POST /conversa/enviar` continuam existindo tal como antes,
+  como caminho funcional sem JavaScript. Desde a Sprint
   13, `HistoricoSujeitoController` implementa a tela de Histórico do
   Sujeito: combina `GET /subjects/{id}`, `GET /subjects/{id}/timeline` e
   `GET /subjects/{id}/consolidation` em uma única página — Linha do
@@ -443,14 +473,23 @@ Controllers/Requests/Responses/Http já existentes na raiz de
 - `Views/`: `layout.php` (com `partials/header.php` e
   `partials/sidebar.php`), uma view por seção, `carregando.php`,
   `errors/error.php` e, desde a Sprint 12, `conversa/index.php` — monta
-  o histórico com `TableComponent`, a caixa de mensagem com
-  `FormComponent` (textarea) e eventuais alertas com `AlertComponent`,
-  reaproveitando exclusivamente os Componentes da Sprint 11A. O único
-  HTML fora desses Componentes é um `<script>` inline mínimo que rola o
-  histórico até a última mensagem ao carregar a página — não há
-  WebSocket nem polling, a atualização acontece porque a própria
-  resposta ao POST de envio já é a página recarregada com o histórico
-  atualizado. Desde a Sprint 13, `historico/mostrar.php` monta a tela de
+  a caixa de mensagem com `FormComponent` (textarea) em torno de um
+  `<div id="conversa-area">`, cujo conteúdo (alerta + histórico) vem
+  pronto de `ConversaAreaComponent`. Até a Sprint 16 a atualização
+  acontecia porque a própria resposta ao POST de envio já era a página
+  recarregada; a partir da Sprint 17, um `<script>` inline (ainda sem
+  bundler/framework — só `fetch()` nativo, no mesmo espírito minimalista
+  do restante do projeto) intercepta o submit do formulário, envia
+  `POST /conversa/mensagens` e troca só o `innerHTML` de
+  `#conversa-area` pelo fragmento devolvido, sem recarregar a página
+  inteira. Não há WebSocket, polling nem SSE — a resposta do sistema é
+  sempre determinística e instantânea (Regra 1-10,
+  `docs/Regras-Dominio.md`), então não há nada para transmitir em
+  chunks; o `fetch()` é só uma troca de HTML pronto por HTML pronto. Se
+  `fetch()` falhar (ou JavaScript estiver desabilitado), o formulário
+  cai de volta no POST clássico a `/conversa/enviar` — a Sprint 17 não
+  introduz nenhum caminho que dependa de JavaScript para funcionar.
+  Desde a Sprint 13, `historico/mostrar.php` monta a tela de
   Histórico do Sujeito com `CardComponent` (contagens da Consolidação),
   um formulário de filtro (tipo/período/texto, GET) e `TableComponent`
   com paginação anterior/próxima — reaproveitando os Componentes já

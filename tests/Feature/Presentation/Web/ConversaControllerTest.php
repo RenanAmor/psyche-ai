@@ -16,6 +16,7 @@ final class ConversaControllerTest extends TestCase
     protected function setUp(): void
     {
         $_SESSION = [];
+        $_COOKIE = [];
     }
 
     public function testIniciarCriaSujeitoESessaoAutomaticamenteQuandoNaoHaConversaAtiva(): void
@@ -110,5 +111,97 @@ final class ConversaControllerTest extends TestCase
         $this->assertStringContainsString('Corrija os campos indicados', $resposta->corpo);
         $this->assertStringContainsString('Mensagem de teste único 12345', $resposta->corpo);
         $this->assertSame('ses-1', $_SESSION['psyche_conversa_sessao_id']);
+    }
+
+    public function testIniciarGeraUmCookieDePessoaQuandoNaoExisteAindaEOUsaParaCriarOSujeito(): void
+    {
+        $controller = new ConversaController(new HttpClientStub());
+
+        $resposta = $controller->iniciar(Request::criar('GET', '/conversa'));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertArrayHasKey('psyche_pessoa_id', $_COOKIE);
+        $this->assertNotSame('', $_COOKIE['psyche_pessoa_id']);
+    }
+
+    public function testIniciarReutilizaOCookieDePessoaJaExistenteEmVezDeGerarOutro(): void
+    {
+        $_COOKIE['psyche_pessoa_id'] = 'pessoa-fixa';
+
+        $controller = new ConversaController(new HttpClientStub());
+        $resposta = $controller->iniciar(Request::criar('GET', '/conversa'));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertSame('pessoa-fixa', $_COOKIE['psyche_pessoa_id']);
+    }
+
+    public function testDuasConversasIndependentesRecebemCookiesDePessoaDiferentes(): void
+    {
+        (new ConversaController(new HttpClientStub()))->iniciar(Request::criar('GET', '/conversa'));
+        $primeiroPessoaId = $_COOKIE['psyche_pessoa_id'];
+
+        $_SESSION = [];
+        $_COOKIE = [];
+
+        (new ConversaController(new HttpClientStub()))->iniciar(Request::criar('GET', '/conversa'));
+        $segundoPessoaId = $_COOKIE['psyche_pessoa_id'];
+
+        $this->assertNotSame($primeiroPessoaId, $segundoPessoaId);
+    }
+
+    public function testMensagensRetornaJsonComOFragmentoDeHistoricoAtualizado(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'ses-fixa';
+
+        $fake = new MensagemHttpClientFake([
+            'events' => [
+                ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa'],
+                ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa'],
+            ],
+        ]);
+
+        $controller = new ConversaController($fake);
+        $resposta = $controller->mensagens(Request::criar('POST', '/conversa/mensagens', [], ['conteudo' => 'Estou ansioso hoje.']));
+
+        $this->assertSame(200, $resposta->status);
+        $corpo = json_decode($resposta->corpo, true);
+
+        $this->assertTrue($corpo['sucesso']);
+        $this->assertSame('', $corpo['valorConteudo']);
+        $this->assertStringContainsString('Estou ansioso hoje.', $corpo['html']);
+        $this->assertStringContainsString('Recebi sua mensagem. Continue falando livremente.', $corpo['html']);
+    }
+
+    public function testMensagensComConteudoVazioRetornaJsonComAlertaDeErroSemQuebrar(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'sessao-fixa';
+
+        $controller = new ConversaController(new HttpClientStub());
+        $resposta = $controller->mensagens(Request::criar('POST', '/conversa/mensagens', [], ['conteudo' => '   ']));
+
+        $this->assertSame(200, $resposta->status);
+        $corpo = json_decode($resposta->corpo, true);
+
+        $this->assertFalse($corpo['sucesso']);
+        $this->assertStringContainsString('A mensagem não pode ser vazia.', $corpo['html']);
+    }
+
+    public function testMensagensComSessaoInexistenteRecuperaAutomaticamenteComUmaNovaSessao(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'sessao-antiga';
+
+        $fake = new MensagemHttpClientFake(['events' => []], ErrorType::NAO_ENCONTRADO);
+        $controller = new ConversaController($fake);
+
+        $resposta = $controller->mensagens(
+            Request::criar('POST', '/conversa/mensagens', [], ['conteudo' => 'Continuando a conversa.'])
+        );
+
+        $this->assertSame(200, $resposta->status);
+        $corpo = json_decode($resposta->corpo, true);
+
+        $this->assertTrue($corpo['sucesso']);
+        $this->assertStringContainsString('não estava mais disponível', $corpo['html']);
+        $this->assertNotSame('sessao-antiga', $_SESSION['psyche_conversa_sessao_id']);
     }
 }

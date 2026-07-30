@@ -14,7 +14,7 @@ use PsycheAI\Application\Services\ObservacaoApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
-use PsycheAI\Infrastructure\AI\RespostaFixaService;
+use PsycheAI\Infrastructure\AI\RespostaEcoRecorrenciaService;
 use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
@@ -76,7 +76,7 @@ final class ApplicationServiceProvider
             new MensagemApplicationService(
                 $sessaoRepository,
                 $uuidGenerator ?? new RandomUuidGenerator(),
-                $respostaAutomatica ?? new RespostaFixaService()
+                $respostaAutomatica ?? new RespostaEcoRecorrenciaService($sujeitoRepository)
             ),
             new LinhaDoTempoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
             new ConsolidacaoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),

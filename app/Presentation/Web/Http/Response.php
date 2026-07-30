@@ -26,6 +26,24 @@ final class Response
         return new self($corpo, 200);
     }
 
+    /**
+     * Resposta JSON para o fetch() de atualização incremental da tela de
+     * Conversa (Sprint 17) — o único consumidor desta variante. O corpo
+     * já vem em HTML pronto (fragmento renderizado pelo mesmo
+     * ViewRenderer/Components da página cheia) dentro do payload, para
+     * que nenhuma lógica de montagem de mensagem seja duplicada em JS.
+     *
+     * @param array<string, mixed> $dados
+     */
+    public static function json(array $dados, int $status = 200): self
+    {
+        return new self(
+            (string) json_encode($dados, JSON_UNESCAPED_UNICODE),
+            $status,
+            ['Content-Type' => 'application/json; charset=utf-8']
+        );
+    }
+
     public static function naoEncontrado(string $corpo): self
     {
         return new self($corpo, 404);

@@ -18,7 +18,7 @@ final class DetectorRecorrencias implements DomainServiceInterface
         $recorrencias = [];
 
         foreach ($eventos as $evento) {
-            $conteudo = $this->normalizar($evento->conteudo()->valor());
+            $conteudo = self::normalizar($evento->conteudo()->valor());
 
             if (!isset($recorrencias[$conteudo])) {
                 $recorrencias[$conteudo] = 0;
@@ -35,8 +35,12 @@ final class DetectorRecorrencias implements DomainServiceInterface
      * caixa) não podem fragmentar a mesma repetição em contagens
      * separadas — normalização textual determinística, sem similaridade
      * semântica nem NLP.
+     *
+     * Pública para que quem precise comparar um texto avulso contra as
+     * chaves já normalizadas de detectar() (ex.: RespostaEcoRecorrenciaService,
+     * Sprint 17) use exatamente a mesma regra, sem duplicá-la.
      */
-    private function normalizar(string $conteudo): string
+    public static function normalizar(string $conteudo): string
     {
         return mb_strtolower(trim($conteudo));
     }

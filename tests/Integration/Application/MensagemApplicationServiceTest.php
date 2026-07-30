@@ -11,6 +11,7 @@ use PsycheAI\Application\Services\MensagemApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
 use PsycheAI\Infrastructure\AI\RespostaFixaService;
+use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSujeitoRepository;
 use PsycheAI\Infrastructure\UUID\RandomUuidGenerator;
@@ -88,5 +89,24 @@ final class MensagemApplicationServiceTest extends SQLiteTestCase
         $this->assertSame($resultado->mensagemUsuario->discursoId, $resultado->respostaSistema->discursoId);
         $this->assertSame('sessao-1', $resultado->mensagemUsuario->sessaoId);
         $this->assertSame('sessao-1', $resultado->respostaSistema->sessaoId);
+    }
+
+    public function testEnviarRepassaOSujeitoIdDaSessaoParaARespostaAutomatica(): void
+    {
+        $espiao = new class implements RespostaAutomaticaInterface {
+            public ?string $sujeitoIdRecebido = null;
+
+            public function responder(string $mensagemUsuario, string $sujeitoId = ''): string
+            {
+                $this->sujeitoIdRecebido = $sujeitoId;
+
+                return 'resposta do espião';
+            }
+        };
+
+        $service = new MensagemApplicationService($this->sessaoRepository, new RandomUuidGenerator(), $espiao);
+        $service->enviar('sessao-1', 'Olá');
+
+        $this->assertSame('sujeito-1', $espiao->sujeitoIdRecebido);
     }
 }

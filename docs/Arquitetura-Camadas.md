@@ -161,7 +161,62 @@ nunca era consultável de fora de um teste.
 - **Motores continuam fora da conversa.** Esta Sprint não altera
   `RespostaAutomaticaInterface`/`ConversaController`, que seguem com
   `RespostaFixaService` — a integração dos motores com a conversa
-  permanece reservada para a Sprint de Interface Conversacional.
+  permanece reservada para a Sprint de Interface Conversacional (deixa
+  de valer na Sprint 17, ver seção abaixo).
+
+---
+
+## Interface Conversacional (Sprint 17)
+
+Referência de produto confirmada com o usuário: "algo como o ChatGPT" só
+na experiência (streaming/atualização incremental, sensação de
+fluidez) — não na inteligência por trás. A decisão de "sem LLM" que
+vale desde a Sprint 1 não é reaberta: `LLMInterface` continua sem
+nenhuma implementação.
+
+- **Motores passam a tocar a conversa.** Decisão fechada com o usuário
+  ao planejar esta Sprint: `RespostaAutomaticaInterface` ganha um novo
+  binding padrão, `RespostaEcoRecorrenciaService`
+  (`Infrastructure/AI/`), que reaproveita os mesmos Use Cases do
+  Discourse Engine/Motor Freud (`ConstruirMemoriaLongitudinalHandler` +
+  `DetectarRecorrenciasHandler`, Sprints 13-15) para checar se a
+  mensagem recebida já foi dita antes pelo Sujeito; se sim, devolve uma
+  pergunta-eco que só nomeia a repetição, nunca uma interpretação
+  (Regra 7, [Regras-Dominio.md](Regras-Dominio.md)). `RespostaFixaService`
+  não é removida — passa a ser a resposta de reserva de
+  `RespostaEcoRecorrenciaService` para quando ainda não há repetição
+  alguma. Para isso, o contrato `RespostaAutomaticaInterface::responder()`
+  ganha um segundo parâmetro, `$sujeitoId` (com valor padrão `''`, para
+  não quebrar implementações que não precisam dele), que
+  `MensagemApplicationService` preenche via
+  `SessaoRepository::sujeitoIdDaSessao()` (já existente desde a Sprint 13).
+- **Identidade por cookie substitui o Sujeito "visitante" fixo.** A nota
+  da Sprint 12 acima (`ConversaController` garante um Sujeito fixo
+  "visitante" compartilhado por todo mundo) deixa de valer: cada
+  navegador passa a receber um cookie de longa duração
+  (`psyche_pessoa_id`, 1 ano, `HttpOnly`, independente de `$_SESSION`)
+  na primeira vez que uma nova Sessao precisa ser criada, reaproveitado
+  nas visitas seguintes mesmo depois que `$_SESSION` expira. Isso isola
+  o discurso de cada pessoa — necessário para que
+  `RespostaEcoRecorrenciaService` (e as telas dos motores Freud/Lacan)
+  observem recorrências de UM sujeito, não a mistura de todos os
+  visitantes. Continua sem login/conta real: é uma identidade anônima
+  estável por navegador, que a Sprint 18 (Plataforma/autenticação) pode
+  ligar a uma conta sem perder o histórico já acumulado.
+- **fetch() troca HTML pronto por HTML pronto, sem WebSocket/SSE.** A
+  resposta do sistema é sempre determinística e computada de forma
+  síncrona — não há nada gerado token a token para transmitir em
+  chunks. "Streaming" nesta Sprint significa apenas: `POST
+  /conversa/mensagens` (novo método `ConversaController::mensagens()`)
+  devolve, em JSON, o mesmo fragmento HTML que `ConversaAreaComponent`
+  (`Presentation/Web/Components/`, novo) já monta para a página cheia; o
+  `<script>` da view troca o `innerHTML` de `#conversa-area` por esse
+  fragmento, sem recarregar a página. Nenhuma lógica de montagem de
+  mensagem é duplicada em JavaScript — o HTML sempre vem pronto do
+  servidor, no mesmo espírito minimalista do restante do projeto (sem
+  bundler, sem framework front-end). `POST /conversa/enviar` (a rota
+  clássica da Sprint 12) continua existindo e funcional: se `fetch()`
+  falhar ou JavaScript estiver desabilitado, o formulário recai nela.
 
 ---
 

@@ -60,6 +60,7 @@ final class Routes
 
         $router->get('/conversa', $conversa->iniciar(...));
         $router->post('/conversa/enviar', $conversa->enviar(...));
+        $router->post('/conversa/mensagens', $conversa->mensagens(...));
 
         $router->get('/erros/comunicacao', $erros->comunicacao(...));
         $router->get('/erros/validacao', $erros->validacao(...));

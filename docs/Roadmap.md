@@ -578,14 +578,88 @@ dados já produzidos pelo Motor Freud — sem significante, sem leitura de
 sentido, sem hipótese, sem diagnóstico, sem endpoint ou tela nova além da
 extensão já prevista desde a Sprint 14.
 
-## Sprint 17 — Interface Conversacional (escopo alto nível)
+## Sprint 17 — Interface Conversacional (concluída)
 
-Streaming/atualização incremental do histórico da Conversa e
-gerenciamento de sessão além do único `$_SESSION['psyche_conversa_sessao_id']`
-— ainda sem autenticação real. Decisão em aberto: se
-`RespostaAutomaticaInterface` continua com `RespostaFixaService` ou passa
-a refletir as repetições observadas (sem interpretar); os motores das
-Sprints 15-16 permanecem desligados da conversa até essa decisão.
+Referência de produto confirmada com o usuário: "algo como o ChatGPT" só
+na experiência (streaming/atualização incremental, visual fluido) — não
+na inteligência por trás. Isso não reabre a decisão de "sem LLM" que
+vale desde a Sprint 1: `LLMInterface` continua sem nenhuma
+implementação. As duas decisões que o planejamento desta Sprint deixou
+em aberto foram fechadas com o usuário antes de implementar:
+
+- [x] **Identidade por cookie, sem autenticação real.** Em vez de
+      resolver identidade de usuário (reservado para a Sprint 18),
+      `ConversaController` passa a gerar um cookie de longa duração
+      (`psyche_pessoa_id`, 1 ano, `HttpOnly`, independente de
+      `$_SESSION`) na primeira vez que uma nova Sessao precisa ser
+      criada, e reaproveitá-lo nas visitas seguintes — inclusive depois
+      que `$_SESSION` expira. Isso substitui o Sujeito "visitante" fixo
+      compartilhado por todo mundo por uma identidade pseudônima
+      estável por navegador: cada pessoa acumula seu próprio histórico
+      ao longo de múltiplas Sessões (visitas), isolado dos demais,
+      necessário para que os motores Freud/Lacan (Sprints 15-16)
+      observem recorrências de UM sujeito. Testado manualmente de ponta
+      a ponta (dois servidores PHP embutidos + curl): o mesmo cookie é
+      reaproveitado entre visitas diferentes, criando uma nova Sessao
+      sob o mesmo Sujeito em vez de um Sujeito novo.
+- [x] **`RespostaAutomaticaInterface` passa a refletir repetições
+      (sem interpretar).** Novo binding padrão
+      `Infrastructure/AI/RespostaEcoRecorrenciaService`: reaproveita
+      `ConstruirMemoriaLongitudinalHandler` + `DetectarRecorrenciasHandler`
+      (os mesmos Use Cases do Discourse Engine/Motor Freud, Sprints
+      13-15) para checar se o conteúdo normalizado da mensagem que a
+      pessoa acabou de enviar já apareceu antes no histórico persistido
+      do Sujeito. Quando sim, a resposta automática é uma pergunta-eco
+      que só nomeia a repetição e convida a continuar falando (ex.:
+      `Você voltou a falar em "X". O que vem à mente sobre isso?`) —
+      nunca uma afirmação ou hipótese sobre a causa da repetição (Regra
+      7, [Regras-Dominio.md](Regras-Dominio.md)). Quando não há
+      repetição (ou o Sujeito não é encontrado), delega para
+      `RespostaFixaService`, que não foi removida — só deixou de ser o
+      binding padrão. `RespostaAutomaticaInterface::responder()` ganha
+      um segundo parâmetro `$sujeitoId` (valor padrão `''`, para não
+      quebrar implementações que não precisam dele), que
+      `MensagemApplicationService` preenche via o já existente
+      `SessaoRepository::sujeitoIdDaSessao()` (Sprint 13).
+      `Domain/Services/DetectorRecorrencias::normalizar()` passou a ser
+      público para que essa comparação use exatamente a mesma regra do
+      Motor Freud, sem duplicá-la.
+- [x] **Atualização incremental via fetch(), sem WebSocket/SSE.** A
+      resposta do sistema é sempre determinística e síncrona — não há
+      nada gerado token a token para transmitir em chunks, então
+      "streaming" aqui significa trocar HTML pronto por HTML pronto:
+      novo endpoint `POST /conversa/mensagens`
+      (`ConversaController::mensagens()`) devolve, em JSON, o mesmo
+      fragmento HTML que o novo `Presentation/Web/Components/ConversaAreaComponent`
+      já monta para a página cheia (extraído para não duplicar a
+      montagem de alerta+histórico em dois lugares); o `<script>` de
+      `conversa/index.php` (vanilla, sem bundler/framework) intercepta o
+      submit do formulário e troca o `innerHTML` de `#conversa-area` por
+      esse fragmento, sem recarregar a página. `POST /conversa/enviar`
+      (rota clássica da Sprint 12) continua existindo e funcional — é o
+      caminho de reserva quando `fetch()` falha ou JavaScript está
+      desabilitado, então a Sprint não introduz nenhum caminho que
+      dependa de JavaScript para funcionar. Nova variante
+      `Presentation/Web/Http/Response::json()` ao lado da `Response` HTML
+      existente.
+- [x] Testes: `RespostaEcoRecorrenciaServiceTest` (integração, histórico
+      persistido de verdade via SQLite), novos casos em
+      `MensagemApplicationServiceTest` (repasse de `$sujeitoId`) e em
+      `DetectorRecorrenciasTest` (`normalizar()` público), e novos casos
+      em `ConversaControllerTest` (cookie de pessoa gerado/reaproveitado,
+      isolamento entre navegadores, endpoint JSON nos três cenários já
+      cobertos por `enviar()`: sucesso, conteúdo vazio, sessão
+      inexistente). Suíte completa executada sem regressões (393 testes,
+      980 asserções; eram 379 testes e 952 asserções ao final da Sprint
+      16).
+- [x] Atualização do Roadmap, `Estrutura-de-Pastas.md` e
+      `Arquitetura-Camadas.md` (nova seção "Interface Conversacional
+      (Sprint 17)").
+
+Escopo desta sprint é exclusivamente UX da conversa (atualização
+incremental, identidade por navegador) e refletir repetições já
+detectadas pelo Motor Freud — sem significante, sem leitura lacaniana na
+conversa, sem hipótese, sem diagnóstico, sem autenticação real.
 
 ## Sprint 18 — Plataforma (escopo alto nível)
 

@@ -39,4 +39,15 @@ final class DetectorRecorrenciasTest extends TestCase
 
         $this->assertSame(['lapso' => 3, 'chiste' => 1], $recorrencias);
     }
+
+    public function testNormalizarEPublicoEUsaAMesmaRegraDeDetectar(): void
+    {
+        $eventos = [
+            new EventoDiscursivo(new Identificador('e1'), new ConteudoDiscursivo('Lapso'), new Posicao(0)),
+        ];
+
+        $recorrencias = (new DetectorRecorrencias())->detectar($eventos);
+
+        $this->assertArrayHasKey(DetectorRecorrencias::normalizar(' LAPSO '), $recorrencias);
+    }
 }
