@@ -12,7 +12,12 @@ use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
  * conversa/index.php) na Sprint 17 para que o mesmo HTML sirva tanto a
  * página cheia (GET /conversa, POST /conversa/enviar) quanto o fragmento
  * JSON devolvido por POST /conversa/mensagens ao fetch() da view — sem
- * duplicar a montagem da tabela em dois lugares.
+ * duplicar a montagem em dois lugares.
+ *
+ * O histórico é renderizado como bolhas de mensagem (não uma tabela
+ * genérica): a tela de Conversa é uma experiência de chat, e alinhar cada
+ * mensagem à esquerda/direita conforme o autor exige um contêiner por
+ * mensagem em vez de linhas de tabela.
  */
 final class ConversaAreaComponent
 {
@@ -21,23 +26,29 @@ final class ConversaAreaComponent
      */
     public static function render(array $mensagens, ?string $alerta, string $tipoAlerta): string
     {
-        $linhas = array_map(
-            static fn (MensagemViewModel $mensagem): array => [
-                'autor' => $mensagem->autor,
-                'conteudo' => $mensagem->conteudo,
-                'criadoEm' => $mensagem->criadoEm,
-            ],
-            $mensagens
-        );
-
         $alertaHtml = $alerta !== null ? AlertComponent::render($alerta, $tipoAlerta) : '';
 
-        $tabelaHtml = TableComponent::render(
-            ['autor' => 'Autor', 'conteudo' => 'Mensagem', 'criadoEm' => 'Quando'],
-            $linhas,
-            'Nenhuma mensagem ainda. Escreva abaixo para começar.'
-        );
+        $historicoHtml = $mensagens === []
+            ? EmptyStateComponent::render('Nenhuma mensagem ainda. Escreva abaixo para começar.')
+            : implode('', array_map(self::renderMensagem(...), $mensagens));
 
-        return $alertaHtml . sprintf('<div id="historico-mensagens" class="historico-mensagens">%s</div>', $tabelaHtml);
+        return $alertaHtml . sprintf('<div id="historico-mensagens" class="historico-mensagens">%s</div>', $historicoHtml);
+    }
+
+    private static function renderMensagem(MensagemViewModel $mensagem): string
+    {
+        $classeAutor = $mensagem->autor === 'Você' ? 'mensagem-voce' : 'mensagem-sistema';
+
+        return sprintf(
+            '<div class="mensagem %s"><div class="mensagem-bolha">'
+                . '<span class="mensagem-autor">%s</span>'
+                . '<p class="mensagem-conteudo">%s</p>'
+                . '<time class="mensagem-quando">%s</time>'
+                . '</div></div>',
+            $classeAutor,
+            Html::e($mensagem->autor),
+            nl2br(Html::e($mensagem->conteudo)),
+            Html::e($mensagem->criadoEm)
+        );
     }
 }
