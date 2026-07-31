@@ -75,6 +75,7 @@ use PsycheAI\Presentation\Web\Http\BasePath;
             .then(function (dados) {
                 area.innerHTML = dados.html;
                 rolarParaOFim();
+                tocarUltimaRespostaDoSistema();
 
                 if (!campo) {
                     return;
@@ -88,6 +89,42 @@ use PsycheAI\Presentation\Web\Http\BasePath;
                 usarEnvioNativoDaProximaVez = true;
                 form.submit();
             });
+    });
+
+    // Sprint 24 (Voz de Saída): um único <audio> reaproveitado por toda a
+    // tela — tanto pelo botão "🔊" manual de cada bolha (progressive
+    // enhancement do link <a href> que já funciona sem JS) quanto pela
+    // resposta mais recente do sistema, tocada automaticamente após o
+    // envio de uma mensagem.
+    var player = new Audio();
+
+    function tocarAudio(url) {
+        player.pause();
+        player.src = url;
+        player.play().catch(function () {
+            // Autoplay bloqueado pelo navegador: a pessoa ainda pode ouvir
+            // clicando manualmente no botão "🔊" da mensagem.
+        });
+    }
+
+    function tocarUltimaRespostaDoSistema() {
+        var bolhas = area.querySelectorAll('.mensagem-sistema .mensagem-ouvir');
+        var ultima = bolhas[bolhas.length - 1];
+
+        if (ultima) {
+            tocarAudio(ultima.getAttribute('data-audio-url'));
+        }
+    }
+
+    area.addEventListener('click', function (evento) {
+        var botao = evento.target.closest('.mensagem-ouvir');
+
+        if (!botao) {
+            return;
+        }
+
+        evento.preventDefault();
+        tocarAudio(botao.getAttribute('data-audio-url'));
     });
 })();
 </script>

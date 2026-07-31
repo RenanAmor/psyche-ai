@@ -19,6 +19,8 @@ use PsycheAI\Domain\Repositories\SessaoRepository;
 use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
 use PsycheAI\Domain\ValueObjects\Identificador;
 use PsycheAI\Domain\ValueObjects\Posicao;
+use PsycheAI\Infrastructure\AI\OpenAITextToSpeechService;
+use PsycheAI\Infrastructure\Contracts\SpeechSynthesisInterface;
 
 /**
  * Orquestra o ciclo de vida completo de Discurso. A criação exige o
@@ -37,7 +39,8 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
         private readonly DiscursoRepository $discursoRepository,
         private readonly SessaoRepository $sessaoRepository,
         private readonly RegistrarDiscursoHandler $registrarDiscurso = new RegistrarDiscursoHandler(),
-        private readonly RegistrarEventoDiscursivoHandler $registrarEvento = new RegistrarEventoDiscursivoHandler()
+        private readonly RegistrarEventoDiscursivoHandler $registrarEvento = new RegistrarEventoDiscursivoHandler(),
+        private readonly SpeechSynthesisInterface $sintese = new OpenAITextToSpeechService()
     ) {
     }
 
@@ -117,6 +120,22 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
         }
 
         return null;
+    }
+
+    /**
+     * Sintetiza em áudio o conteúdo de um EventoDiscursivo já existente
+     * (ex.: a resposta do Motor de Enunciação Socrática) — exposto para a
+     * camada HTTP servir a reprodução por voz na tela de Conversa.
+     */
+    public function sintetizarFalaDoEvento(string $eventoId): string
+    {
+        $evento = $this->buscarEvento($eventoId);
+
+        if ($evento === null) {
+            throw RecursoNaoEncontradoException::paraId('EventoDiscursivo', $eventoId);
+        }
+
+        return $this->sintese->synthesize($evento->conteudo);
     }
 
     public function atualizarEvento(string $eventoId, string $novoConteudo, int $novaPosicao): EventoDiscursivoDTO

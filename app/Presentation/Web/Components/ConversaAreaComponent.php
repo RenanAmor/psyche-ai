@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PsycheAI\Presentation\Web\Components;
 
+use PsycheAI\Presentation\Web\Http\BasePath;
 use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
 
 /**
@@ -39,16 +40,26 @@ final class ConversaAreaComponent
     {
         $classeAutor = $mensagem->autor === 'Você' ? 'mensagem-voce' : 'mensagem-sistema';
 
+        $botaoOuvirHtml = $classeAutor === 'mensagem-sistema'
+            ? sprintf(
+                '<a class="mensagem-ouvir" href="%s" data-audio-url="%s" aria-label="Ouvir esta mensagem">🔊</a>',
+                Html::e(BasePath::url('/conversa/mensagens/' . $mensagem->id . '/audio')),
+                Html::e(BasePath::url('/conversa/mensagens/' . $mensagem->id . '/audio'))
+            )
+            : '';
+
         return sprintf(
             '<div class="mensagem %s"><div class="mensagem-bolha">'
                 . '<span class="mensagem-autor">%s</span>'
                 . '<p class="mensagem-conteudo">%s</p>'
                 . '<time class="mensagem-quando">%s</time>'
+                . '%s'
                 . '</div></div>',
             $classeAutor,
             Html::e($mensagem->autor),
             nl2br(Html::e($mensagem->conteudo)),
-            Html::e($mensagem->criadoEm)
+            Html::e($mensagem->criadoEm),
+            $botaoOuvirHtml
         );
     }
 }

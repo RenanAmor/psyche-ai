@@ -167,6 +167,24 @@ final class ConversaController
         return Response::json(['sucesso' => true]);
     }
 
+    /**
+     * Sintetiza em voz a resposta do sistema (Sprint 24, Voz de Saída) —
+     * repassa o áudio devolvido por GET /events/{id}/audio, mesma
+     * disciplina de SessoesController::audio() (getBinario(), nunca fala
+     * com Infrastructure direto).
+     */
+    public function audioResposta(Request $request): Response
+    {
+        $id = (string) $request->routeParam('id', '');
+        $resposta = $this->httpClient->getBinario('events/' . $id . '/audio');
+
+        if (!$resposta->sucesso) {
+            return Response::naoEncontrado('Não foi possível gerar o áudio desta mensagem.');
+        }
+
+        return new Response($resposta->bytes, 200, ['Content-Type' => $resposta->contentType ?? 'audio/mpeg']);
+    }
+
     public function cadastro(Request $request): Response
     {
         return $this->renderizarCadastro();

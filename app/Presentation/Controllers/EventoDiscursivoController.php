@@ -8,6 +8,7 @@ use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Presentation\Http\HttpException;
 use PsycheAI\Presentation\Http\JsonResponse;
 use PsycheAI\Presentation\Http\Request;
+use PsycheAI\Presentation\Http\Response;
 use PsycheAI\Presentation\Requests\AtualizarEventoDiscursivoRequest;
 use PsycheAI\Presentation\Requests\CriarEventoDiscursivoRequest;
 use PsycheAI\Presentation\Responses\EventoDiscursivoResponse;
@@ -70,6 +71,20 @@ final class EventoDiscursivoController extends Controller
         }
 
         return $this->sucesso(EventoDiscursivoResponse::fromDTO($dto)->toArray());
+    }
+
+    /**
+     * Sintetiza em voz o conteúdo do EventoDiscursivo (Sprint 24, Voz de
+     * Saída) e devolve os bytes de áudio brutos — nunca o envelope JSON
+     * padrão, mesma exceção já aberta por GravacaoAudioController::baixar.
+     *
+     * @param array<string, string> $params
+     */
+    public function falar(Request $request, array $params): Response
+    {
+        $audio = $this->service->sintetizarFalaDoEvento($params['id']);
+
+        return new Response(200, $audio, ['Content-Type' => 'audio/mpeg']);
     }
 
     /**

@@ -66,6 +66,7 @@ final class Routes
 
         $router->post('/events', [$eventos, 'criar']);
         $router->get('/events', [$eventos, 'listar']);
+        $router->get('/events/{id}/audio', [$eventos, 'falar']);
         $router->get('/events/{id}', [$eventos, 'buscar']);
         $router->put('/events/{id}', [$eventos, 'atualizar']);
         $router->delete('/events/{id}', [$eventos, 'excluir']);
