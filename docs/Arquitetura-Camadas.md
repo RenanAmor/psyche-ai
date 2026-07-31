@@ -540,6 +540,60 @@ configurável para não assumir mais que é dona da raiz do domínio.
 
 ---
 
+## Sprint 22 — Captura de Áudio da Sessão
+
+O sujeito passa a poder falar, não só digitar: `/conversa` grava a
+sessão inteira em áudio contínuo (não um arquivo por turno), preservado
+intacto para o analista ouvir e validar a transcrição — a fala revela o
+que a escrita já filtra (hesitação, meia-palavra, ato falho).
+
+- **Duas portas de infraestrutura que existiam desde a Sprint 7 sem
+  implementação ganham a primeira**: `StorageInterface`
+  (`LocalFilesystemStorage`, disco local) e `TranscriptionInterface`
+  (`OpenAIWhisperTranscriptionService`, `response_format=verbose_json`,
+  `temperature=0` — verbatim, sem correção da fala, deliberado).
+- **A transcrição vira `EventoDiscursivo` pelo mesmo caminho que uma
+  mensagem digitada** — `TranscreverGravacaoAudioHandler` reaproveita
+  `RegistrarEventoDiscursivoHandler` (usado por
+  `MensagemApplicationService::enviar()`), um evento por segmento
+  detectado pelo provedor de transcrição, sem disparar
+  `RespostaAutomaticaInterface` (é fala contínua, não um turno de
+  pergunta/resposta). Nenhum Motor Freud/Lacan lê o conteúdo transcrito
+  nesta sprint — a Regra 11 (`/conversa*` nunca expõe interpretação)
+  continua intocada.
+- **Pipeline assíncrono, não síncrono ao upload**: `POST
+  /conversa/audio` só grava o binário bruto (`GravacaoAudio` fica
+  `Pendente`); um worker CLI (`bin/transcrever-gravacoes.php`, agendado
+  via cron do servidor — infraestrutura, não código desta sprint)
+  processa as pendentes chamando `GravacaoAudioApplicationService::transcrever()`.
+  Evita acoplar a resposta HTTP do navegador à latência de uma API de
+  transcrição externa.
+- **Primeiro corpo binário do projeto, em ambas as Requests HTTP**:
+  `Presentation\Http\Request` (API) passa a decodificar JSON só sob
+  demanda (`corpo()`), preservando o corpo bruto em `corpoBinario()`; o
+  mesmo padrão é espelhado em `Presentation\Web\Http\Request`. Sem essa
+  mudança, o áudio (que não é JSON) quebraria o parsing existente.
+  `HttpClientInterface` ganha `postBinario()`/`getBinario()`
+  (`BinaryApiResponse`) para a Web repassar/servir esses bytes sem
+  nunca falar com `StorageInterface` diretamente — mesma disciplina de
+  toda chamada Web → API já existente.
+- **Áudio e texto convivem**: o textarea de `/conversa` continua
+  funcionando sem nenhuma mudança; a gravação (via `MediaRecorder` no
+  navegador, oculta quando o navegador não suporta) é um caminho
+  adicional, não uma substituição — decisão do usuário, que precisa
+  poder ouvir a sessão para validar o que o sistema escreveu.
+- **v1 é upload único, não incremental**: o navegador só envia o áudio
+  completo quando o sujeito clica "Encerrar e enviar gravação". Upload
+  em pedaços (resiliente a fechar a aba no meio) fica para depois de
+  validado o uso real — mesmo padrão de redução de escopo já usado nas
+  Sprints 18/20.
+- **Suíte completa sem regressão**: 569 testes / 1392 asserções (eram
+  532/1318 ao final da Sprint 21), incluindo dois novos duplos de teste
+  compartilhados (`StorageStub`/`TranscricaoStub`, mesmo padrão de
+  `HttpClientStub`).
+
+---
+
 # Camada de Aplicação
 
 Responsável por coordenar os casos de uso.

@@ -15,6 +15,11 @@ use PsycheAI\Presentation\Web\Http\BasePath;
     </p>
     <div id="conversa-area"><?= $areaConversaHtml ?></div>
 
+    <div id="conversa-gravacao" class="conversa-gravacao" hidden>
+        <button type="button" id="conversa-gravacao-botao">Gravar</button>
+        <span id="conversa-gravacao-status"></span>
+    </div>
+
     <?= FormComponent::render(
         '/conversa/enviar',
         'POST',
@@ -83,6 +88,89 @@ use PsycheAI\Presentation\Web\Http\BasePath;
                 usarEnvioNativoDaProximaVez = true;
                 form.submit();
             });
+    });
+})();
+</script>
+<script>
+(function () {
+    // Sprint 22 (Captura de Áudio da Sessão): grava a sessão inteira como
+    // um único áudio contínuo, do clique em "Gravar" até "Encerrar e
+    // enviar" — convive com o textarea acima (nenhum dos dois substitui o
+    // outro). Sem microfone/MediaRecorder no navegador, a seção inteira
+    // permanece oculta (hidden por padrão no HTML) e a conversa continua
+    // funcionando só por texto.
+    var secao = document.getElementById('conversa-gravacao');
+    var botao = document.getElementById('conversa-gravacao-botao');
+    var status = document.getElementById('conversa-gravacao-status');
+
+    if (!secao || !botao || !status || !window.fetch || !navigator.mediaDevices || !window.MediaRecorder) {
+        return;
+    }
+
+    secao.hidden = false;
+
+    var mediaRecorder = null;
+    var pedacos = [];
+
+    function definirStatus(texto) {
+        status.textContent = texto;
+    }
+
+    function iniciarGravacao() {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function (fluxo) {
+                pedacos = [];
+                mediaRecorder = new MediaRecorder(fluxo);
+
+                mediaRecorder.ondataavailable = function (evento) {
+                    if (evento.data && evento.data.size > 0) {
+                        pedacos.push(evento.data);
+                    }
+                };
+
+                mediaRecorder.onstop = function () {
+                    fluxo.getTracks().forEach(function (faixa) { faixa.stop(); });
+                    enviarGravacao(new Blob(pedacos, { type: mediaRecorder.mimeType || 'audio/webm' }));
+                };
+
+                mediaRecorder.start();
+                botao.textContent = 'Encerrar e enviar gravação';
+                definirStatus('Gravando...');
+            })
+            .catch(function () {
+                definirStatus('Não foi possível acessar o microfone.');
+            });
+    }
+
+    function enviarGravacao(blob) {
+        botao.disabled = true;
+        definirStatus('Enviando gravação...');
+
+        fetch(<?= json_encode(BasePath::url('/conversa/audio'), JSON_THROW_ON_ERROR) ?>, {
+            method: 'POST',
+            body: blob
+        })
+            .then(function (resposta) { return resposta.json(); })
+            .then(function (dados) {
+                definirStatus(dados.sucesso ? 'Gravação enviada.' : (dados.alerta || 'Falha ao enviar a gravação.'));
+            })
+            .catch(function () {
+                definirStatus('Falha ao enviar a gravação.');
+            })
+            .finally(function () {
+                botao.disabled = false;
+                botao.textContent = 'Gravar';
+                mediaRecorder = null;
+            });
+    }
+
+    botao.addEventListener('click', function () {
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+            return;
+        }
+
+        iniciarGravacao();
     });
 })();
 </script>

@@ -196,6 +196,19 @@ e-mail/senha a um Sujeito **já existente** (nunca cria um novo),
 reconstruindo a Entidade e preservando as Sessões já acumuladas, mesmo
 padrão sem Handler já usado por `atualizar()`.
 
+Desde a Sprint 22, `GravacaoAudioApplicationService` orquestra a captura
+de áudio da sessão: `registrar()` grava o binário via `StorageInterface`
+e persiste a `GravacaoAudio` pendente; `transcrever()` (chamado pelo
+worker `bin/transcrever-gravacoes.php`) lê o áudio de volta, chama
+`TranscriptionInterface`, divide o resultado em `EventoDiscursivo` via
+`TranscreverGravacaoAudioHandler` (que reaproveita
+`RegistrarEventoDiscursivoHandler`) e marca a gravação como
+transcrita/falha; `buscarPorSessao()`/`bytesDoArquivo()` servem a
+reprodução do áudio original ao analista; `listarPendentes()` alimenta o
+worker. Depende de `GravacaoAudioRepository`, `SessaoRepository`,
+`StorageInterface`, `TranscriptionInterface` e `UuidGeneratorInterface`
+só por interface.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -244,6 +257,15 @@ de `Analista`, não é uma Entidade nova: é o mesmo Sujeito de sempre,
 agora podendo carregar uma conta real além do cookie pseudônimo (Sprint
 17) — a maioria continua sem uma.
 
+Desde a Sprint 22 (Captura de Áudio da Sessão), `GravacaoAudio` representa
+a gravação contínua e bruta de uma Sessao inteira — falada, não
+digitada. Distinta de `EventoDiscursivo` (o texto já transcrito, um por
+segmento): a `GravacaoAudio` é a fonte primária, preservada intacta
+(Regra 2), com `caminhoArmazenamento` apontando para o arquivo no
+`StorageInterface` — a Entidade nunca carrega os bytes em si.
+`marcarTranscrita()`/`marcarFalha()` só alteram o status operacional do
+pipeline, nunca conteúdo produzido pelo sujeito.
+
 ---
 
 ### Events
@@ -270,6 +292,12 @@ Desde a Sprint 18, `AnalistaRepository` (`findById`, `findByEmail`,
 
 Desde a Sprint 20, `SujeitoRepository` ganha `findByEmail()` também,
 espelhando `AnalistaRepository`.
+
+Desde a Sprint 22, `GravacaoAudioRepository` (`findById`,
+`findBySessaoId`, `findPendentesDeTranscricao`, `save`) segue o mesmo
+desenho — implementado por `SQLiteGravacaoAudioRepository`.
+`findPendentesDeTranscricao()` é consumido só pelo worker assíncrono
+(`bin/transcrever-gravacoes.php`).
 
 ---
 
@@ -308,6 +336,10 @@ mas o primeiro enum na camada de Domínio.
 Desde a Sprint 18, `Email` valida formato via `FILTER_VALIDATE_EMAIL` —
 usado por `Analista`, mesmo padrão de validação simples de
 `Identificador`/`NomeSujeito`.
+
+Desde a Sprint 22, `StatusTranscricao` é um enum nativo (`Pendente`,
+`Transcrita`, `Falha`) — puro vocabulário, mesmo precedente de
+`TipoFormacaoFreudiana`.
 
 ---
 
@@ -353,6 +385,14 @@ nova porta é acrescentada: `ClassificadorEstruturalInterface`
 Application conhece para classificação estrutural, nunca a
 implementação concreta.
 
+Desde a Sprint 22, `StorageInterface` e `TranscriptionInterface` — as
+duas portas restantes desde a Sprint 7 sem implementação — ganham a
+primeira (`Storage/LocalFilesystemStorage.php` e
+`AI/OpenAIWhisperTranscriptionService.php`, ver abaixo).
+`TranscriptionResultDTO` ganha campo aditivo `segments`
+(`array<{text, inicio, fim}>`) — trechos com timestamp, usados para
+dividir uma gravação contínua em múltiplos `EventoDiscursivo`.
+
 ### Persistence
 
 Contém a primeira implementação concreta de persistência do sistema, em
@@ -368,12 +408,14 @@ Contém a primeira implementação concreta de persistência do sistema, em
   `CreateEventosDiscursivosTable`, `CreateMemoriasLongitudinaisTable`,
   `CreateMemoriaSessoesTable`, `AddCriadoEmToEventosDiscursivosTable`,
   `CreateAnalistasTable` desde a Sprint 18, `AddContaToSujeitosTable`
-  desde a Sprint 20) e `MigrationRunner`, que as aplica de forma
+  desde a Sprint 20, `CreateGravacoesAudioTable` (versão `0010`) desde a
+  Sprint 22) e `MigrationRunner`, que as aplica de forma
   ordenada e idempotente, registrando o histórico em
   `schema_migrations`.
 - `Repositories/`: adaptadores `SQLiteSujeitoRepository`,
   `SQLiteSessaoRepository`, `SQLiteDiscursoRepository`,
-  `SQLiteMemoriaRepository` e, desde a Sprint 18, `SQLiteAnalistaRepository`
+  `SQLiteMemoriaRepository`, `SQLiteAnalistaRepository` (Sprint 18) e,
+  desde a Sprint 22, `SQLiteGravacaoAudioRepository`/`GravacaoAudioMapper`
   — que implementam os respectivos Repositórios do
   Domínio usando PDO puro. `SessaoMapper`, `DiscursoMapper` e
   `EventoDiscursivoMapper` são hidratadores internos, compartilhados entre
@@ -435,6 +477,16 @@ passou a ocupar:
   `TipoFormacaoFreudiana::tryFrom()` — qualquer coisa fora do esperado
   (JSON inválido, valor desconhecido, falha de rede/API) cai em
   `NaoClassificado`, nunca um valor solto.
+- `Storage/LocalFilesystemStorage.php`: desde a Sprint 22, **primeira
+  implementação concreta de `StorageInterface`** (porta existente desde
+  a Sprint 7). Grava blobs no disco local sob uma raiz configurável via
+  `PSYCHEAI_AUDIO_STORAGE_PATH` (fallback `storage/audio/`).
+- `AI/OpenAIWhisperTranscriptionService.php`: desde a Sprint 22,
+  **primeira implementação concreta de `TranscriptionInterface`** (porta
+  existente desde a Sprint 7). Chama a API de transcrição da OpenAI
+  (`whisper-1`, `response_format=verbose_json`, `temperature=0`, sem
+  correção/normalização da fala — deliberado, é o material que os
+  Motores Freud/Lacan precisam), chave em `OPENAI_API_KEY`.
 
 ---
 
@@ -497,6 +549,16 @@ sabe o id de antemão (é assim que se recupera a conta de outro
 navegador), por isso é endpoint próprio, mesmo padrão de
 `AutenticacaoController`/`POST /auth/login` do analista.
 
+Desde a Sprint 22, `Presentation\Http\Request` decodifica o corpo JSON
+sob demanda (só em `corpo()`, não mais no construtor) e ganha
+`corpoBinario()` aditivo — o corpo bruto, nunca decodificado — usado por
+`GravacaoAudioController`: `POST /sessions/{id}/audio` (primeiro
+endpoint de upload binário do projeto, `multipart`/JSON nunca fazem
+sentido aqui, só bytes crus) e `GET /sessions/{id}/audio` (devolve os
+mesmos bytes originais, `Content-Type: audio/webm` — nunca o texto
+transcrito, que continua exposto normalmente como `EventoDiscursivo`
+pelos endpoints já existentes).
+
 ### Web
 
 Interface web (HTML) do PsycheAI, construída na Sprint 11A de forma
@@ -515,12 +577,19 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   Analista. Desde a Sprint 21, `BasePath` (holder estático,
   `definir()`/`url()`/`valor()`) permite rodar sob um subcaminho de um
   domínio compartilhado (ex.: `/psycheai`) — `Response::redirecionar()`
-  passa a aplicar `BasePath::url()` ao `Location`.
+  passa a aplicar `BasePath::url()` ao `Location`. Desde a Sprint 22,
+  `Request` ganha `corpoBinario()` (capturado de `php://input` em
+  `public/web/index.php`, ao lado de `$_POST`) — usado por
+  `ConversaController::audio()`.
 - `Client/`: `HttpClientInterface` — porta de comunicação com a API
   REST (Sprint 10) — e `ApiHttpClient`, sua implementação de produção
   desde a Sprint 11B, que fala HTTP de verdade (cURL) com a API REST e
   traduz status HTTP reais para os quatro tipos de erro (`ErrorType`).
-  `ApiResponse` é o envelope de retorno.
+  `ApiResponse` é o envelope de retorno. Desde a Sprint 22,
+  `HttpClientInterface` ganha `postBinario()`/`getBinario()` — o segundo
+  devolve `BinaryApiResponse` (bytes crus + Content-Type, não um array
+  JSON) — para que a Web sirva o áudio original sem nunca falar com
+  `StorageInterface` diretamente.
 - `ViewModels/`: `SujeitoViewModel`, `SessaoViewModel`,
   `DiscursoViewModel`, `MemoriaViewModel`, `EventoDiscursivoViewModel`,
   `DashboardViewModel` e, desde a Sprint 12, `MensagemViewModel` —
@@ -619,7 +688,16 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   Novo `sair()` (`POST /conversa/sair`) remove o cookie de identidade.
   `pessoaIdAtivaOuNova()` foi refatorado para reaproveitar
   `definirCookiePessoa()`, usado tanto para gerar um pseudônimo novo
-  quanto para trocar de identidade no login. Desde a Sprint
+  quanto para trocar de identidade no login. Desde a Sprint 22,
+  `ConversaController` ganha `audio()` (`POST /conversa/audio`): lê
+  `Request::corpoBinario()` (a gravação contínua feita no navegador via
+  `MediaRecorder`, ver `conversa/index.php`) e repassa para
+  `POST sessions/{id}/audio` na mesma Sessao ativa — nunca toca os
+  Motores Freud/Lacan (Regra 11 intocada). `SessoesController` (CRUD)
+  ganha `audio()` (`GET /sessoes/{id}/audio`, atrás do Portão do
+  Analista): busca `sessions/{id}/audio` via
+  `HttpClientInterface::getBinario()` e devolve os bytes originais para
+  o player `<audio>` de `sessoes/mostrar.php`. Desde a Sprint
   13, `HistoricoSujeitoController` implementa a tela de Histórico do
   Sujeito: combina `GET /subjects/{id}`, `GET /subjects/{id}/timeline` e
   `GET /subjects/{id}/consolidation` em uma única página — Linha do

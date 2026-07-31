@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Support;
 
 use PsycheAI\Presentation\Web\Client\ApiResponse;
+use PsycheAI\Presentation\Web\Client\BinaryApiResponse;
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
 use PsycheAI\Presentation\Web\Errors\ErrorType;
 use PsycheAI\Presentation\Web\Errors\ErrorViewModel;
@@ -91,6 +92,16 @@ final class ObservacoesHttpClientFake implements HttpClientInterface
     public function delete(string $recurso): ApiResponse
     {
         return $this->delegado->delete($recurso);
+    }
+
+    public function postBinario(string $recurso, string $binario): ApiResponse
+    {
+        return $this->delegado->postBinario($recurso, $binario);
+    }
+
+    public function getBinario(string $recurso): BinaryApiResponse
+    {
+        return $this->delegado->getBinario($recurso);
     }
 
     private function erroPara(ErrorType $tipo, string $recurso): ErrorViewModel

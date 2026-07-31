@@ -28,4 +28,17 @@ interface HttpClientInterface
     public function put(string $recurso, array $dados = []): ApiResponse;
 
     public function delete(string $recurso): ApiResponse;
+
+    /**
+     * Envia um corpo binário bruto (Sprint 22, captura de áudio) — a API
+     * ainda responde no envelope JSON padrão, só o corpo da requisição
+     * foge do formato form/JSON dos demais métodos.
+     */
+    public function postBinario(string $recurso, string $binario): ApiResponse;
+
+    /**
+     * Busca um recurso cuja resposta é o próprio binário (ex.: o áudio
+     * original de uma sessão), não um envelope JSON.
+     */
+    public function getBinario(string $recurso): BinaryApiResponse;
 }

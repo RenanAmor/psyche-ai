@@ -133,6 +133,26 @@ final class SessoesController extends AbstractCrudResourceController
         return Response::ok($html);
     }
 
+    /**
+     * Reproduz a gravação de áudio original da sessão (Sprint 22) para o
+     * analista validar o que a transcrição escreveu — nunca o texto, só
+     * os mesmos bytes que o Sujeito gravou (Regra 2, preservação
+     * integral). A Web nunca fala com StorageInterface direto: repassa
+     * via HttpClientInterface::getBinario(), mesma disciplina do resto da
+     * camada.
+     */
+    public function audio(Request $request): Response
+    {
+        $id = (string) $request->routeParam('id', '');
+        $resposta = $this->httpClient->getBinario($this->recurso() . '/' . $id . '/audio');
+
+        if (!$resposta->sucesso) {
+            return Response::naoEncontrado('Nenhuma gravação de áudio encontrada para esta sessão.');
+        }
+
+        return new Response($resposta->bytes, 200, ['Content-Type' => $resposta->contentType ?? 'audio/webm']);
+    }
+
     public function atualizar(Request $request): Response
     {
         $id = (string) $request->routeParam('id', '');

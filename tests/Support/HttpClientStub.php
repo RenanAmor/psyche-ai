@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Support;
 
 use PsycheAI\Presentation\Web\Client\ApiResponse;
+use PsycheAI\Presentation\Web\Client\BinaryApiResponse;
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
 use PsycheAI\Presentation\Web\Errors\ErrorType;
 use PsycheAI\Presentation\Web\Errors\ErrorViewModel;
@@ -61,6 +62,11 @@ final class HttpClientStub implements HttpClientInterface
      * @var array<string, array<int, array<string, mixed>>>
      */
     private array $armazenamento;
+
+    /**
+     * @var array<string, string>
+     */
+    private array $audios = [];
 
     /**
      * @param array<string, array<int, array<string, mixed>>> $recursos
@@ -230,6 +236,34 @@ final class HttpClientStub implements HttpClientInterface
         }
 
         return ApiResponse::falha(ErrorViewModelFactory::naoEncontrado($chave));
+    }
+
+    public function postBinario(string $recurso, string $binario): ApiResponse
+    {
+        $chave = trim($recurso, '/');
+
+        if ($this->falhaForcada !== null) {
+            return ApiResponse::falha($this->erroPara($this->falhaForcada, $chave));
+        }
+
+        $this->audios[$chave] = $binario;
+
+        return ApiResponse::sucesso(['status' => 'pendente']);
+    }
+
+    public function getBinario(string $recurso): BinaryApiResponse
+    {
+        $chave = trim($recurso, '/');
+
+        if ($this->falhaForcada !== null) {
+            return BinaryApiResponse::falha($this->erroPara($this->falhaForcada, $chave));
+        }
+
+        if (!isset($this->audios[$chave])) {
+            return BinaryApiResponse::falha(ErrorViewModelFactory::naoEncontrado($chave));
+        }
+
+        return BinaryApiResponse::sucesso($this->audios[$chave], 'audio/webm');
     }
 
     /**

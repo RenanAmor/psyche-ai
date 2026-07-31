@@ -303,4 +303,36 @@ final class ConversaControllerTest extends TestCase
         $this->assertArrayNotHasKey('psyche_pessoa_id', $_COOKIE);
         $this->assertArrayNotHasKey('psyche_conversa_sessao_id', $_SESSION);
     }
+
+    public function testAudioComCorpoVazioRetorna400SemChamarAApi(): void
+    {
+        $controller = new ConversaController(HttpClientStub::comFalha(ErrorType::COMUNICACAO));
+
+        $resposta = $controller->audio(Request::criar('POST', '/conversa/audio', [], [], ''));
+
+        $this->assertSame(400, $resposta->status);
+        $this->assertStringContainsString('vazia', $resposta->corpo);
+    }
+
+    public function testAudioComSucessoRepassaOBinarioParaASessaoAtiva(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'ses-fixa';
+
+        $controller = new ConversaController(new HttpClientStub());
+        $resposta = $controller->audio(Request::criar('POST', '/conversa/audio', [], [], 'bytes-do-audio'));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('"sucesso":true', $resposta->corpo);
+    }
+
+    public function testAudioComFalhaDeComunicacaoRetorna502(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'ses-fixa';
+
+        $controller = new ConversaController(HttpClientStub::comFalha(ErrorType::COMUNICACAO));
+        $resposta = $controller->audio(Request::criar('POST', '/conversa/audio', [], [], 'bytes-do-audio'));
+
+        $this->assertSame(502, $resposta->status);
+        $this->assertStringContainsString('"sucesso":false', $resposta->corpo);
+    }
 }

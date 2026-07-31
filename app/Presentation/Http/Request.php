@@ -5,20 +5,30 @@ declare(strict_types=1);
 namespace PsycheAI\Presentation\Http;
 
 /**
- * Representa uma requisição HTTP já normalizada (método, path, corpo JSON
- * decodificado e query string), independente de como foi capturada — de
+ * Representa uma requisição HTTP já normalizada (método, path, corpo e
+ * query string), independente de como foi capturada — de
  * $_SERVER/php://input em produção, ou construída diretamente nos testes.
+ *
+ * O corpo bruto é sempre preservado como string; a decodificação JSON
+ * (exigida pela API desde a Sprint 10) só acontece sob demanda, em
+ * corpo() — lazy, para que rotas de corpo binário (Sprint 22, upload de
+ * áudio) possam ler os mesmos bytes via corpoBinario() sem disparar
+ * HttpException::badRequest() por não ser um JSON válido.
  */
 final class Request
 {
     /**
-     * @param array<string, mixed> $corpo
+     * @var array<string, mixed>|null
+     */
+    private ?array $corpoDecodificado = null;
+
+    /**
      * @param array<string, mixed> $query
      */
     private function __construct(
         private readonly string $metodo,
         private readonly string $path,
-        private readonly array $corpo,
+        private readonly string $corpoBruto,
         private readonly array $query
     ) {
     }
@@ -27,9 +37,9 @@ final class Request
     {
         $metodo = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
         $path = self::normalizarPath((string) ($_SERVER['REQUEST_URI'] ?? '/'));
-        $corpo = self::decodificarCorpo((string) (file_get_contents('php://input') ?: ''));
+        $corpoBruto = (string) (file_get_contents('php://input') ?: '');
 
-        return new self($metodo, $path, $corpo, $_GET);
+        return new self($metodo, $path, $corpoBruto, $_GET);
     }
 
     /**
@@ -38,7 +48,21 @@ final class Request
      */
     public static function criar(string $metodo, string $path, array $corpo = [], array $query = []): self
     {
-        return new self(strtoupper($metodo), self::normalizarPath($path), $corpo, $query);
+        $instancia = new self(strtoupper($metodo), self::normalizarPath($path), '', $query);
+        $instancia->corpoDecodificado = $corpo;
+
+        return $instancia;
+    }
+
+    /**
+     * Constrói uma requisição de corpo binário bruto (Sprint 22, upload de
+     * áudio) — nunca decodificado como JSON.
+     *
+     * @param array<string, mixed> $query
+     */
+    public static function criarComCorpoBinario(string $metodo, string $path, string $corpoBinario, array $query = []): self
+    {
+        return new self(strtoupper($metodo), self::normalizarPath($path), $corpoBinario, $query);
     }
 
     private static function normalizarPath(string $uri): string
@@ -83,7 +107,17 @@ final class Request
      */
     public function corpo(): array
     {
-        return $this->corpo;
+        return $this->corpoDecodificado ??= self::decodificarCorpo($this->corpoBruto);
+    }
+
+    /**
+     * Corpo bruto, sem nenhuma tentativa de decodificação — usado pelas
+     * rotas de upload binário (Sprint 22), onde o corpo é o próprio áudio,
+     * não JSON.
+     */
+    public function corpoBinario(): string
+    {
+        return $this->corpoBruto;
     }
 
     public function query(string $chave, mixed $default = null): mixed

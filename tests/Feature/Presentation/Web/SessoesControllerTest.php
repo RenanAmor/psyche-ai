@@ -135,4 +135,36 @@ final class SessoesControllerTest extends TestCase
         $this->assertSame(200, $resposta->status);
         $this->assertStringNotContainsString('2026-06-02', $resposta->corpo);
     }
+
+    public function testMostrarExibeOPlayerDeAudioApontandoParaARotaWeb(): void
+    {
+        $controller = new SessoesController(new HttpClientStub());
+
+        $resposta = $controller->mostrar(Request::criar('GET', '/sessoes/ses-001')->comRouteParams(['id' => 'ses-001']));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('/sessoes/ses-001/audio', $resposta->corpo);
+    }
+
+    public function testAudioDevolveOsBytesQuandoAGravacaoExiste(): void
+    {
+        $httpClient = new HttpClientStub();
+        $httpClient->postBinario('sessions/ses-001/audio', 'bytes-da-gravacao');
+
+        $controller = new SessoesController($httpClient);
+        $resposta = $controller->audio(Request::criar('GET', '/sessoes/ses-001/audio')->comRouteParams(['id' => 'ses-001']));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertSame('bytes-da-gravacao', $resposta->corpo);
+        $this->assertSame('audio/webm', $resposta->headers['Content-Type']);
+    }
+
+    public function testAudioRetorna404QuandoNaoHaGravacao(): void
+    {
+        $controller = new SessoesController(new HttpClientStub());
+
+        $resposta = $controller->audio(Request::criar('GET', '/sessoes/ses-001/audio')->comRouteParams(['id' => 'ses-001']));
+
+        $this->assertSame(404, $resposta->status);
+    }
 }

@@ -133,6 +133,40 @@ final class ConversaController
         );
     }
 
+    /**
+     * Recebe a gravação contínua de áudio da sessão (Sprint 22, "Captura
+     * de Áudio da Sessão") e repassa o binário bruto para
+     * POST /sessions/{id}/audio — a transcrição em EventoDiscursivo
+     * acontece depois, de forma assíncrona (bin/transcrever-gravacoes.php),
+     * nunca aqui. Mesma identidade por cookie/Sessao ativa do restante de
+     * /conversa*, sem tocar os Motores Freud/Lacan (Regra 11).
+     */
+    public function audio(Request $request): Response
+    {
+        $audioBinario = $request->corpoBinario();
+
+        if ($audioBinario === '') {
+            return Response::json(['sucesso' => false, 'alerta' => 'A gravação está vazia.'], 400);
+        }
+
+        $sessaoId = $this->sessaoAtivaOuNova();
+
+        if ($sessaoId === null) {
+            return Response::json(
+                ['sucesso' => false, 'alerta' => ErrorViewModelFactory::comunicacao('sessions')->mensagem],
+                502
+            );
+        }
+
+        $resposta = $this->httpClient->postBinario('sessions/' . $sessaoId . '/audio', $audioBinario);
+
+        if (!$resposta->sucesso) {
+            return Response::json(['sucesso' => false, 'alerta' => $this->mensagemErro($resposta->erro)], 502);
+        }
+
+        return Response::json(['sucesso' => true]);
+    }
+
     public function cadastro(Request $request): Response
     {
         return $this->renderizarCadastro();

@@ -53,6 +53,60 @@ final class ApiHttpClient implements HttpClientInterface
         return $this->requisitar('DELETE', $recurso);
     }
 
+    public function postBinario(string $recurso, string $binario): ApiResponse
+    {
+        $url = rtrim($this->baseUrl, '/') . '/' . ltrim($recurso, '/');
+
+        $handle = curl_init($url);
+        curl_setopt_array($handle, [
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => $this->timeoutSegundos,
+            CURLOPT_TIMEOUT => $this->timeoutSegundos,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/octet-stream', 'Accept: application/json'],
+            CURLOPT_POSTFIELDS => $binario,
+        ]);
+
+        $corpoResposta = curl_exec($handle);
+        $codigoErroCurl = curl_errno($handle);
+        $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+        curl_close($handle);
+
+        if ($codigoErroCurl !== 0 || $corpoResposta === false) {
+            return ApiResponse::falha(ErrorViewModelFactory::comunicacao($recurso));
+        }
+
+        return $this->interpretar($status, (string) $corpoResposta, $recurso);
+    }
+
+    public function getBinario(string $recurso): BinaryApiResponse
+    {
+        $url = rtrim($this->baseUrl, '/') . '/' . ltrim($recurso, '/');
+
+        $handle = curl_init($url);
+        curl_setopt_array($handle, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => $this->timeoutSegundos,
+            CURLOPT_TIMEOUT => $this->timeoutSegundos,
+        ]);
+
+        $corpoResposta = curl_exec($handle);
+        $codigoErroCurl = curl_errno($handle);
+        $status = (int) curl_getinfo($handle, CURLINFO_RESPONSE_CODE);
+        $contentType = curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
+        curl_close($handle);
+
+        if ($codigoErroCurl !== 0 || $corpoResposta === false) {
+            return BinaryApiResponse::falha(ErrorViewModelFactory::comunicacao($recurso));
+        }
+
+        if ($status >= 200 && $status < 300) {
+            return BinaryApiResponse::sucesso((string) $corpoResposta, is_string($contentType) ? $contentType : null);
+        }
+
+        return BinaryApiResponse::falha($this->interpretar($status, (string) $corpoResposta, $recurso)->erro ?? ErrorViewModelFactory::interno());
+    }
+
     /**
      * @param array<string, string> $parametros
      * @param array<string, string>|null $corpo

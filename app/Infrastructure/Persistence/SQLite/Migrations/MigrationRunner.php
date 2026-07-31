@@ -46,6 +46,7 @@ final class MigrationRunner
             new AddCriadoEmToEventosDiscursivosTable(),
             new CreateAnalistasTable(),
             new AddContaToSujeitosTable(),
+            new CreateGravacoesAudioTable(),
         ];
     }
 

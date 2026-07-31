@@ -9,6 +9,7 @@ use PsycheAI\Presentation\Controllers\AutenticacaoController;
 use PsycheAI\Presentation\Controllers\AutenticacaoSujeitoController;
 use PsycheAI\Presentation\Controllers\DiscursoController;
 use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
+use PsycheAI\Presentation\Controllers\GravacaoAudioController;
 use PsycheAI\Presentation\Controllers\LinhaDoTempoController;
 use PsycheAI\Presentation\Controllers\MemoriaController;
 use PsycheAI\Presentation\Controllers\MensagemController;
@@ -34,6 +35,7 @@ final class Routes
         $eventos = new EventoDiscursivoController($provider->discursos());
         $memorias = new MemoriaController($provider->memorias(), $provider->sujeitoRepository());
         $mensagens = new MensagemController($provider->mensagens());
+        $gravacoesAudio = new GravacaoAudioController($provider->gravacoesAudio());
         $linhaDoTempo = new LinhaDoTempoController($provider->linhaDoTempo(), $provider->consolidacao());
         $observacoes = new ObservacaoController($provider->observacoes());
         $autenticacao = new AutenticacaoController($provider->analistas());
@@ -59,6 +61,8 @@ final class Routes
         $router->put('/sessions/{id}', [$sessoes, 'atualizar']);
         $router->delete('/sessions/{id}', [$sessoes, 'excluir']);
         $router->post('/sessions/{id}/messages', [$mensagens, 'enviar']);
+        $router->post('/sessions/{id}/audio', [$gravacoesAudio, 'enviar']);
+        $router->get('/sessions/{id}/audio', [$gravacoesAudio, 'baixar']);
 
         $router->post('/events', [$eventos, 'criar']);
         $router->get('/events', [$eventos, 'listar']);

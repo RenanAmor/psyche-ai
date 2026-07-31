@@ -8,6 +8,7 @@ use PDO;
 use PsycheAI\Application\Services\AnalistaApplicationService;
 use PsycheAI\Application\Services\ConsolidacaoApplicationService;
 use PsycheAI\Application\Services\DiscursoApplicationService;
+use PsycheAI\Application\Services\GravacaoAudioApplicationService;
 use PsycheAI\Application\Services\LinhaDoTempoApplicationService;
 use PsycheAI\Application\Services\MemoriaApplicationService;
 use PsycheAI\Application\Services\MensagemApplicationService;
@@ -18,16 +19,21 @@ use PsycheAI\Application\UseCases\ClassificarFormacaoFreudiana\ClassificarFormac
 use PsycheAI\Domain\Repositories\SujeitoRepository;
 use PsycheAI\Infrastructure\AI\AnthropicLLMService;
 use PsycheAI\Infrastructure\AI\ClassificadorFreudianoLLM;
+use PsycheAI\Infrastructure\AI\OpenAIWhisperTranscriptionService;
 use PsycheAI\Infrastructure\AI\RespostaEcoRecorrenciaService;
 use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
+use PsycheAI\Infrastructure\Contracts\StorageInterface;
+use PsycheAI\Infrastructure\Contracts\TranscriptionInterface;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
 use PsycheAI\Infrastructure\Persistence\SQLite\Migrations\MigrationRunner;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteAnalistaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
+use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteGravacaoAudioRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteMemoriaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSujeitoRepository;
+use PsycheAI\Infrastructure\Storage\LocalFilesystemStorage;
 use PsycheAI\Infrastructure\UUID\RandomUuidGenerator;
 
 /**
@@ -51,6 +57,7 @@ final class ApplicationServiceProvider
         private readonly ConsolidacaoApplicationService $consolidacao,
         private readonly ObservacaoApplicationService $observacoes,
         private readonly AnalistaApplicationService $analistas,
+        private readonly GravacaoAudioApplicationService $gravacoesAudio,
         private readonly SujeitoRepository $sujeitoRepository
     ) {
     }
@@ -66,7 +73,9 @@ final class ApplicationServiceProvider
         PDO $pdo,
         ?UuidGeneratorInterface $uuidGenerator = null,
         ?RespostaAutomaticaInterface $respostaAutomatica = null,
-        ?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana = null
+        ?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana = null,
+        ?StorageInterface $storage = null,
+        ?TranscriptionInterface $transcricao = null
     ): self {
         MigrationRunner::comMigrationsPadrao($pdo)->run();
 
@@ -75,10 +84,13 @@ final class ApplicationServiceProvider
         $discursoRepository = new SQLiteDiscursoRepository($pdo);
         $memoriaRepository = new SQLiteMemoriaRepository($pdo);
         $analistaRepository = new SQLiteAnalistaRepository($pdo);
+        $gravacaoAudioRepository = new SQLiteGravacaoAudioRepository($pdo);
         $uuidGenerator ??= new RandomUuidGenerator();
         $classificarFormacaoFreudiana ??= new ClassificarFormacaoFreudianaHandler(
             new ClassificadorFreudianoLLM(new AnthropicLLMService())
         );
+        $storage ??= new LocalFilesystemStorage();
+        $transcricao ??= new OpenAIWhisperTranscriptionService();
 
         return new self(
             new SujeitoApplicationService($sujeitoRepository),
@@ -97,6 +109,13 @@ final class ApplicationServiceProvider
                 classificarFormacaoFreudiana: $classificarFormacaoFreudiana
             ),
             new AnalistaApplicationService($analistaRepository, $uuidGenerator),
+            new GravacaoAudioApplicationService(
+                $gravacaoAudioRepository,
+                $sessaoRepository,
+                $storage,
+                $transcricao,
+                $uuidGenerator
+            ),
             $sujeitoRepository
         );
     }
@@ -144,6 +163,11 @@ final class ApplicationServiceProvider
     public function analistas(): AnalistaApplicationService
     {
         return $this->analistas;
+    }
+
+    public function gravacoesAudio(): GravacaoAudioApplicationService
+    {
+        return $this->gravacoesAudio;
     }
 
     /**

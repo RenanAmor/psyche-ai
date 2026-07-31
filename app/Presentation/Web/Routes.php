@@ -63,6 +63,7 @@ final class Routes
         $router->get('/sujeitos/{id}/observacoes', PortaoDeAnalista::proteger($observacoes->mostrar(...)));
         $router->get('/sujeitos/{id}/observacoes/grafo-circuito', PortaoDeAnalista::proteger($observacoes->grafoCircuito(...)));
         self::registrarCrud($router, '/sessoes', $sessoes);
+        $router->get('/sessoes/{id}/audio', PortaoDeAnalista::proteger($sessoes->audio(...)));
         self::registrarCrud($router, '/discursos', $discursos);
         self::registrarCrud($router, '/memorias', $memorias);
 
@@ -71,6 +72,7 @@ final class Routes
         $router->get('/conversa', $conversa->iniciar(...));
         $router->post('/conversa/enviar', $conversa->enviar(...));
         $router->post('/conversa/mensagens', $conversa->mensagens(...));
+        $router->post('/conversa/audio', $conversa->audio(...));
         $router->get('/conversa/cadastro', $conversa->cadastro(...));
         $router->post('/conversa/cadastro', $conversa->cadastrar(...));
         $router->get('/conversa/entrar', $conversa->entrar(...));

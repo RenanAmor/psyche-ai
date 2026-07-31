@@ -21,16 +21,22 @@ final class Request
         public readonly string $path,
         public readonly array $query = [],
         public readonly array $body = [],
-        public readonly array $routeParams = []
+        public readonly array $routeParams = [],
+        private readonly string $corpoBinario = ''
     ) {
     }
 
-    public static function criar(string $method, string $path, array $query = [], array $body = []): self
-    {
+    public static function criar(
+        string $method,
+        string $path,
+        array $query = [],
+        array $body = [],
+        string $corpoBinario = ''
+    ): self {
         $normalizado = '/' . ltrim((string) parse_url($path, PHP_URL_PATH), '/');
         $normalizado = $normalizado === '/' ? $normalizado : rtrim($normalizado, '/');
 
-        return new self(strtoupper($method), $normalizado, $query, $body);
+        return new self(strtoupper($method), $normalizado, $query, $body, corpoBinario: $corpoBinario);
     }
 
     /**
@@ -38,7 +44,17 @@ final class Request
      */
     public function comRouteParams(array $routeParams): self
     {
-        return new self($this->method, $this->path, $this->query, $this->body, $routeParams);
+        return new self($this->method, $this->path, $this->query, $this->body, $routeParams, $this->corpoBinario);
+    }
+
+    /**
+     * Corpo bruto da requisição (Sprint 22, upload de áudio da tela
+     * /conversa) — nunca populado a partir de $_POST, que só carrega
+     * campos de formulário form-encoded.
+     */
+    public function corpoBinario(): string
+    {
+        return $this->corpoBinario;
     }
 
     public function query(string $chave, ?string $padrao = null): ?string
