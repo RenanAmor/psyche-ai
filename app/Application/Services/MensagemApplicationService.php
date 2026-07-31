@@ -66,7 +66,7 @@ final class MensagemApplicationService implements ApplicationServiceInterface
             ->evento();
 
         $sujeitoId = $this->sessaoRepository->sujeitoIdDaSessao($sessaoId) ?? '';
-        $textoResposta = $this->respostaAutomatica->responder($conteudo, $sujeitoId);
+        $textoResposta = $this->respostaAutomatica->responder($conteudo, $sujeitoId, $sessaoId);
 
         $respostaSistema = $this->registrarEvento
             ->handle(new RegistrarEventoDiscursivoCommand(

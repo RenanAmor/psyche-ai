@@ -16,11 +16,14 @@ use PsycheAI\Application\Services\ObservacaoApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
 use PsycheAI\Application\UseCases\ClassificarFormacaoFreudiana\ClassificarFormacaoFreudianaHandler;
+use PsycheAI\Application\UseCases\GerarPerguntaSocratica\GerarPerguntaSocraticaHandler;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
 use PsycheAI\Infrastructure\AI\AnthropicLLMService;
 use PsycheAI\Infrastructure\AI\ClassificadorFreudianoLLM;
+use PsycheAI\Infrastructure\AI\GeradorDePerguntaSocraticaLLM;
 use PsycheAI\Infrastructure\AI\OpenAIWhisperTranscriptionService;
 use PsycheAI\Infrastructure\AI\RespostaEcoRecorrenciaService;
+use PsycheAI\Infrastructure\AI\RespostaSocraticaService;
 use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
 use PsycheAI\Infrastructure\Contracts\StorageInterface;
 use PsycheAI\Infrastructure\Contracts\TranscriptionInterface;
@@ -91,6 +94,12 @@ final class ApplicationServiceProvider
         );
         $storage ??= new LocalFilesystemStorage();
         $transcricao ??= new OpenAIWhisperTranscriptionService();
+        $respostaAutomatica ??= new RespostaSocraticaService(
+            $sujeitoRepository,
+            $sessaoRepository,
+            new GerarPerguntaSocraticaHandler(new GeradorDePerguntaSocraticaLLM(new AnthropicLLMService())),
+            new RespostaEcoRecorrenciaService($sujeitoRepository)
+        );
 
         return new self(
             new SujeitoApplicationService($sujeitoRepository),
@@ -100,7 +109,7 @@ final class ApplicationServiceProvider
             new MensagemApplicationService(
                 $sessaoRepository,
                 $uuidGenerator,
-                $respostaAutomatica ?? new RespostaEcoRecorrenciaService($sujeitoRepository)
+                $respostaAutomatica
             ),
             new LinhaDoTempoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
             new ConsolidacaoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),

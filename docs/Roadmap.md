@@ -1221,6 +1221,25 @@ Três decisões fechadas com o usuário antes de implementar:
 - [x] **Testes**: aditivos em todas as camadas (Domain/Infrastructure/Application/API/Web), incluindo novos duplos de teste compartilhados `StorageStub`/`TranscricaoStub` (`tests/Support/`, mesmo padrão de `HttpClientStub`) e atualização dos três fakes de `HttpClientInterface` existentes (`ObservacoesHttpClientFake`/`HistoricoHttpClientFake`/`MensagemHttpClientFake`) com os dois métodos binários novos da interface. **569 testes / 1392 asserções, zero regressão** (eram 532/1318 ao final da Sprint 21).
 - [x] **Fora de escopo desta passagem**: upload incremental em pedaços (decisão explícita, ver acima); segmentação por turno em vez de gravação contínua; qualquer leitura/rótulo dos Motores Freud/Lacan sobre o conteúdo transcrito (a Regra 11 continua intocada — `/conversa*` nunca expõe interpretação); agendamento do cron do worker no servidor (infraestrutura, não código).
 
+## Sprint 23 — Motor de Enunciação Socrática via LLM (conversa real com o Sujeito)
+
+**Origem**: até aqui `RespostaAutomaticaInterface` só tinha dois estados possíveis, nenhum deles uma conversa de verdade — `RespostaFixaService` (texto fixo) e `RespostaEcoRecorrenciaService` (Sprint 17, template `sprintf` quando detecta repetição literal). Nenhum LLM participava da resposta ao Sujeito; o único LLM do projeto (Motor Freud) classificava formações estruturais só para as telas do analista. Pedido do usuário: a ferramenta precisa "conversar de verdade", com "jogo de cintura", dando continuidade ao assunto que o Sujeito traz — mantendo a promessa do método socrático ([Documento-Mestre.md §6.7](Documento-Mestre.md#67-modo-de-enunciação-o-método-socrático)) e as Regras 7/9/10/11 ([Regras-Dominio.md](Regras-Dominio.md)): nunca afirmar, nunca interpretar, nunca dar causa ou diagnóstico, só perguntar.
+
+Três decisões fechadas com o usuário antes de implementar, não relitigar:
+
+1. **O LLM roda em toda mensagem do Sujeito**, não só quando há repetição literal — é o que torna isso conversa, não um gatilho raro.
+2. **Guardrail é estrutural** (JSON Schema fechado + validação de forma), mesmo padrão do Motor Freud — sem lista de bloqueio léxica; a fidelidade ao método socrático vem do prompt/design da experiência, não de moderação de conteúdo a posteriori.
+3. **Vira o binding padrão** de `RespostaAutomaticaInterface` em `ApplicationServiceProvider::comPDO()`, mesmo padrão `??=` já usado para `$classificarFormacaoFreudiana`.
+
+**Achado que simplifica o design**: `EventoDiscursivo` não guarda quem falou — a convenção já usada pelo projeto (`MensagemApplicationService`, docblock + `MensagemViewModel`) é que, dentro do único `Discurso` de uma `Sessao`, posição par = Sujeito e ímpar = Sistema (a conversa sempre alterna estritamente). Isso permite reconstruir "os últimos N turnos desta sessão" sem nenhum campo novo no Domínio, só sabendo o `sessaoId` — que `RespostaAutomaticaInterface::responder()` ainda não recebia.
+
+- [x] **Infrastructure/Contracts**: `RespostaAutomaticaInterface::responder()` ganha `$sessaoId = ''` (parâmetro aditivo, mesma técnica já usada para `$sujeitoId` na Sprint 17 — implementações que ignoram continuam válidas). Nova porta `GeradorDePerguntaSocraticaInterface` (`gerar(string, ContextoConversaDTO): ?string` — `null` sinaliza "guardrail falhou, use o fallback determinístico") + novo DTO `ContextoConversaDTO` (turnos recentes, se é repetição, descrição da recorrência).
+- [x] **Infrastructure/AI**: `GeradorDePerguntaSocraticaLLM` — mesmo guardrail sistêmico do Motor Freud: `output_config.format` só admite um campo (`pergunta`); a resposta bruta só é aceita se for JSON válido, com texto não vazio terminando em "?"; qualquer desvio (JSON inválido, campo ausente, texto que não é pergunta, falha de rede/API) devolve `null` dentro de `try/catch (Throwable)`, nunca propaga exceção. O prompt de sistema cita/parafraseia Documento-Mestre.md §6.7 e as Regras 7/9/10/11, proibindo explicitamente vocabulário técnico (ato falho, metáfora, etc., exclusivos do analista). Nova `RespostaSocraticaService` — **binding padrão a partir desta sprint**: calcula a resposta de `RespostaEcoRecorrenciaService` primeiro (cobre Sujeito não encontrado sem custo de API, e serve de rede de segurança quando o LLM falha/guardrail rejeita); recalcula `ehRepeticao`/`descricaoRecorrencia` com o mesmo critério da Sprint 17 (`minimo=1`); monta os turnos recentes a partir de `Sessao->discursos()[0]` (paridade de `Posicao`).
+- [x] **Application**: nova tríade `UseCases/GerarPerguntaSocratica/` (Command/Handler/Result), mesmo padrão de `ClassificarFormacaoFreudiana` — `GerarPerguntaSocraticaHandler` sem valor default para o gerador (dependência externa, wiring explícito no composition root). `MensagemApplicationService::enviar()`: única linha alterada, passa `$sessaoId` (já em escopo) para `responder()`.
+- [x] **Infrastructure/Providers**: `ApplicationServiceProvider::comPDO()` — `$respostaAutomatica ??= new RespostaSocraticaService(...)`, mesmo padrão já usado para `$classificarFormacaoFreudiana`. Nenhuma rota/API muda — `MensagemApplicationService::enviar(string, string)` mantém a assinatura pública intacta.
+- [x] **Testes**: novos `GeradorDePerguntaSocraticaLLMTest` (espelha `ClassificadorFreudianoLLMTest` — JSON válido terminando em "?", JSON válido que não termina em "?", campo ausente, texto livre não-JSON, pergunta vazia, falha de rede/API simulada — todos caem em `null`, nenhuma exceção escapa), `GerarPerguntaSocraticaHandlerTest`, `RespostaSocraticaServiceTest` (espelha `RespostaEcoRecorrenciaServiceTest`, `SQLiteTestCase`: Sujeito inexistente não chama o LLM, LLM válido devolvido verbatim, LLM inválido cai no fallback determinístico, turnos recentes montados na ordem cronológica correta). Espião de `MensagemApplicationServiceTest` atualizado para capturar `$sessaoId`. **596 testes / 1450 asserções, zero regressão** (eram 581/1428 antes desta sprint).
+- [x] **Fora de escopo desta passagem**: nenhuma leitura do Motor Freud/Lacan entra no prompt do Sujeito (evita segunda chamada de LLM por mensagem, mantém a Regra 11 — fundamentação teórica exclusiva do analista); nenhum sinal de "circuito" cross-sessão no contexto, só a janela de turnos da sessão atual; nenhum filtro léxico adicional além do guardrail estrutural (decisão do usuário); zero mudança em `Presentation/Web` (Views/Components/CSS) — havia uma reforma visual em andamento em paralelo (`layout.php`, `ConversaAreaComponent.php`, `estilo.css` novo), deliberadamente não tocada por esta sprint.
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
 - **Cadeia de significantes (Lacan) como matema formal** (S1↔S2,
@@ -1265,6 +1284,19 @@ Três decisões fechadas com o usuário antes de implementar:
   em si (`/conversa/cadastro`, `/conversa/entrar`), mas não decidiu como
   a Home pública do investimentos369 chega até lá (ver memória de
   projeto `integracao_investimentos369.md`).
+- **Motor de Enunciação Socrática: grounding no Motor Freud/Lacan** —
+  adiado explicitamente na Sprint 23 acima; o prompt de
+  `GeradorDePerguntaSocraticaLLM` hoje só usa turnos recentes +
+  repetição literal, nunca a classificação estrutural
+  (`TipoFormacaoFreudiana`/rótulo lacaniano) que já existe desde a
+  revisão do Motor Freud. Incorporar isso exigiria uma segunda chamada
+  de LLM por mensagem (custo/latência) e cuidado redobrado para nunca
+  vazar vocabulário técnico ao Sujeito (Regra 11).
+- **Motor de Enunciação Socrática: continuidade cross-sessão ("circuito")**
+  — adiado na Sprint 23; o contexto do prompt hoje só inclui os turnos
+  recentes da sessão atual, não o histórico de quando/onde um tema
+  reapareceu em sessões anteriores (`OcorrenciaRecorrencia`, já
+  disponível desde a revisão pós-Sprint 16).
 - Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura), a partir do Modelo Computacional do Discurso.
 - Especificação técnica do Evento Discursivo (formato de registro, granularidade, critérios de segmentação) — ver [Modelo-Computacional-Discurso.md (3.2)](Modelo-Computacional-Discurso.md#32-por-que-uma-unidade-própria).
 - Consolidação da bibliografia freudiana estruturada em [Ontologia-Freud.md (6)](Ontologia-Freud.md#6-referências) e da bibliografia lacaniana estruturada em [Ontologia-Lacan.md (6)](Ontologia-Lacan.md#6-referências).

@@ -594,6 +594,81 @@ que a escrita já filtra (hesitação, meia-palavra, ato falho).
 
 ---
 
+## Sprint 23 — Motor de Enunciação Socrática via LLM (conversa real com o Sujeito)
+
+Até aqui `RespostaAutomaticaInterface` só tinha dois estados possíveis,
+nenhum deles uma conversa de verdade: `RespostaFixaService` (texto fixo)
+e `RespostaEcoRecorrenciaService` (Sprint 17, template `sprintf` quando
+detecta repetição). Nenhum LLM participava da resposta ao Sujeito — o
+único LLM do projeto (Motor Freud) classificava formações estruturais só
+para as telas do analista. Decisão do usuário: a ferramenta precisa
+"conversar de verdade", com "jogo de cintura", dando continuidade ao
+assunto que o Sujeito traz — mantendo a promessa do método socrático
+(Documento-Mestre.md §6.7) e as Regras 7/9/10/11
+(docs/Regras-Dominio.md): nunca afirmar, nunca interpretar, nunca dar
+causa ou diagnóstico, só perguntar.
+
+Três decisões fechadas com o usuário antes de implementar, não relitigar:
+1. O LLM roda em **toda mensagem** do Sujeito, não só quando há
+   repetição literal — é o que torna isso conversa, não um gatilho raro.
+2. O guardrail é **estrutural** (JSON Schema fechado + validação de
+   forma), mesmo padrão do Motor Freud — sem lista de bloqueio léxica; a
+   fidelidade ao método socrático vem do prompt/design da experiência,
+   não de moderação de conteúdo a posteriori.
+3. Vira o **binding padrão** de `RespostaAutomaticaInterface` em
+   `ApplicationServiceProvider::comPDO()`, mesmo padrão `??=` já usado
+   para `$classificarFormacaoFreudiana`.
+
+**Achado que simplifica o design**: `EventoDiscursivo` não guarda quem
+falou — a convenção já usada pelo projeto (par = Sujeito, ímpar =
+Sistema, dentro do único `Discurso` de cada `Sessao`) permite reconstruir
+os turnos recentes de uma conversa sem nenhum campo novo no Domínio,
+bastando saber o `sessaoId`. Como `RespostaAutomaticaInterface::responder()`
+só recebia `$sujeitoId`, o contrato ganha `$sessaoId` (parâmetro
+aditivo, valor padrão `''`, mesma técnica já usada para `$sujeitoId` na
+Sprint 17) — `RespostaFixaService`/`RespostaEcoRecorrenciaService` só
+repassam o parâmetro adiante, sem mudança de comportamento.
+
+- **`GeradorDePerguntaSocraticaInterface` + `ContextoConversaDTO`**
+  (novos, `Infrastructure/Contracts`): porta que devolve `?string` — a
+  pergunta gerada, ou `null` sinalizando "guardrail falhou, use o
+  fallback determinístico". `ContextoConversaDTO` carrega os turnos
+  recentes da sessão atual (`autor`/`conteudo`), se a mensagem atual é
+  uma repetição e qual o conteúdo repetido.
+- **`GeradorDePerguntaSocraticaLLM`** (novo, `Infrastructure/AI`): mesmo
+  guardrail sistêmico do Motor Freud — `output_config.format` só admite
+  um campo (`pergunta`); a resposta bruta nunca é confiada, só é aceita
+  se for JSON válido, com texto não vazio terminando em "?"; qualquer
+  desvio (JSON inválido, campo ausente, texto que não é pergunta, falha
+  de rede/API) devolve `null` dentro de um `try/catch (Throwable)`, nunca
+  propaga exceção. O prompt de sistema cita/parafraseia Documento-Mestre.md
+  §6.7 e as Regras 7/9/10/11, proibindo explicitamente vocabulário técnico
+  (ato falho, metáfora, etc. continuam exclusivos do analista).
+- **`Application/UseCases/GerarPerguntaSocratica`** (novo, tríade
+  Command/Handler/Result no mesmo padrão de `ClassificarFormacaoFreudiana`):
+  `GerarPerguntaSocraticaHandler` não tem valor default para o gerador —
+  dependência externa, wiring explícito no composition root.
+- **`RespostaSocraticaService`** (novo, `Infrastructure/AI`, binding
+  padrão a partir desta sprint): calcula a resposta determinística de
+  `RespostaEcoRecorrenciaService` primeiro (cobre "Sujeito não
+  encontrado" sem custo de API, e serve de rede de segurança); recalcula
+  `ehRepeticao`/`descricaoRecorrencia` com o mesmo critério da Sprint 17
+  (`minimo=1`); monta os turnos recentes a partir de `Sessao->discursos()[0]`
+  (paridade de `Posicao`); chama o LLM e devolve a pergunta gerada, ou o
+  fallback determinístico quando o guardrail falha.
+- **`MensagemApplicationService::enviar()`**: única linha alterada — passa
+  `$sessaoId` (já em escopo) para `responder()`.
+- **Fora de escopo desta passagem** (ver "Sprints futuras" em
+  Roadmap.md): nenhuma leitura do Motor Freud/Lacan entra no prompt do
+  Sujeito (evita segunda chamada de LLM por mensagem, mantém a Regra 11);
+  nenhum sinal de "circuito" cross-sessão no contexto, só a janela de
+  turnos da sessão atual; nenhum filtro léxico adicional (decisão do
+  usuário); zero mudança em `Presentation/Web` (Views/Components/CSS).
+- **Suíte completa sem regressão**: 596 testes / 1450 asserções (eram
+  581/1428 antes desta sprint).
+
+---
+
 # Camada de Aplicação
 
 Responsável por coordenar os casos de uso.

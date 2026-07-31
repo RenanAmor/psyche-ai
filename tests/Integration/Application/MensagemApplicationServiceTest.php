@@ -95,10 +95,12 @@ final class MensagemApplicationServiceTest extends SQLiteTestCase
     {
         $espiao = new class implements RespostaAutomaticaInterface {
             public ?string $sujeitoIdRecebido = null;
+            public ?string $sessaoIdRecebido = null;
 
-            public function responder(string $mensagemUsuario, string $sujeitoId = ''): string
+            public function responder(string $mensagemUsuario, string $sujeitoId = '', string $sessaoId = ''): string
             {
                 $this->sujeitoIdRecebido = $sujeitoId;
+                $this->sessaoIdRecebido = $sessaoId;
 
                 return 'resposta do espião';
             }
@@ -108,5 +110,6 @@ final class MensagemApplicationServiceTest extends SQLiteTestCase
         $service->enviar('sessao-1', 'Olá');
 
         $this->assertSame('sujeito-1', $espiao->sujeitoIdRecebido);
+        $this->assertSame('sessao-1', $espiao->sessaoIdRecebido);
     }
 }

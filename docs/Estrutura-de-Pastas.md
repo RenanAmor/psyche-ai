@@ -209,6 +209,15 @@ worker. Depende de `GravacaoAudioRepository`, `SessaoRepository`,
 `StorageInterface`, `TranscriptionInterface` e `UuidGeneratorInterface`
 só por interface.
 
+Desde a Sprint 23 (Motor de Enunciação Socrática), a nova tríade
+`UseCases/GerarPerguntaSocratica/` (`Command`, `Handler`, `Result`) segue
+o mesmo desenho de `ClassificarFormacaoFreudiana`: `GerarPerguntaSocraticaHandler`
+não tem valor default para `GeradorDePerguntaSocraticaInterface` (mesma
+razão — dependência externa com credencial, wiring explícito no
+composition root). `Result::pergunta()` devolve `?string` — `null`
+significa "guardrail falhou, use o fallback determinístico", nunca uma
+exceção.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -393,6 +402,16 @@ primeira (`Storage/LocalFilesystemStorage.php` e
 (`array<{text, inicio, fim}>`) — trechos com timestamp, usados para
 dividir uma gravação contínua em múltiplos `EventoDiscursivo`.
 
+Desde a Sprint 23, `RespostaAutomaticaInterface::responder()` ganha um
+segundo parâmetro aditivo, `$sessaoId` (valor padrão `''`, mesma técnica
+já usada para `$sujeitoId` na Sprint 17) — sem ele não dá para
+reconstruir os turnos recentes da conversa atual. Nova porta
+`GeradorDePerguntaSocraticaInterface` (`gerar(string, ContextoConversaDTO): ?string`)
++ novo DTO `ContextoConversaDTO` (`Contracts/DTOs/`) — mesmo espírito de
+`ClassificadorEstruturalInterface`: a Application/Infraestrutura só
+conhecem o contrato, nunca a implementação concreta (`AI/GeradorDePerguntaSocraticaLLM.php`,
+ver abaixo).
+
 ### Persistence
 
 Contém a primeira implementação concreta de persistência do sistema, em
@@ -449,7 +468,7 @@ passou a ocupar:
   continua em uso como resposta de reserva de
   `RespostaEcoRecorrenciaService`.
 - `AI/RespostaEcoRecorrenciaService.php`: binding padrão de
-  `RespostaAutomaticaInterface` desde a Sprint 17 — reaproveita
+  `RespostaAutomaticaInterface` entre as Sprints 17 e 22 — reaproveita
   `ConstruirMemoriaLongitudinalHandler` + `DetectarRecorrenciasHandler`
   (os mesmos Use Cases do Discourse Engine/Motor Freud, Sprints 14-15)
   para checar se o conteúdo normalizado da mensagem recebida já apareceu
@@ -457,8 +476,8 @@ passou a ocupar:
   pergunta-eco que só nomeia a repetição e convida a continuar falando
   (nunca uma afirmação ou hipótese sobre a causa — Regra 7,
   `docs/Regras-Dominio.md`); senão, delega a `RespostaFixaService`.
-  Único ponto em que os motores das Sprints 15-16 passam a tocar a
-  conversa — decisão fechada com o usuário ao planejar a Sprint 17.
+  Deixou de ser o binding padrão na Sprint 23, mas continua em uso como
+  resposta de reserva de `RespostaSocraticaService`.
 - `UUID/RandomUuidGenerator.php`: implementação de
   `UuidGeneratorInterface` via UUID v4 aleatório (`random_bytes`), sem
   dependências externas.
@@ -487,6 +506,27 @@ passou a ocupar:
   (`whisper-1`, `response_format=verbose_json`, `temperature=0`, sem
   correção/normalização da fala — deliberado, é o material que os
   Motores Freud/Lacan precisam), chave em `OPENAI_API_KEY`.
+- `AI/GeradorDePerguntaSocraticaLLM.php`: implementação de
+  `GeradorDePerguntaSocraticaInterface` desde a Sprint 23. Mesmo guardrail
+  sistêmico do Motor Freud — `output_config.format` só admite um campo
+  (`pergunta`); a resposta bruta só é aceita se for JSON válido, com
+  texto não vazio terminando em "?"; qualquer desvio (JSON inválido,
+  campo ausente, texto que não é pergunta, falha de rede/API) devolve
+  `null`, nunca propaga exceção. O prompt de sistema cita/parafraseia
+  Documento-Mestre.md §6.7 e as Regras 7/9/10/11, proibindo vocabulário
+  técnico (exclusivo do analista).
+- `AI/RespostaSocraticaService.php`: **binding padrão de
+  `RespostaAutomaticaInterface` a partir da Sprint 23** — substitui o
+  template fixo/eco por uma pergunta gerada dinamicamente via LLM em
+  toda mensagem do Sujeito (não só quando há repetição), dando
+  continuidade real ao assunto trazido ("jogo de cintura", decisão do
+  usuário). Calcula a resposta de `RespostaEcoRecorrenciaService`
+  primeiro como rede de segurança (cobre Sujeito não encontrado sem
+  custo de API, e é o fallback quando o LLM falha/guardrail rejeita);
+  monta os turnos recentes da sessão atual a partir da paridade de
+  `Posicao` dentro do `Discurso` (par = Sujeito, ímpar = Sistema — mesma
+  convenção de `MensagemApplicationService`), sem nenhum campo novo no
+  Domínio.
 
 ---
 

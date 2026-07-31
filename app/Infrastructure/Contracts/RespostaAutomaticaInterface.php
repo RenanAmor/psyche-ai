@@ -13,10 +13,14 @@ namespace PsycheAI\Infrastructure\Contracts;
  * repetições que o Motor Freud (Sprint 15) já detecta no histórico do
  * Sujeito — por isso o contrato ganha $sujeitoId, o dado mínimo que
  * qualquer implementação baseada em recorrências precisa para localizar
- * esse histórico. O parâmetro tem valor padrão para não quebrar
- * implementações (como RespostaFixaService) que não precisam dele.
+ * esse histórico. A partir da Sprint 23, RespostaSocraticaService passa a
+ * ser a implementação padrão e precisa também de $sessaoId — sem ele não
+ * dá para reconstruir os turnos recentes da conversa atual (Sessao →
+ * Discurso → EventoDiscursivo) para dar continuidade ao assunto trazido
+ * pelo Sujeito. Ambos os parâmetros têm valor padrão para não quebrar
+ * implementações (como RespostaFixaService) que não precisam deles.
  */
 interface RespostaAutomaticaInterface
 {
-    public function responder(string $mensagemUsuario, string $sujeitoId = ''): string;
+    public function responder(string $mensagemUsuario, string $sujeitoId = '', string $sessaoId = ''): string;
 }

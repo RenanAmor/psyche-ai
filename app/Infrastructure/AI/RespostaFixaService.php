@@ -20,7 +20,7 @@ final class RespostaFixaService implements RespostaAutomaticaInterface
 {
     private const RESPOSTA_PADRAO = 'Recebi sua mensagem. Continue falando livremente.';
 
-    public function responder(string $mensagemUsuario, string $sujeitoId = ''): string
+    public function responder(string $mensagemUsuario, string $sujeitoId = '', string $sessaoId = ''): string
     {
         return self::RESPOSTA_PADRAO;
     }

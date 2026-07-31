@@ -43,12 +43,12 @@ final class RespostaEcoRecorrenciaService implements RespostaAutomaticaInterface
     ) {
     }
 
-    public function responder(string $mensagemUsuario, string $sujeitoId = ''): string
+    public function responder(string $mensagemUsuario, string $sujeitoId = '', string $sessaoId = ''): string
     {
         $sujeito = $sujeitoId === '' ? null : $this->sujeitoRepository->findById($sujeitoId);
 
         if ($sujeito === null) {
-            return $this->respostaPadrao->responder($mensagemUsuario, $sujeitoId);
+            return $this->respostaPadrao->responder($mensagemUsuario, $sujeitoId, $sessaoId);
         }
 
         $memoria = $this->construirMemoriaLongitudinal
@@ -70,6 +70,6 @@ final class RespostaEcoRecorrenciaService implements RespostaAutomaticaInterface
             }
         }
 
-        return $this->respostaPadrao->responder($mensagemUsuario, $sujeitoId);
+        return $this->respostaPadrao->responder($mensagemUsuario, $sujeitoId, $sessaoId);
     }
 }
