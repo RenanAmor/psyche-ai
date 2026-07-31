@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Feature\Presentation\Web;
 
 use PHPUnit\Framework\TestCase;
+use PsycheAI\Presentation\Web\Http\BasePath;
 use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Router;
 use PsycheAI\Presentation\Web\Navigation\NavigationMenu;
@@ -37,6 +38,7 @@ final class RoutesTest extends TestCase
     {
         $_SESSION = [];
         $_COOKIE = [];
+        BasePath::definir('');
     }
 
     private function criarRouter(): Router
@@ -256,5 +258,26 @@ final class RoutesTest extends TestCase
         $this->assertSame(302, $sair->status);
         $this->assertSame('/conversa', $sair->headers['Location']);
         $this->assertArrayNotHasKey('psyche_pessoa_id', $_COOKIE);
+    }
+
+    public function testComPrefixoDeBaseConfiguradoOsLinksDoMenuVemPrefixados(): void
+    {
+        BasePath::definir('/psycheai');
+
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/sujeitos'));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('href="/psycheai/sujeitos/novo"', $resposta->corpo);
+    }
+
+    public function testComPrefixoDeBaseConfiguradoORedirecionamentoDoPortaoVemPrefixado(): void
+    {
+        BasePath::definir('/psycheai');
+        $_SESSION = [];
+
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/'));
+
+        $this->assertSame(302, $resposta->status);
+        $this->assertSame('/psycheai/entrar', $resposta->headers['Location']);
     }
 }

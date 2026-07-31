@@ -10,6 +10,7 @@ use PsycheAI\Presentation\Web\Components\ConversaAreaComponent;
 use PsycheAI\Presentation\Web\Errors\ErrorType;
 use PsycheAI\Presentation\Web\Errors\ErrorViewModel;
 use PsycheAI\Presentation\Web\Errors\ErrorViewModelFactory;
+use PsycheAI\Presentation\Web\Http\BasePath;
 use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Response;
 use PsycheAI\Presentation\Web\Http\ViewRenderer;
@@ -435,7 +436,7 @@ final class ConversaController
         if (!headers_sent()) {
             setcookie(self::CHAVE_PESSOA_ID, $pessoaId, [
                 'expires' => time() + self::DURACAO_COOKIE_PESSOA_EM_SEGUNDOS,
-                'path' => '/',
+                'path' => BasePath::url('/'),
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
@@ -449,7 +450,7 @@ final class ConversaController
         if (!headers_sent()) {
             setcookie(self::CHAVE_PESSOA_ID, '', [
                 'expires' => time() - 3600,
-                'path' => '/',
+                'path' => BasePath::url('/'),
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);

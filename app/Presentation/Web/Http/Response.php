@@ -46,11 +46,13 @@ final class Response
 
     /**
      * Redirecionamento 302 usado pelo Portão do Analista (revisão
-     * pós-Sprint 16): sem corpo, apenas o cabeçalho Location.
+     * pós-Sprint 16): sem corpo, apenas o cabeçalho Location. Passa por
+     * BasePath::url() (Sprint 21) para todo redirect continuar dentro do
+     * subcaminho configurado, se houver.
      */
     public static function redirecionar(string $local): self
     {
-        return new self('', 302, ['Location' => $local]);
+        return new self('', 302, ['Location' => BasePath::url($local)]);
     }
 
     public static function naoEncontrado(string $corpo): self

@@ -10,6 +10,7 @@ use PsycheAI\Presentation\Web\Components\ButtonComponent;
 use PsycheAI\Presentation\Web\Components\CircuitoTrajetoComponent;
 use PsycheAI\Presentation\Web\Components\Html;
 use PsycheAI\Presentation\Web\Components\TableComponent;
+use PsycheAI\Presentation\Web\Http\BasePath;
 
 $linhasRecorrencias = array_map(
     static fn ($recorrencia) => [
@@ -69,7 +70,7 @@ $linhasObservacoes = array_map(
     </p>
     <div
         id="grafo-circuito"
-        data-endpoint="/sujeitos/<?= Html::e($sujeito->id) ?>/observacoes/grafo-circuito"
+        data-endpoint="<?= Html::e(BasePath::url('/sujeitos/' . $sujeito->id . '/observacoes/grafo-circuito')) ?>"
     ></div>
     <p class="legenda-grafo-circuito">
         Tracejado = leitura lacaniana, estrutura candidata — nunca uma
@@ -84,5 +85,5 @@ $linhasObservacoes = array_map(
 </section>
 <?php if ($circuitos !== []): ?>
 <script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="/assets/js/grafo-circuito.js" defer></script>
+<script src="<?= Html::e(BasePath::url('/assets/js/grafo-circuito.js')) ?>" defer></script>
 <?php endif; ?>

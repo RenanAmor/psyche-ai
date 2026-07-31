@@ -6,9 +6,15 @@ namespace PsycheAI\Tests\Unit\Presentation\Web\Components;
 
 use PHPUnit\Framework\TestCase;
 use PsycheAI\Presentation\Web\Components\ButtonComponent;
+use PsycheAI\Presentation\Web\Http\BasePath;
 
 final class ButtonComponentTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        BasePath::definir('');
+    }
+
     public function testLinkRenderizaAncoraComVarianteValida(): void
     {
         $html = ButtonComponent::link('Novo Sujeito', '/sujeitos/novo', 'secundario');
@@ -28,5 +34,14 @@ final class ButtonComponentTest extends TestCase
         $html = ButtonComponent::submit('Salvar', 'perigo');
 
         $this->assertStringContainsString('<button type="submit" class="botao botao-perigo">Salvar</button>', $html);
+    }
+
+    public function testLinkAntepoeOPrefixoDeBaseQuandoConfigurado(): void
+    {
+        BasePath::definir('/psycheai');
+
+        $html = ButtonComponent::link('Novo Sujeito', '/sujeitos/novo', 'secundario');
+
+        $this->assertStringContainsString('href="/psycheai/sujeitos/novo"', $html);
     }
 }

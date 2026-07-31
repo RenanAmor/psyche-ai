@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PsycheAI\Presentation\Web\Components;
 
+use PsycheAI\Presentation\Web\Http\BasePath;
+
 /**
  * Formulário genérico dirigido por dados. Cada campo é um array com as
  * chaves "nome", "rotulo", "tipo" (opcional, padrão "text"), "valor"
@@ -50,7 +52,7 @@ final class FormComponent
 
         return sprintf(
             '<form class="formulario" action="%s" method="%s">%s%s</form>',
-            Html::e($acao),
+            Html::e(BasePath::url($acao)),
             Html::e($metodo),
             $camposHtml,
             ButtonComponent::submit($rotuloSubmit)

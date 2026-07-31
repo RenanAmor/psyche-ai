@@ -1129,6 +1129,77 @@ abaixo): recuperação de senha, papéis/permissões diferenciados para o
 Sujeito (continua um único tipo de conta), qualquer decisão sobre como a
 Home do investimentos369 linka para este cadastro/login.
 
+## Sprint 21 — Prefixo de base para a interface web (2026-07-31)
+
+Decisão de integração: o PsycheAI vai rodar, ao menos na fase de testes,
+sob um subcaminho do investimentos369.com (`investimentos369.com/psycheai`)
+— sem subdomínio disponível na hospedagem atual, e um domínio próprio
+para o PsycheAI ainda não existe (previsto para depois; a Home e o
+Laboratório do investimentos369 já têm entradas/placeholder esperando o
+link). Diferente de sonus-ai/Collector369 (integrados por chamada direta
+de código/leitura de arquivo — nenhum dos dois é uma aplicação web com
+rotas próprias), o PsycheAI é uma aplicação web completa: toda a camada
+Web gera/casa caminhos absolutos a partir da raiz do domínio
+(`NavigationMenu`, formulários, `Response::redirecionar()`, cookies, o
+asset do grafo D3, `fetch()` em JS), então rodar sob `/psycheai` exige
+que ela aprenda um prefixo configurável — decisão técnica que ficava em
+aberto desde a Sprint 18 (ver memória de projeto `integracao_investimentos369.md`).
+
+- [x] `Presentation/Web/Http/BasePath` (novo): holder estático com
+      `definir()`/`url()`/`valor()`. Zero acoplamento com o Router: rotas
+      continuam declaradas "limpas" (`/conversa`, `/sujeitos`, ...) em
+      `Routes.php` — o prefixo é removido na borda de entrada (antes do
+      Router ver a requisição) e reaplicado na borda de saída (em todo
+      lugar que gera link/cookie/redirect), nunca no meio.
+- [x] `public/web/index.php` lê `PSYCHEAI_BASE_PATH` (novo, `.env.example`)
+      e remove o prefixo do `REQUEST_URI` antes de montar a `Request` —
+      o Router nunca sabe que o prefixo existe. Sem a variável definida
+      (padrão, inclusive em todo o desenvolvimento local até aqui),
+      `BasePath::url()` é *no-op* — string vazia antes de qualquer
+      caminho não muda nada, por isso as 532 asserções existentes
+      continuam passando sem nenhuma alteração.
+- [x] Prefixo reaplicado em: `Response::redirecionar()` (cobre todo
+      redirect do Portão/Analista/Sujeito de graça, sem tocar
+      Controllers); `ButtonComponent::link()` e `FormComponent::render()`
+      (cobrem praticamente todo `href`/`action` da Web, únicos dois
+      pontos que geravam link em toda a árvore de Views, confirmado por
+      busca exaustiva); `partials/sidebar.php` (menu de navegação);
+      `ConversaController` (cookie `psyche_pessoa_id`, path escopado ao
+      prefixo); `conversa/index.php` (links "Criar conta"/"Entrar" e o
+      `fetch()` em JS); `observacoes/mostrar.php` (`data-endpoint` do
+      grafo e o `<script src>` de `grafo-circuito.js`). O cookie de
+      sessão nativo do PHP (`session_set_cookie_params()`) também é
+      escopado ao prefixo, para não colidir com a sessão do próprio
+      investimentos369 na raiz do domínio.
+- [x] Achado durante a verificação de ponta a ponta: o servidor embutido
+      do PHP (`php -S`), ao receber `return false` do roteador achando
+      que é um arquivo estático, procura o arquivo pelo `REQUEST_URI`
+      **original** (ainda com o prefixo) — não bate com o caminho físico
+      em disco quando há prefixo configurado. Corrigido servindo o
+      arquivo diretamente (`readfile()`) no roteador quando
+      `PSYCHEAI_BASE_PATH` está em jogo; só afeta teste local — em
+      produção (Apache/Nginx) o servidor real nunca invoca PHP para pedir
+      um asset estático.
+- [x] Testes aditivos: `BasePathTest` (novo), casos novos em
+      `ButtonComponentTest`/`FormComponentTest`/`ResponseTest`/`RoutesTest`
+      confirmando o prefixo aplicado a link/ação de formulário/redirect/
+      menu de navegação quando configurado — todos com `tearDown()`
+      limpando `BasePath::definir('')`, para não vazar estado entre
+      testes (holder estático). Verificado também de ponta a ponta com
+      servidores reais e `PSYCHEAI_BASE_PATH=/psycheai`: menu, formulário,
+      cookie escopado a `/psycheai`, redirecionamento do Portão e o asset
+      do grafo — todos corretos. 532 testes, 1318 asserções (eram
+      523/1304 ao final da Sprint 20) — zero regressão.
+
+**Fora de escopo desta passagem** (decisão do usuário/infraestrutura, não
+de código): onde exatamente os arquivos do PsycheAI ficam no servidor da
+Hostinger (o document root público — `public_html` ou equivalente —
+precisa apontar direto para o conteúdo hoje em `public/web/`, mesmo
+padrão que o próprio investimentos369 já usa consigo mesmo: código fora
+do document root, só o necessário exposto); a criação do subcaminho/link
+real na Home e no Laboratório do investimentos369 (já feita pelo usuário
+— commit `f9c854b` — como placeholder, à espera deste prefixo).
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
 - **Cadeia de significantes (Lacan) como matema formal** (S1↔S2,

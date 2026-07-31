@@ -496,6 +496,50 @@ público é a superfície certa para quem fala em `/conversa*`.
 
 ---
 
+## Sprint 21 — Prefixo de base para a interface web
+
+Decisão de integração: o PsycheAI vai rodar (ao menos na fase de testes)
+sob `investimentos369.com/psycheai` — sem subdomínio disponível na
+hospedagem atual. Diferente de sonus-ai/Collector369 (integrados por
+chamada direta de código/leitura de arquivo, nenhuma rota própria), o
+PsycheAI é uma aplicação web completa e precisa aprender um prefixo
+configurável para não assumir mais que é dona da raiz do domínio.
+
+- **Prefixo removido na borda de entrada, reaplicado na borda de
+  saída — nunca no meio.** `Presentation/Web/Http/BasePath` (holder
+  estático) é definido uma vez em `public/web/index.php` a partir de
+  `PSYCHEAI_BASE_PATH` (novo, `.env.example`); o front controller remove
+  o prefixo do `REQUEST_URI` antes de montar a `Request`, então
+  `Router`/`Routes.php` nunca sabem que ele existe — rotas continuam
+  declaradas limpas (`/conversa`, `/sujeitos`). O prefixo só reaparece
+  quando algo gera um caminho de volta para o navegador.
+- **Só dois pontos concentram quase toda a geração de link da árvore de
+  Views** (confirmado por busca exaustiva antes de tocar código):
+  `ButtonComponent::link()` e `FormComponent::render()`. Prefixar só
+  esses dois cobre todo `href`/`action` de toda tela CRUD. Os outros
+  pontos (`Response::redirecionar()`, `partials/sidebar.php`, cookie de
+  `ConversaController`, `fetch()` em `conversa/index.php`,
+  `data-endpoint`/`<script src>` em `observacoes/mostrar.php`, cookie de
+  sessão nativo do PHP) foram tratados individualmente.
+- **Sem prefixo configurado, `BasePath::url()` é *no-op*** — string
+  vazia antes de qualquer caminho não muda nada. Por isso todo o
+  desenvolvimento local e as 532 asserções já existentes continuam
+  passando sem qualquer alteração de comportamento.
+- **Achado da verificação de ponta a ponta**: o servidor embutido do PHP
+  (`php -S`), ao receber `return false` do roteador achando que é
+  arquivo estático, procura o arquivo pelo `REQUEST_URI` **original**
+  (ainda com o prefixo) — não bate com o caminho físico em disco.
+  Corrigido servindo o arquivo diretamente (`readfile()`) nesse caso; só
+  relevante para teste local, produção (Apache/Nginx) nunca invoca PHP
+  para um asset estático.
+- **Fora de escopo**: onde exatamente os arquivos ficam no servidor da
+  Hostinger (decisão de infraestrutura do usuário, mesmo padrão que o
+  próprio investimentos369 já usa consigo mesmo — código fora do
+  document root público); a API REST não precisa do prefixo, porque
+  nunca é chamada direto pelo navegador.
+
+---
+
 # Camada de Aplicação
 
 Responsável por coordenar os casos de uso.

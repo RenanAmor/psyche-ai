@@ -512,7 +512,10 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   fetch() de atualização incremental da Conversa) ao lado da `Response`
   HTML padrão. Desde a revisão pós-Sprint 16, `Response::redirecionar()`
   devolve um 302 com o cabeçalho `Location`, usado pelo Portão do
-  Analista.
+  Analista. Desde a Sprint 21, `BasePath` (holder estático,
+  `definir()`/`url()`/`valor()`) permite rodar sob um subcaminho de um
+  domínio compartilhado (ex.: `/psycheai`) — `Response::redirecionar()`
+  passa a aplicar `BasePath::url()` ao `Location`.
 - `Client/`: `HttpClientInterface` — porta de comunicação com a API
   REST (Sprint 10) — e `ApiHttpClient`, sua implementação de produção
   desde a Sprint 11B, que fala HTTP de verdade (cURL) com a API REST e
@@ -558,7 +561,11 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   `EmptyStateComponent`), `CardComponent`, `ButtonComponent`,
   `FormComponent`, `ModalComponent`, `AlertComponent` e
   `LoadingIndicatorComponent` — todos escapando HTML através do
-  utilitário `Html`. Desde a Sprint 17, `ConversaAreaComponent` combina
+  utilitário `Html`. Desde a Sprint 21, `ButtonComponent::link()` e
+  `FormComponent::render()` aplicam `BasePath::url()` ao `href`/`action`
+  — são os dois únicos pontos que geram link em praticamente toda a
+  árvore de Views, então prefixá-los cobre quase tudo de graça. Desde a
+  Sprint 17, `ConversaAreaComponent` combina
   `AlertComponent` + `TableComponent` no bloco de alerta/histórico da
   Conversa, para que o mesmo HTML sirva tanto a página cheia quanto o
   fragmento JSON de `POST /conversa/mensagens`. Desde a revisão
@@ -697,7 +704,17 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   independente de `public/index.php` (API REST). Desde a Sprint 12,
   chama `session_start()` antes de despachar a requisição, para que
   `ConversaController` consiga associar uma conversa em andamento à
-  mesma aba do navegador.
+  mesma aba do navegador. Desde a Sprint 21, lê `PSYCHEAI_BASE_PATH`
+  (`.env.example`) e remove esse prefixo do `REQUEST_URI` antes de
+  montar a `Request` — o `Router`/`Routes.php` nunca sabem que ele
+  existe. Também escopa o cookie de sessão nativo do PHP ao prefixo
+  (`session_set_cookie_params()`), para não colidir com a sessão de uma
+  aplicação hospedeira na raiz do domínio (ex.: investimentos369.com).
+  No modo `cli-server` (só desenvolvimento local), serve assets
+  estáticos diretamente via `readfile()` quando há prefixo configurado
+  — `return false` não funciona nesse caso porque o servidor embutido
+  procuraria o arquivo pelo `REQUEST_URI` original, ainda com o
+  prefixo.
 
 Desde a Sprint 11B, toda a comunicação passa por `ApiHttpClient`, que
 fala HTTP de verdade com a API REST — nenhuma rota depende de dados

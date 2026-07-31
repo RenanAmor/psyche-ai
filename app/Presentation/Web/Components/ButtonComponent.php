@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace PsycheAI\Presentation\Web\Components;
 
+use PsycheAI\Presentation\Web\Http\BasePath;
+
 final class ButtonComponent
 {
     private const VARIANTES_VALIDAS = ['primario', 'secundario', 'perigo'];
@@ -13,7 +15,7 @@ final class ButtonComponent
         return sprintf(
             '<a class="botao botao-%s" href="%s">%s</a>',
             self::variante($variante),
-            Html::e($href),
+            Html::e(BasePath::url($href)),
             Html::e($rotulo)
         );
     }

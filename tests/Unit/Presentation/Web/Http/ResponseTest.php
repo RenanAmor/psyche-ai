@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Unit\Presentation\Web\Http;
 
 use PHPUnit\Framework\TestCase;
+use PsycheAI\Presentation\Web\Http\BasePath;
 use PsycheAI\Presentation\Web\Http\Response;
 
 final class ResponseTest extends TestCase
 {
+    protected function tearDown(): void
+    {
+        BasePath::definir('');
+    }
+
     public function testFactoriesRetornamOsStatusCorretos(): void
     {
         $this->assertSame(200, Response::ok('x')->status);
@@ -33,5 +39,14 @@ final class ResponseTest extends TestCase
         $this->assertSame(302, $response->status);
         $this->assertSame('/entrar', $response->headers['Location']);
         $this->assertSame('', $response->corpo);
+    }
+
+    public function testRedirecionarAntepoeOPrefixoDeBaseQuandoConfigurado(): void
+    {
+        BasePath::definir('/psycheai');
+
+        $response = Response::redirecionar('/entrar');
+
+        $this->assertSame('/psycheai/entrar', $response->headers['Location']);
     }
 }

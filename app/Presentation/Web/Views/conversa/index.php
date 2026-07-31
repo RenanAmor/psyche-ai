@@ -5,11 +5,13 @@
  */
 
 use PsycheAI\Presentation\Web\Components\FormComponent;
+use PsycheAI\Presentation\Web\Components\Html;
+use PsycheAI\Presentation\Web\Http\BasePath;
 ?>
 <section class="pagina-conversa">
     <p class="conversa-conta-links">
-        <a href="/conversa/cadastro">Criar conta</a> ·
-        <a href="/conversa/entrar">Entrar</a>
+        <a href="<?= Html::e(BasePath::url('/conversa/cadastro')) ?>">Criar conta</a> ·
+        <a href="<?= Html::e(BasePath::url('/conversa/entrar')) ?>">Entrar</a>
     </p>
     <div id="conversa-area"><?= $areaConversaHtml ?></div>
 
@@ -59,7 +61,7 @@ use PsycheAI\Presentation\Web\Components\FormComponent;
         var corpo = new URLSearchParams();
         corpo.set('conteudo', campo ? campo.value : '');
 
-        fetch('/conversa/mensagens', {
+        fetch(<?= json_encode(BasePath::url('/conversa/mensagens'), JSON_THROW_ON_ERROR) ?>, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: corpo.toString()
