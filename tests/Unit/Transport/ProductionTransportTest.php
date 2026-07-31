@@ -152,6 +152,20 @@ final class ProductionTransportTest extends TestCase
         self::assertSame(2, $ftp->connectAttempts);
     }
 
+    public function testReconnectsPeriodicallyToAvoidHostingerSessionLimit(): void
+    {
+        $this->writeLocalFile('app/A.php', 'a');
+        $this->writeLocalFile('app/B.php', 'b');
+        $this->writeLocalFile('app/C.php', 'c');
+        $this->writeLocalFile('app/D.php', 'd');
+
+        $ftp = new FakeFtpClient();
+        $outcome = $this->makeTransport($ftp, reconnectEveryFiles: 2)->run();
+
+        self::assertTrue($outcome->connected);
+        self::assertGreaterThan(1, $ftp->connectAttempts);
+    }
+
     public function testReportsTotalFailureWhenConnectionNeverSucceeds(): void
     {
         $this->writeLocalFile('app/Foo.php', 'conteudo-real');
@@ -203,7 +217,7 @@ final class ProductionTransportTest extends TestCase
     /**
      * @param array<int, int> $retryDelaysSeconds
      */
-    private function makeTransport(FakeFtpClient $ftp, array $retryDelaysSeconds = [0, 0]): ProductionTransport
+    private function makeTransport(FakeFtpClient $ftp, array $retryDelaysSeconds = [0, 0], int $reconnectEveryFiles = 20): ProductionTransport
     {
         return new ProductionTransport(
             localRoot: $this->root,
@@ -215,6 +229,7 @@ final class ProductionTransportTest extends TestCase
             remoteRoot: '/',
             connectTimeoutSeconds: 1,
             retryDelaysSeconds: $retryDelaysSeconds,
+            reconnectEveryFiles: $reconnectEveryFiles,
         );
     }
 }

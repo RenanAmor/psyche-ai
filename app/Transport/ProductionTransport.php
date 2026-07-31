@@ -39,6 +39,7 @@ final class ProductionTransport
 
     /**
      * @param array<int, int> $retryDelaysSeconds espera (segundos) entre tentativas de conexão; a quantidade de tentativas é count($retryDelaysSeconds) + 1
+     * @param int $reconnectEveryFiles a conta FTP da Hostinger derruba a sessão depois de um número de comandos/conexões de dados PASV (descoberto empiricamente: duas execuções reais pararam por volta do mesmo ponto, entre ~150 e ~300 comandos, independente de quais arquivos). Com milhares de arquivos numa única sessão isso sempre estoura, então a conexão é recriada periodicamente em vez de mantida do início ao fim.
      */
     public function __construct(
         private readonly string $localRoot,
@@ -50,6 +51,7 @@ final class ProductionTransport
         private readonly string $remoteRoot = '/',
         private readonly int $connectTimeoutSeconds = 10,
         private readonly array $retryDelaysSeconds = [2, 5],
+        private readonly int $reconnectEveryFiles = 20,
     ) {
     }
 
@@ -63,10 +65,18 @@ final class ProductionTransport
         }
 
         $results = [];
-        $emit = function (FileTransportResult $result) use (&$results, $onProgress): void {
+        $processedSinceConnect = 0;
+        $emit = function (FileTransportResult $result) use (&$results, &$processedSinceConnect, $onProgress): void {
             $results[] = $result;
             if ($onProgress !== null) {
                 $onProgress($result);
+            }
+
+            $processedSinceConnect++;
+            if ($processedSinceConnect >= $this->reconnectEveryFiles) {
+                $this->ftp->close();
+                $this->connectWithRetry();
+                $processedSinceConnect = 0;
             }
         };
 

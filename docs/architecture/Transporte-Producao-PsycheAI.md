@@ -30,19 +30,25 @@ O Collector369 transporta **um arquivo por provider**. Aqui é uma **árvore int
   - Arquivo remoto **já existe com o mesmo tamanho**: tratado como `already_current` sem download — aceita-se esse nível de confiança para código/dependências (ao contrário de dado financeiro, colisão de tamanho com conteúdo diferente em código versionado é um cenário extremamente improvável).
   - Arquivo remoto **já existe com tamanho diferente**: `conflict`, upload abortado, nada é sobrescrito — investigação humana necessária, mesma postura do Collector369.
 
-## 5. Upload seguro por arquivo
+## 5. Descoberta em produção: a sessão FTP tem limite
+
+Confirmado contra o FTP real (não só teoria): as duas primeiras execuções completas do transporte pararam por volta do mesmo número de comandos FTP (entre ~150 e ~300, contando `size`/`put`/`get`/`rename`/`mkdir`), independente de quais arquivos estavam sendo processados no momento — sintoma de que a conta `u196460065.psycheai` (ou a Hostinger em geral) derruba a sessão depois de um certo volume de comandos/conexões de dados PASV, não por erro de rede aleatório. Com milhares de arquivos (`vendor/` sozinho passa de 3800), uma única sessão persistente do início ao fim sempre estoura esse limite.
+
+Mitigação: `ProductionTransport` reconecta periodicamente (a cada `reconnectEveryFiles` itens processados, padrão 20) em vez de manter uma conexão só. Cada arquivo já processado com sucesso antes de uma queda continua íntegro (o desenho de `.tmp` + rename garante isso); reexecutar o comando depois de uma falha parcial é sempre seguro — os arquivos já publicados batem em tamanho (`already_current`, sem novo upload) e só os que faltaram são reenviados.
+
+## 6. Upload seguro por arquivo
 
 Igual ao Collector369: `.tmp_{nome}` → verifica tamanho → baixa e compara hash → `ftp_rename` para o nome final. `.tmp` órfão de uma execução anterior interrompida é removido antes de cada tentativa. Nenhum arquivo é sobrescrito silenciosamente.
 
-## 6. Idempotência e reexecução
+## 7. Idempotência e reexecução
 
-Rodar o comando de novo depois de um deploy já publicado é seguro e rápido: a maioria dos arquivos bate em tamanho (`already_current`), só os que realmente mudaram (normalmente dentro de `app/`, raramente `vendor/`) são reenviados. Não há cron nem gatilho automático — a publicação é sempre uma decisão manual do operador, mesma postura do Collector369.
+Rodar o comando de novo depois de um deploy já publicado (ou de uma queda de sessão no meio do caminho, ver seção 5) é seguro e rápido: a maioria dos arquivos bate em tamanho (`already_current`), só os que realmente mudaram ou faltaram (normalmente dentro de `app/`, raramente `vendor/`) são reenviados. Não há cron nem gatilho automático — a publicação é sempre uma decisão manual do operador, mesma postura do Collector369.
 
-## 7. Testes
+## 8. Testes
 
-`tests/Unit/Transport/ProductionTransportTest.php`, com `FakeFtpClient` (`tests/Support/FakeFtpClient.php`) — sem rede real. Cobre: upload da árvore incluída, exclusão de `tests/`/`docs/`/`README.md`/`.git`/`.env`, proteção total de `storage/` (arquivos locais ali nunca sobem, mesmo existindo), `already_current`/`conflict` por tamanho, limpeza de `.tmp` órfão, detecção de corrupção pós-upload, retry de conexão e callback de progresso.
+`tests/Unit/Transport/ProductionTransportTest.php`, com `FakeFtpClient` (`tests/Support/FakeFtpClient.php`) — sem rede real. Cobre: upload da árvore incluída, exclusão de `tests/`/`docs/`/`README.md`/`.git`/`.env`, proteção total de `storage/` (arquivos locais ali nunca sobem, mesmo existindo), `already_current`/`conflict` por tamanho, limpeza de `.tmp` órfão, detecção de corrupção pós-upload, retry de conexão, reconexão periódica e callback de progresso.
 
-## 8. O que este documento não cobre
+## 9. O que este documento não cobre
 
 - Criação da conta FTP no hPanel (feita manualmente por Renan — ver histórico de decisão em `investimentos369/docs/arquitetura/Integracao-PsycheAI.md`).
 - Preenchimento de `ANTHROPIC_API_KEY`/`OPENAI_API_KEY` (ficam no `.env` do `investimentos369/psycheai/`, não neste `.env`, que só tem as credenciais de transporte).
