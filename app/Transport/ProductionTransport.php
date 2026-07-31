@@ -58,7 +58,7 @@ final class ProductionTransport
 
     /**
      * @param array<int, int> $retryDelaysSeconds espera (segundos) entre tentativas de conexão; a quantidade de tentativas é count($retryDelaysSeconds) + 1
-     * @param int $reconnectEveryFiles a conta FTP da Hostinger derruba a sessão depois de um número de comandos/conexões de dados PASV (descoberto empiricamente: duas execuções reais pararam por volta do mesmo ponto, entre ~150 e ~300 comandos, independente de quais arquivos). Com milhares de arquivos numa única sessão isso sempre estoura, então a conexão é recriada periodicamente em vez de mantida do início ao fim.
+     * @param int $reconnectEveryFiles a conta FTP da Hostinger derruba a sessão depois de um número de comandos/conexões de dados PASV (descoberto empiricamente: execuções reais pararam por volta do mesmo ponto, entre ~150 e ~300 comandos, independente de quais arquivos). Com milhares de arquivos numa única sessão isso sempre estoura, então a conexão é recriada periodicamente em vez de mantida do início ao fim. Reduzido de 20 para 8 depois que a verificação de hash sempre-ligada (ver `contentsMatch`) passou a custar até 3-4 comandos FTP por arquivo já existente (antes só 1, `size`) — com 20 arquivos por lote isso se aproximava do limite da sessão de novo.
      */
     public function __construct(
         private readonly string $localRoot,
@@ -70,7 +70,7 @@ final class ProductionTransport
         private readonly string $remoteRoot = '/',
         private readonly int $connectTimeoutSeconds = 10,
         private readonly array $retryDelaysSeconds = [2, 5],
-        private readonly int $reconnectEveryFiles = 20,
+        private readonly int $reconnectEveryFiles = 8,
     ) {
     }
 
