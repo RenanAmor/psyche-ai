@@ -11,6 +11,7 @@ use PsycheAI\Domain\Entities\Sessao;
 use PsycheAI\Domain\Entities\Sujeito;
 use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
 use PsycheAI\Domain\ValueObjects\DataSessao;
+use PsycheAI\Domain\ValueObjects\Email;
 use PsycheAI\Domain\ValueObjects\Identificador;
 use PsycheAI\Domain\ValueObjects\NomeSujeito;
 use PsycheAI\Domain\ValueObjects\Posicao;
@@ -97,5 +98,56 @@ final class SQLiteSujeitoRepositoryTest extends SQLiteTestCase
         self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM sessoes')->fetchColumn());
         self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM discursos')->fetchColumn());
         self::assertSame(0, (int) $this->pdo->query('SELECT COUNT(*) FROM eventos_discursivos')->fetchColumn());
+    }
+
+    public function testSalvaEEncontraUmSujeitoComConta(): void
+    {
+        $repositorio = new SQLiteSujeitoRepository($this->pdo);
+        $repositorio->save(new Sujeito(
+            new Identificador('sujeito-1'),
+            new NomeSujeito('Sujeito Um'),
+            new Email('sujeito@psyche.ai'),
+            password_hash('segredo', PASSWORD_DEFAULT)
+        ));
+
+        $recuperado = $repositorio->findById('sujeito-1');
+
+        self::assertNotNull($recuperado);
+        self::assertTrue($recuperado->temConta());
+        self::assertSame('sujeito@psyche.ai', $recuperado->email()->valor());
+        self::assertTrue($recuperado->verificarSenha('segredo'));
+    }
+
+    public function testEncontraPorEmail(): void
+    {
+        $repositorio = new SQLiteSujeitoRepository($this->pdo);
+        $repositorio->save(new Sujeito(
+            new Identificador('sujeito-1'),
+            new NomeSujeito('Sujeito Um'),
+            new Email('sujeito@psyche.ai'),
+            password_hash('segredo', PASSWORD_DEFAULT)
+        ));
+
+        $recuperado = $repositorio->findByEmail('sujeito@psyche.ai');
+
+        self::assertNotNull($recuperado);
+        self::assertSame('sujeito-1', $recuperado->id()->valor());
+    }
+
+    public function testFindByEmailRetornaNuloQuandoNaoEncontrado(): void
+    {
+        $repositorio = new SQLiteSujeitoRepository($this->pdo);
+
+        self::assertNull($repositorio->findByEmail('inexistente@psyche.ai'));
+    }
+
+    public function testSujeitoAnonimoNaoAparecePorEmail(): void
+    {
+        $repositorio = new SQLiteSujeitoRepository($this->pdo);
+        $repositorio->save(new Sujeito(new Identificador('sujeito-1'), new NomeSujeito('Visitante')));
+
+        $recuperado = $repositorio->findById('sujeito-1');
+
+        self::assertFalse($recuperado->temConta());
     }
 }

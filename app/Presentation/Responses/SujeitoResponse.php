@@ -31,6 +31,7 @@ final class SujeitoResponse
             'id' => $this->dto->id,
             'nome' => $this->dto->nome,
             'quantidadeDeSessoes' => $this->dto->quantidadeDeSessoes,
+            'email' => $this->dto->email,
         ];
     }
 }

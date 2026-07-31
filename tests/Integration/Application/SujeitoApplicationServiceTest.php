@@ -82,4 +82,61 @@ final class SujeitoApplicationServiceTest extends SQLiteTestCase
         self::assertCount(2, $lista);
         self::assertSame(['sujeito-1', 'sujeito-2'], array_map(static fn ($dto) => $dto->id, $lista));
     }
+
+    public function testRegistrarContaLigaEmailESenhaPreservandoSessoesExistentes(): void
+    {
+        $this->service->criar('sujeito-1', 'Visitante');
+
+        $dto = $this->service->registrarConta('sujeito-1', 'sujeito@psyche.ai', 'segredo');
+
+        self::assertSame('sujeito@psyche.ai', $dto->email);
+        self::assertSame('sujeito@psyche.ai', $this->service->buscarPorId('sujeito-1')->email);
+    }
+
+    public function testRegistrarContaLancaExcecaoQuandoSujeitoNaoExiste(): void
+    {
+        $this->expectException(RecursoNaoEncontradoException::class);
+
+        $this->service->registrarConta('inexistente', 'sujeito@psyche.ai', 'segredo');
+    }
+
+    public function testBuscarPorEmailRetornaNuloQuandoNaoEncontrado(): void
+    {
+        self::assertNull($this->service->buscarPorEmail('inexistente@psyche.ai'));
+    }
+
+    public function testBuscarPorEmailEncontraOSujeitoComConta(): void
+    {
+        $this->service->criar('sujeito-1', 'Visitante');
+        $this->service->registrarConta('sujeito-1', 'sujeito@psyche.ai', 'segredo');
+
+        $encontrado = $this->service->buscarPorEmail('sujeito@psyche.ai');
+
+        self::assertNotNull($encontrado);
+        self::assertSame('sujeito-1', $encontrado->id);
+    }
+
+    public function testAutenticarComCredenciaisCorretasRetornaODTO(): void
+    {
+        $this->service->criar('sujeito-1', 'Visitante');
+        $this->service->registrarConta('sujeito-1', 'sujeito@psyche.ai', 'segredo');
+
+        $autenticado = $this->service->autenticar('sujeito@psyche.ai', 'segredo');
+
+        self::assertNotNull($autenticado);
+        self::assertSame('sujeito-1', $autenticado->id);
+    }
+
+    public function testAutenticarComSenhaIncorretaRetornaNulo(): void
+    {
+        $this->service->criar('sujeito-1', 'Visitante');
+        $this->service->registrarConta('sujeito-1', 'sujeito@psyche.ai', 'segredo');
+
+        self::assertNull($this->service->autenticar('sujeito@psyche.ai', 'senha-errada'));
+    }
+
+    public function testAutenticarComEmailInexistenteRetornaNulo(): void
+    {
+        self::assertNull($this->service->autenticar('inexistente@psyche.ai', 'segredo'));
+    }
 }

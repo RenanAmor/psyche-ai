@@ -7,6 +7,10 @@
 use PsycheAI\Presentation\Web\Components\FormComponent;
 ?>
 <section class="pagina-conversa">
+    <p class="conversa-conta-links">
+        <a href="/conversa/cadastro">Criar conta</a> ·
+        <a href="/conversa/entrar">Entrar</a>
+    </p>
     <div id="conversa-area"><?= $areaConversaHtml ?></div>
 
     <?= FormComponent::render(

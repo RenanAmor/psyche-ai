@@ -11,7 +11,8 @@ final class SujeitoDTO
     public function __construct(
         public readonly string $id,
         public readonly string $nome,
-        public readonly int $quantidadeDeSessoes
+        public readonly int $quantidadeDeSessoes,
+        public readonly ?string $email = null
     ) {
     }
 
@@ -20,7 +21,8 @@ final class SujeitoDTO
         return new self(
             id: $sujeito->id()->valor(),
             nome: $sujeito->nome()->valor(),
-            quantidadeDeSessoes: count($sujeito->sessoes())
+            quantidadeDeSessoes: count($sujeito->sessoes()),
+            email: $sujeito->email()?->valor()
         );
     }
 }

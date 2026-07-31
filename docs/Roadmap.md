@@ -1053,6 +1053,82 @@ em `consultarCircuito()` — não altera `consultar()` (sem circuito, que
 continua usando só `reclassificar()`), não mexe na conversa do sujeito,
 não introduz papéis/permissões novas.
 
+## Sprint 20 — Contas reais do Sujeito (2026-07-31)
+
+Decisão de produto do usuário: para que cada Sujeito tenha seu **espaço
+singular de registro do discurso**, o cookie pseudônimo `psyche_pessoa_id`
+(Sprint 17) não basta — não sobrevive a troca de navegador/dispositivo
+nem a limpeza de cookies, então não garante de verdade que aquele espaço
+seja "dele" ao longo do tempo. Reabre o item que tinha ficado como
+"Sprints futuras" na Sprint 18 ("Contas reais para o Sujeito"). Escopo
+fechado com o usuário antes de implementar: auto-cadastro público (não
+CLI, ao contrário do analista), histórico do cookie vinculado à conta no
+primeiro cadastro (não começa do zero), sem recuperação de senha nesta
+passagem.
+
+- [x] `Domain/Entities/Sujeito` ganha `?Email $email = null`/`?string
+      $senhaHash = null` opcionais (trailing, compatível com todo
+      `new Sujeito($id, $nome)` já existente) — `email()`, `temConta()`,
+      `verificarSenha()`, `senhaHash()` (exposto só para a
+      Infraestrutura persistir o hash). A maioria dos Sujeitos continua
+      anônima; só ganham valor quando o Sujeito se cadastra.
+      `Domain/Repositories/SujeitoRepository` ganha `findByEmail()`.
+- [x] Migration `AddContaToSujeitosTable` (versão `0009`): `email`/
+      `senha_hash` nulos na tabela `sujeitos` + índice único parcial
+      (`WHERE email IS NOT NULL`). `SQLiteSujeitoRepository` atualizado
+      (hidratar/save/findByEmail).
+- [x] `SujeitoApplicationService` ganha `registrarConta()` (liga
+      e-mail/senha a um Sujeito **já existente**, nunca cria um novo —
+      reconstrói a Entidade preservando as Sessões já acumuladas, mesmo
+      padrão de `atualizar()`), `autenticar()` e `buscarPorEmail()` —
+      `autenticar()` nunca distingue e-mail inexistente de senha errada
+      no retorno, mesmo cuidado de `AnalistaApplicationService`.
+      `SujeitoDTO` ganha `?string $email`.
+- [x] API REST: `POST /subjects/{id}/account` (`SujeitoController::registrarConta()`)
+      liga a conta a um Sujeito existente — 404 se o Sujeito não existe,
+      409 se ele já tem conta, 409 se o e-mail já está em uso por outro
+      Sujeito. `POST /auth/subject/login` (novo
+      `AutenticacaoSujeitoController`) — 200 com `{id, nome,
+      quantidadeDeSessoes, email}` ou 401. Distinto de
+      `/subjects/{id}/account` porque o login não sabe o id de antemão
+      (é assim que se recupera o espaço a partir de outro
+      navegador/dispositivo).
+- [x] `Presentation/Web/Controllers/ConversaController` ganha
+      `cadastro()`/`cadastrar()` (`GET`/`POST /conversa/cadastro`) e
+      `entrar()`/`autenticar()` (`GET`/`POST /conversa/entrar`), mesmos
+      nomes de método de `AutenticacaoAnalistaController` por
+      consistência. `cadastrar()` liga a conta ao Sujeito que o cookie
+      atual já aponta (chama `garantirSujeito()` primeiro, para quem
+      chega direto nesta tela sem nunca ter passado por `/conversa`).
+      `autenticar()` **troca o cookie de identidade** para o Sujeito da
+      conta (via `POST auth/subject/login`) e descarta a Sessão ativa
+      (pertencia à identidade anterior) — é assim que o mesmo espaço é
+      recuperado de outro navegador. Novo `sair()`
+      (`POST /conversa/sair`) remove o cookie de identidade; a próxima
+      visita gera um Sujeito anônimo novo, como um primeiro acesso.
+      Continua tudo fora do Portão do Analista — é a superfície pública
+      do Sujeito. Views novas `conversa/cadastro.php`/`conversa/entrar.php`
+      (mesmo padrão de `autenticacao/entrar.php`); `conversa/index.php`
+      ganha links simples "Criar conta"/"Entrar" (sem personalização por
+      enquanto — evita uma chamada de API extra a cada carregamento só
+      para mostrar status de login, redução de escopo deliberada, mesmo
+      espírito de "sem recuperação de senha").
+- [x] Testes aditivos em todas as camadas (Domain/Infra/Application/
+      API/Web) + `HttpClientStub` ganha suporte a
+      `subjects/{id}/account` e `auth/subject/login`. Verificado também
+      de ponta a ponta com servidores reais (`php -S` + `curl`,
+      simulando "outro navegador" com um cookie jar novo): cadastro liga
+      a conta ao Sujeito do cookie, login a partir de um cookie jar
+      **diferente** devolve exatamente o mesmo `pessoa_id` original
+      (prova de que o espaço é recuperado de verdade), logout remove o
+      cookie. 523 testes, 1304 asserções (eram 492/1218 ao final da
+      revisão do Motor Lacan acima) — zero regressão.
+
+**Explicitamente fora de escopo nesta passagem** (ver "Sprints futuras"
+abaixo): recuperação de senha, papéis/permissões diferenciados para o
+Sujeito (continua um único tipo de conta), qualquer decisão sobre como a
+Home do investimentos369 linka para este cadastro/login.
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
 - **Cadeia de significantes (Lacan) como matema formal** (S1↔S2,
@@ -1088,9 +1164,15 @@ não introduz papéis/permissões novas.
   acima por escolha explícita de escopo (só a conta única de analista
   nesta passagem); entra quando o produto precisar de mais de um papel
   de acesso.
-- **Contas reais para o Sujeito** — hoje continua anônimo por cookie
-  (`psyche_pessoa_id`, Sprint 17); a Sprint 18 deliberadamente não mexeu
-  nisso, mantendo "dois públicos, duas regras" (revisão pós-Sprint 16).
+- **Recuperação de senha** (Sujeito e analista) — adiada explicitamente
+  na Sprint 20 (contas do Sujeito) e na Sprint 18 (conta do analista);
+  exigiria infraestrutura de envio de e-mail que o sistema ainda não
+  tem.
+- **Decisão de roteamento entre a Home do investimentos369 e o
+  cadastro/login do Sujeito** — a Sprint 20 implementou o cadastro/login
+  em si (`/conversa/cadastro`, `/conversa/entrar`), mas não decidiu como
+  a Home pública do investimentos369 chega até lá (ver memória de
+  projeto `integracao_investimentos369.md`).
 - Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura), a partir do Modelo Computacional do Discurso.
 - Especificação técnica do Evento Discursivo (formato de registro, granularidade, critérios de segmentação) — ver [Modelo-Computacional-Discurso.md (3.2)](Modelo-Computacional-Discurso.md#32-por-que-uma-unidade-própria).
 - Consolidação da bibliografia freudiana estruturada em [Ontologia-Freud.md (6)](Ontologia-Freud.md#6-referências) e da bibliografia lacaniana estruturada em [Ontologia-Lacan.md (6)](Ontologia-Lacan.md#6-referências).

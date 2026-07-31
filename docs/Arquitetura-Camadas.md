@@ -455,6 +455,47 @@ a ser usada de fato em `ObservacaoApplicationService::consultarCircuito()`.
 
 ---
 
+## Sprint 20 — Contas reais do Sujeito
+
+Decisão de produto: o cookie pseudônimo `psyche_pessoa_id` (Sprint 17)
+não garante um "espaço singular" de verdade — não sobrevive a troca de
+navegador/dispositivo. Diferente da Sprint 18 (conta do analista, só
+CLI, sem tela pública), aqui o Sujeito se cadastra sozinho — auto-registro
+público é a superfície certa para quem fala em `/conversa*`.
+
+- **A conta não substitui o cookie, complementa.** `Sujeito` (Domain)
+  ganha `?Email $email`/`?string $senhaHash` opcionais — a maioria dos
+  Sujeitos continua anônima. Cadastrar-se (`POST /subjects/{id}/account`)
+  liga e-mail/senha ao Sujeito que o cookie **já aponta**, preservando
+  as Sessões acumuladas (mesmo padrão de reconstrução de
+  `SujeitoApplicationService::atualizar()`, que também recria a
+  Entidade preservando o grafo existente). Nenhuma "adoção"/merge entre
+  dois Sujeitos diferentes é necessária — é sempre o mesmo id.
+- **Login troca o cookie, não busca um Sujeito por id.** Diferente do
+  cadastro (que já sabe o id via cookie), o login
+  (`POST /auth/subject/login`) não sabe o id de antemão — por isso é
+  endpoint próprio, não sub-recurso de `/subjects/{id}`. No sucesso,
+  `ConversaController::autenticar()` chama `definirCookiePessoa()`
+  (refatorado de `pessoaIdAtivaOuNova()`) para apontar o cookie deste
+  navegador para o Sujeito da conta — é assim que o mesmo espaço volta a
+  aparecer em outro navegador/dispositivo. A Sessão ativa anterior
+  (`psyche_conversa_sessao_id`) é descartada, porque pertencia à
+  identidade anterior.
+- **Nunca vaza qual e-mail tem conta.**
+  `SujeitoApplicationService::autenticar()` devolve `null` tanto para
+  e-mail inexistente quanto para senha errada — mesmo cuidado de
+  `AnalistaApplicationService::autenticar()` (Sprint 18).
+- **Status de login não é mostrado na tela.** `conversa/index.php` ganha
+  só dois links estáticos ("Criar conta"/"Entrar"), sem indicar se o
+  visitante atual já tem conta — evita uma chamada de API extra a cada
+  carregamento de `/conversa` só para personalizar essa mensagem, mesma
+  lógica de redução de escopo de "sem recuperação de senha".
+- **Continua fora do Portão do Analista.** Todas as rotas novas
+  (`/conversa/cadastro`, `/conversa/entrar`, `/conversa/sair`) ficam na
+  superfície pública do Sujeito — o Portão nunca as protege.
+
+---
+
 # Camada de Aplicação
 
 Responsável por coordenar os casos de uso.

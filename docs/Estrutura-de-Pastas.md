@@ -189,6 +189,13 @@ Desde a Sprint 18 (Plataforma), `AnalistaApplicationService` (`criar`,
 `AnalistaRepository` e `UuidGeneratorInterface` — usando a nova tríade
 `UseCases/CadastrarAnalista/` para a construção validada da Entidade.
 
+Desde a Sprint 20, `SujeitoApplicationService` ganha `registrarConta()`,
+`autenticar()` e `buscarPorEmail()`. Diferente de `AnalistaApplicationService::criar()`,
+`registrarConta()` não passa por um Use Case/Handler — liga
+e-mail/senha a um Sujeito **já existente** (nunca cria um novo),
+reconstruindo a Entidade e preservando as Sessões já acumuladas, mesmo
+padrão sem Handler já usado por `atualizar()`.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -230,6 +237,13 @@ acesso ao sistema (analista/administrador), sem nenhum significado
 psicanalítico, ao lado de Sujeito/Sessao/Discurso/EventoDiscursivo.
 `verificarSenha()` (`password_verify`) vive na própria Entidade.
 
+Desde a Sprint 20, `Sujeito` ganha `?Email $email`/`?string $senhaHash`
+opcionais (trailing, compatíveis com todo `new Sujeito($id, $nome)` já
+existente) — `temConta()`, `verificarSenha()`, `senhaHash()`. Diferente
+de `Analista`, não é uma Entidade nova: é o mesmo Sujeito de sempre,
+agora podendo carregar uma conta real além do cookie pseudônimo (Sprint
+17) — a maioria continua sem uma.
+
 ---
 
 ### Events
@@ -253,6 +267,9 @@ Nenhum acesso ao banco de dados deve ser implementado nesta camada.
 Desde a Sprint 18, `AnalistaRepository` (`findById`, `findByEmail`,
 `save`) segue o mesmo desenho de `SujeitoRepository` — implementado por
 `SQLiteAnalistaRepository`.
+
+Desde a Sprint 20, `SujeitoRepository` ganha `findByEmail()` também,
+espelhando `AnalistaRepository`.
 
 ---
 
@@ -350,8 +367,9 @@ Contém a primeira implementação concreta de persistência do sistema, em
   `CreateSessoesTable`, `CreateDiscursosTable`,
   `CreateEventosDiscursivosTable`, `CreateMemoriasLongitudinaisTable`,
   `CreateMemoriaSessoesTable`, `AddCriadoEmToEventosDiscursivosTable`,
-  `CreateAnalistasTable` desde a Sprint 18) e `MigrationRunner`, que as
-  aplica de forma ordenada e idempotente, registrando o histórico em
+  `CreateAnalistasTable` desde a Sprint 18, `AddContaToSujeitosTable`
+  desde a Sprint 20) e `MigrationRunner`, que as aplica de forma
+  ordenada e idempotente, registrando o histórico em
   `schema_migrations`.
 - `Repositories/`: adaptadores `SQLiteSujeitoRepository`,
   `SQLiteSessaoRepository`, `SQLiteDiscursoRepository`,
@@ -466,6 +484,19 @@ endpoint de autenticação da API — `POST /auth/login` (com
 quando a credencial é inválida. Sem endpoint de cadastro exposto por
 HTTP — ver `bin/criar-analista.php` na raiz do projeto.
 
+Desde a Sprint 20, `SujeitoController` ganha `registrarConta()` (com
+`RegistrarContaSujeitoRequest`) — `POST /subjects/{id}/account` liga
+e-mail/senha a um Sujeito **já existente** (404 se não existe, 409 se
+já tem conta ou se o e-mail já está em uso). Diferente do analista, o
+Sujeito se auto-cadastra — este é o único endpoint de escrita novo desta
+Sprint que fica em `SujeitoController` em vez de um Controller próprio,
+porque opera sobre um Sujeito já identificado por id (sub-recurso de
+`/subjects/{id}`). Login é diferente: novo `AutenticacaoSujeitoController`
+(com `AutenticarSujeitoRequest`) expõe `POST /auth/subject/login` — não
+sabe o id de antemão (é assim que se recupera a conta de outro
+navegador), por isso é endpoint próprio, mesmo padrão de
+`AutenticacaoController`/`POST /auth/login` do analista.
+
 ### Web
 
 Interface web (HTML) do PsycheAI, construída na Sprint 11A de forma
@@ -562,13 +593,26 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   seguintes, mesmo depois que `$_SESSION` expira — ou seja, cada
   navegador acumula seu próprio Sujeito ao longo de várias Sessões
   (visitas), isolado dos demais, sem exigir login (isso continua
-  reservado para a Sprint 18). A Sprint 17 também acrescenta o método
+  reservado para a Sprint 18/20). A Sprint 17 também acrescenta o método
   `mensagens()` (rota `POST /conversa/mensagens`): mesma lógica de
   `enviar()`, mas devolve só o fragmento HTML de
   `ConversaAreaComponent` em JSON, para o fetch() de
   `conversa/index.php` atualizar o histórico sem recarregar a página —
   `enviar()`/`POST /conversa/enviar` continuam existindo tal como antes,
-  como caminho funcional sem JavaScript. Desde a Sprint
+  como caminho funcional sem JavaScript. Desde a Sprint 20,
+  `ConversaController` ganha `cadastro()`/`cadastrar()` (`GET`/`POST
+  /conversa/cadastro`) e `entrar()`/`autenticar()` (`GET`/`POST
+  /conversa/entrar`), mesmos nomes de método de
+  `AutenticacaoAnalistaController` por consistência: `cadastrar()` liga
+  e-mail/senha ao Sujeito que o cookie atual já aponta (chama
+  `garantirSujeito()` primeiro); `autenticar()` troca o cookie de
+  identidade para o Sujeito da conta via `POST auth/subject/login` e
+  descarta a Sessão ativa, que pertencia à identidade anterior — é assim
+  que o mesmo espaço volta a aparecer em outro navegador/dispositivo.
+  Novo `sair()` (`POST /conversa/sair`) remove o cookie de identidade.
+  `pessoaIdAtivaOuNova()` foi refatorado para reaproveitar
+  `definirCookiePessoa()`, usado tanto para gerar um pseudônimo novo
+  quanto para trocar de identidade no login. Desde a Sprint
   13, `HistoricoSujeitoController` implementa a tela de Histórico do
   Sujeito: combina `GET /subjects/{id}`, `GET /subjects/{id}/timeline` e
   `GET /subjects/{id}/consolidation` em uma única página — Linha do
@@ -631,7 +675,12 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   permanece como fallback textual sempre renderizado pelo servidor.
   Também desde a revisão pós-Sprint 16, `autenticacao/entrar.php` monta
   o formulário de senha do Portão do Analista com
-  `FormComponent`/`AlertComponent`.
+  `FormComponent`/`AlertComponent`. Desde a Sprint 20,
+  `conversa/cadastro.php` e `conversa/entrar.php` seguem o mesmo padrão
+  de `FormComponent`/`AlertComponent` (agora com campo de e-mail), e
+  `conversa/index.php` ganha dois links estáticos ("Criar conta"/"Entrar"),
+  sem personalizar por status de login — evita uma chamada de API extra
+  a cada carregamento só para isso.
 - `Routes.php`: registra todas as rotas internas sobre um `Router`,
   reaproveitando os mesmos caminhos do `NavigationMenu`. Desde a revisão
   pós-Sprint 16, todo handler de coleta/análise (`/`, `/sujeitos*`,
@@ -640,7 +689,10 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   registro; `/conversa*`, `/erros/*`, `/entrar` e `/sair` ficam de fora.
   Desde a Sprint 19, `/sujeitos/{id}/observacoes/grafo-circuito` (JSON do
   grafo, consumido pelo `fetch()` de `grafo-circuito.js`) entra no mesmo
-  grupo protegido.
+  grupo protegido. Desde a Sprint 20, `/conversa/cadastro`,
+  `/conversa/entrar` e `/conversa/sair` entram no grupo **não**
+  protegido — são a superfície pública do Sujeito, mesma regra de
+  `/conversa*`.
 - `public/web/index.php`: front controller da interface web,
   independente de `public/index.php` (API REST). Desde a Sprint 12,
   chama `session_start()` antes de despachar a requisição, para que

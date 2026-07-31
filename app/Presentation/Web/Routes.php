@@ -71,6 +71,11 @@ final class Routes
         $router->get('/conversa', $conversa->iniciar(...));
         $router->post('/conversa/enviar', $conversa->enviar(...));
         $router->post('/conversa/mensagens', $conversa->mensagens(...));
+        $router->get('/conversa/cadastro', $conversa->cadastro(...));
+        $router->post('/conversa/cadastro', $conversa->cadastrar(...));
+        $router->get('/conversa/entrar', $conversa->entrar(...));
+        $router->post('/conversa/entrar', $conversa->autenticar(...));
+        $router->post('/conversa/sair', $conversa->sair(...));
 
         $router->get('/entrar', $autenticacao->entrar(...));
         $router->post('/entrar', $autenticacao->autenticar(...));

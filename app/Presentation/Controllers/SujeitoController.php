@@ -10,6 +10,7 @@ use PsycheAI\Presentation\Http\JsonResponse;
 use PsycheAI\Presentation\Http\Request;
 use PsycheAI\Presentation\Requests\AtualizarSujeitoRequest;
 use PsycheAI\Presentation\Requests\CriarSujeitoRequest;
+use PsycheAI\Presentation\Requests\RegistrarContaSujeitoRequest;
 use PsycheAI\Presentation\Responses\SujeitoResponse;
 
 final class SujeitoController extends Controller
@@ -82,5 +83,36 @@ final class SujeitoController extends Controller
         $this->service->excluir($params['id']);
 
         return $this->semConteudo();
+    }
+
+    /**
+     * Sprint 20 ("Contas reais do Sujeito"): liga e-mail/senha a um
+     * Sujeito já existente (identificado pelo cookie pseudônimo do
+     * navegador) — nunca cria um Sujeito novo, preserva o histórico já
+     * acumulado.
+     *
+     * @param array<string, string> $params
+     */
+    public function registrarConta(Request $request, array $params): JsonResponse
+    {
+        $dados = RegistrarContaSujeitoRequest::fromArray($request->corpo());
+
+        $existente = $this->service->buscarPorId($params['id']);
+
+        if ($existente === null) {
+            throw HttpException::naoEncontrado(sprintf('Sujeito com id "%s" não foi encontrado.', $params['id']));
+        }
+
+        if ($existente->email !== null) {
+            throw HttpException::conflito('Este sujeito já possui conta.');
+        }
+
+        if ($this->service->buscarPorEmail($dados->email) !== null) {
+            throw HttpException::conflito(sprintf('E-mail "%s" já está em uso.', $dados->email));
+        }
+
+        $dto = $this->service->registrarConta($params['id'], $dados->email, $dados->senha);
+
+        return $this->sucesso(SujeitoResponse::fromDTO($dto)->toArray());
     }
 }

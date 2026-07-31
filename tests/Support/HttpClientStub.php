@@ -29,6 +29,14 @@ final class HttpClientStub implements HttpClientInterface
     public const ANALISTA_EMAIL_PADRAO = 'analista@psyche.ai';
     public const ANALISTA_SENHA_PADRAO = 'senha-de-teste';
 
+    /**
+     * Idem, para `POST /auth/subject/login` (Sprint 20) — a conta do
+     * Sujeito, distinta da conta do analista acima.
+     */
+    public const SUJEITO_ID_PADRAO = 'sujeito-teste';
+    public const SUJEITO_EMAIL_PADRAO = 'sujeito@psyche.ai';
+    public const SUJEITO_SENHA_PADRAO = 'senha-do-sujeito';
+
     private const RECURSOS_PADRAO = [
         'subjects' => [
             ['id' => 'sub-001', 'nome' => 'Sujeito A', 'quantidadeDeSessoes' => 3],
@@ -110,6 +118,14 @@ final class HttpClientStub implements HttpClientInterface
             return $this->autenticar($dados);
         }
 
+        if ($chave === 'auth/subject/login') {
+            return $this->autenticarSujeito($dados);
+        }
+
+        if (preg_match('#^subjects/([^/]+)/account$#', $chave, $referencias) === 1) {
+            return $this->registrarContaSujeito($referencias[1], $dados);
+        }
+
         $this->armazenamento[$chave][] = $dados;
 
         return ApiResponse::sucesso($dados);
@@ -128,6 +144,43 @@ final class HttpClientStub implements HttpClientInterface
         }
 
         return ApiResponse::sucesso(['id' => self::ANALISTA_ID_PADRAO, 'email' => self::ANALISTA_EMAIL_PADRAO]);
+    }
+
+    /**
+     * @param array<string, string> $dados
+     */
+    private function autenticarSujeito(array $dados): ApiResponse
+    {
+        $credenciaisValidas = ($dados['email'] ?? null) === self::SUJEITO_EMAIL_PADRAO
+            && ($dados['senha'] ?? null) === self::SUJEITO_SENHA_PADRAO;
+
+        if (!$credenciaisValidas) {
+            return ApiResponse::falha(ErrorViewModelFactory::validacao(['credenciais' => 'E-mail ou senha inválidos.']));
+        }
+
+        return ApiResponse::sucesso(['id' => self::SUJEITO_ID_PADRAO, 'email' => self::SUJEITO_EMAIL_PADRAO]);
+    }
+
+    /**
+     * @param array<string, string> $dados
+     */
+    private function registrarContaSujeito(string $id, array $dados): ApiResponse
+    {
+        foreach ($this->armazenamento['subjects'] ?? [] as $indice => $sujeito) {
+            if (($sujeito['id'] ?? null) !== $id) {
+                continue;
+            }
+
+            if (($sujeito['email'] ?? null) !== null) {
+                return ApiResponse::falha(ErrorViewModelFactory::validacao(['email' => 'Este sujeito já possui conta.']));
+            }
+
+            $this->armazenamento['subjects'][$indice]['email'] = $dados['email'] ?? null;
+
+            return ApiResponse::sucesso($this->armazenamento['subjects'][$indice]);
+        }
+
+        return ApiResponse::falha(ErrorViewModelFactory::naoEncontrado('subjects'));
     }
 
     /**

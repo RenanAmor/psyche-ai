@@ -46,6 +46,15 @@ use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
  * Não estende AbstractResourceController/AbstractCrudResourceController:
  * o ceremonial de listagem/CRUD genérico não se aplica a uma tela de
  * conversa com fluxo próprio de iniciar/enviar.
+ *
+ * Sprint 20 ("Contas reais do Sujeito") acrescenta cadastro/login/logout
+ * reais, sem substituir a identidade por cookie — só a complementa: o
+ * cookie continua sendo como o Sujeito é identificado a cada requisição;
+ * cadastrar-se liga um e-mail/senha ao Sujeito que o cookie já aponta
+ * (preservando o histórico), e logar troca o cookie para apontar para o
+ * Sujeito da conta, permitindo recuperar o mesmo espaço de outro
+ * navegador/dispositivo. Continua fora do Portão do Analista — é a
+ * superfície pública do Sujeito.
  */
 final class ConversaController
 {
@@ -54,6 +63,9 @@ final class ConversaController
     private const CHAVE_PESSOA_ID = 'psyche_pessoa_id';
     private const DURACAO_COOKIE_PESSOA_EM_SEGUNDOS = 60 * 60 * 24 * 365;
     private const ROTA = '/conversa';
+    private const ROTA_CADASTRO = '/conversa/cadastro';
+    private const ROTA_ENTRAR = '/conversa/entrar';
+    private const MENSAGEM_CREDENCIAIS_INVALIDAS = 'E-mail ou senha inválidos.';
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -117,6 +129,114 @@ final class ConversaController
             $resultado['alerta'],
             $resultado['tipoAlerta'],
             $resultado['valorConteudo']
+        );
+    }
+
+    public function cadastro(Request $request): Response
+    {
+        return $this->renderizarCadastro();
+    }
+
+    /**
+     * Liga e-mail/senha ao Sujeito que o cookie atual já aponta —
+     * garante que o Sujeito exista primeiro (quem chega direto nesta
+     * tela sem nunca ter passado por /conversa ainda não tem um), depois
+     * preserva o histórico já acumulado sob esse id.
+     */
+    public function cadastrar(Request $request): Response
+    {
+        $pessoaId = $this->pessoaIdAtivaOuNova();
+
+        if (!$this->garantirSujeito($pessoaId)) {
+            return ErrorController::renderizar(
+                ErrorViewModelFactory::comunicacao('subjects'),
+                $this->viewRenderer,
+                self::ROTA_CADASTRO
+            );
+        }
+
+        $email = (string) $request->input('email', '');
+        $senha = (string) $request->input('senha', '');
+
+        $resposta = $this->httpClient->post('subjects/' . $pessoaId . '/account', ['email' => $email, 'senha' => $senha]);
+
+        if (!$resposta->sucesso) {
+            return Response::erroValidacao($this->renderizarCadastroHtml($this->mensagemErro($resposta->erro)));
+        }
+
+        return Response::redirecionar(self::ROTA);
+    }
+
+    public function entrar(Request $request): Response
+    {
+        return $this->renderizarEntrar();
+    }
+
+    /**
+     * Troca o cookie de identidade para o Sujeito da conta — é assim que
+     * o mesmo espaço singular é recuperado a partir de outro
+     * navegador/dispositivo. A Sessao ativa (se houver) pertence à
+     * identidade anterior, então é descartada.
+     */
+    public function autenticar(Request $request): Response
+    {
+        $email = (string) $request->input('email', '');
+        $senha = (string) $request->input('senha', '');
+
+        $resposta = $this->httpClient->post('auth/subject/login', ['email' => $email, 'senha' => $senha]);
+
+        if (!$resposta->sucesso) {
+            return Response::erroValidacao($this->renderizarEntrarHtml(self::MENSAGEM_CREDENCIAIS_INVALIDAS));
+        }
+
+        /** @var string $sujeitoId */
+        $sujeitoId = $resposta->dados['id'];
+
+        $this->definirCookiePessoa($sujeitoId);
+        $this->limparSessaoAtiva();
+
+        return Response::redirecionar(self::ROTA);
+    }
+
+    /**
+     * Remove a identidade atual do navegador — a próxima visita a
+     * /conversa gera um novo Sujeito anônimo, como um primeiro acesso.
+     */
+    public function sair(Request $request): Response
+    {
+        $this->removerCookiePessoa();
+        $this->limparSessaoAtiva();
+
+        return Response::redirecionar(self::ROTA);
+    }
+
+    private function renderizarCadastro(?string $erro = null): Response
+    {
+        return Response::ok($this->renderizarCadastroHtml($erro));
+    }
+
+    private function renderizarCadastroHtml(?string $erro = null): string
+    {
+        return $this->viewRenderer->renderComLayout(
+            'conversa/cadastro',
+            ['erro' => $erro],
+            'Criar conta',
+            self::ROTA_CADASTRO
+        );
+    }
+
+    private function renderizarEntrar(?string $erro = null): Response
+    {
+        return Response::ok($this->renderizarEntrarHtml($erro));
+    }
+
+    private function renderizarEntrarHtml(?string $erro = null): string
+    {
+        return $this->viewRenderer->renderComLayout(
+            'conversa/entrar',
+            ['erro' => $erro],
+            'Entrar',
+            self::ROTA_ENTRAR
         );
     }
 
@@ -297,19 +417,43 @@ final class ConversaController
         }
 
         $novoPessoaId = bin2hex(random_bytes(16));
+        $this->definirCookiePessoa($novoPessoaId);
 
-        $_COOKIE[self::CHAVE_PESSOA_ID] = $novoPessoaId;
+        return $novoPessoaId;
+    }
+
+    /**
+     * Grava o cookie de identidade — usado tanto para gerar um id novo
+     * (visitante anônimo) quanto para trocar de identidade no login
+     * (Sprint 20), que aponta o cookie para o Sujeito da conta em vez de
+     * gerar um pseudônimo novo.
+     */
+    private function definirCookiePessoa(string $pessoaId): void
+    {
+        $_COOKIE[self::CHAVE_PESSOA_ID] = $pessoaId;
 
         if (!headers_sent()) {
-            setcookie(self::CHAVE_PESSOA_ID, $novoPessoaId, [
+            setcookie(self::CHAVE_PESSOA_ID, $pessoaId, [
                 'expires' => time() + self::DURACAO_COOKIE_PESSOA_EM_SEGUNDOS,
                 'path' => '/',
                 'httponly' => true,
                 'samesite' => 'Lax',
             ]);
         }
+    }
 
-        return $novoPessoaId;
+    private function removerCookiePessoa(): void
+    {
+        unset($_COOKIE[self::CHAVE_PESSOA_ID]);
+
+        if (!headers_sent()) {
+            setcookie(self::CHAVE_PESSOA_ID, '', [
+                'expires' => time() - 3600,
+                'path' => '/',
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+        }
     }
 
     private function garantirSujeito(string $sujeitoId): bool

@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use PsycheAI\Domain\Entities\Sessao;
 use PsycheAI\Domain\Entities\Sujeito;
 use PsycheAI\Domain\ValueObjects\DataSessao;
+use PsycheAI\Domain\ValueObjects\Email;
 use PsycheAI\Domain\ValueObjects\Identificador;
 use PsycheAI\Domain\ValueObjects\NomeSujeito;
 
@@ -29,5 +30,30 @@ final class SujeitoTest extends TestCase
         $sujeito->adicionarSessao($sessao);
 
         $this->assertSame([$sessao], $sujeito->sessoes());
+    }
+
+    public function testSemContaPorPadrao(): void
+    {
+        $sujeito = new Sujeito(new Identificador('1'), new NomeSujeito('Sujeito Um'));
+
+        $this->assertFalse($sujeito->temConta());
+        $this->assertNull($sujeito->email());
+        $this->assertNull($sujeito->senhaHash());
+        $this->assertFalse($sujeito->verificarSenha('qualquer'));
+    }
+
+    public function testComContaExpoeEmailEVerificaSenha(): void
+    {
+        $sujeito = new Sujeito(
+            new Identificador('1'),
+            new NomeSujeito('Sujeito Um'),
+            new Email('sujeito@psyche.ai'),
+            password_hash('segredo', PASSWORD_DEFAULT)
+        );
+
+        $this->assertTrue($sujeito->temConta());
+        $this->assertSame('sujeito@psyche.ai', $sujeito->email()->valor());
+        $this->assertTrue($sujeito->verificarSenha('segredo'));
+        $this->assertFalse($sujeito->verificarSenha('senha-errada'));
     }
 }

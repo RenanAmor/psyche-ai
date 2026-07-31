@@ -104,4 +104,51 @@ final class SujeitoEndpointsTest extends HttpTestCase
 
         self::assertSame(404, $response->status());
     }
+
+    public function testPostAccountLigaContaAoSujeitoERetorna200(): void
+    {
+        $this->despachar('POST', '/subjects', ['id' => 'sujeito-1', 'nome' => 'Visitante']);
+
+        $response = $this->despachar('POST', '/subjects/sujeito-1/account', [
+            'email' => 'sujeito@psyche.ai',
+            'senha' => 'segredo',
+        ]);
+
+        self::assertSame(200, $response->status());
+
+        $corpo = $this->decodificar($response);
+        self::assertTrue($corpo['success']);
+        self::assertSame('sujeito@psyche.ai', $corpo['data']['email']);
+    }
+
+    public function testPostAccountEmSujeitoInexistenteRetorna404(): void
+    {
+        $response = $this->despachar('POST', '/subjects/inexistente/account', [
+            'email' => 'sujeito@psyche.ai',
+            'senha' => 'segredo',
+        ]);
+
+        self::assertSame(404, $response->status());
+    }
+
+    public function testPostAccountQuandoSujeitoJaTemContaRetorna409(): void
+    {
+        $this->despachar('POST', '/subjects', ['id' => 'sujeito-1', 'nome' => 'Visitante']);
+        $this->despachar('POST', '/subjects/sujeito-1/account', ['email' => 'sujeito@psyche.ai', 'senha' => 'segredo']);
+
+        $response = $this->despachar('POST', '/subjects/sujeito-1/account', ['email' => 'outro@psyche.ai', 'senha' => 'segredo']);
+
+        self::assertSame(409, $response->status());
+    }
+
+    public function testPostAccountComEmailJaEmUsoRetorna409(): void
+    {
+        $this->despachar('POST', '/subjects', ['id' => 'sujeito-1', 'nome' => 'Visitante']);
+        $this->despachar('POST', '/subjects', ['id' => 'sujeito-2', 'nome' => 'Visitante']);
+        $this->despachar('POST', '/subjects/sujeito-1/account', ['email' => 'sujeito@psyche.ai', 'senha' => 'segredo']);
+
+        $response = $this->despachar('POST', '/subjects/sujeito-2/account', ['email' => 'sujeito@psyche.ai', 'senha' => 'outra-senha']);
+
+        self::assertSame(409, $response->status());
+    }
 }

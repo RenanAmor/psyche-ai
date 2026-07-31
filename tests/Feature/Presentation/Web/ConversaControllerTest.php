@@ -204,4 +204,103 @@ final class ConversaControllerTest extends TestCase
         $this->assertStringContainsString('não estava mais disponível', $corpo['html']);
         $this->assertNotSame('sessao-antiga', $_SESSION['psyche_conversa_sessao_id']);
     }
+
+    public function testCadastroExibeOFormulario(): void
+    {
+        $controller = new ConversaController(new HttpClientStub());
+
+        $resposta = $controller->cadastro(Request::criar('GET', '/conversa/cadastro'));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('<form', $resposta->corpo);
+        $this->assertStringContainsString('email', $resposta->corpo);
+        $this->assertStringContainsString('senha', $resposta->corpo);
+    }
+
+    public function testCadastrarLigaContaAoSujeitoDoCookieERedireciona(): void
+    {
+        $_COOKIE['psyche_pessoa_id'] = 'pessoa-fixa';
+
+        $controller = new ConversaController(new HttpClientStub());
+        $resposta = $controller->cadastrar(Request::criar('POST', '/conversa/cadastro', [], [
+            'email' => 'sujeito@psyche.ai',
+            'senha' => 'segredo',
+        ]));
+
+        $this->assertSame(302, $resposta->status);
+        $this->assertSame('/conversa', $resposta->headers['Location']);
+    }
+
+    public function testCadastrarQuandoSujeitoJaTemContaReexibeFormularioComErro(): void
+    {
+        $_COOKIE['psyche_pessoa_id'] = 'pessoa-fixa';
+
+        $fake = new HttpClientStub([
+            'subjects' => [
+                ['id' => 'pessoa-fixa', 'nome' => 'Visitante', 'email' => 'ja-cadastrado@psyche.ai'],
+            ],
+        ]);
+        $controller = new ConversaController($fake);
+
+        $resposta = $controller->cadastrar(Request::criar('POST', '/conversa/cadastro', [], [
+            'email' => 'novo@psyche.ai',
+            'senha' => 'segredo',
+        ]));
+
+        $this->assertSame(422, $resposta->status);
+        $this->assertStringContainsString('Corrija os campos indicados', $resposta->corpo);
+    }
+
+    public function testEntrarExibeOFormulario(): void
+    {
+        $controller = new ConversaController(new HttpClientStub());
+
+        $resposta = $controller->entrar(Request::criar('GET', '/conversa/entrar'));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('<form', $resposta->corpo);
+    }
+
+    public function testAutenticarComCredenciaisCorretasTrocaOCookieERedireciona(): void
+    {
+        $_COOKIE['psyche_pessoa_id'] = 'pessoa-anonima-anterior';
+        $_SESSION['psyche_conversa_sessao_id'] = 'sessao-da-identidade-anterior';
+
+        $controller = new ConversaController(new HttpClientStub());
+        $resposta = $controller->autenticar(Request::criar('POST', '/conversa/entrar', [], [
+            'email' => HttpClientStub::SUJEITO_EMAIL_PADRAO,
+            'senha' => HttpClientStub::SUJEITO_SENHA_PADRAO,
+        ]));
+
+        $this->assertSame(302, $resposta->status);
+        $this->assertSame('/conversa', $resposta->headers['Location']);
+        $this->assertSame(HttpClientStub::SUJEITO_ID_PADRAO, $_COOKIE['psyche_pessoa_id']);
+        $this->assertArrayNotHasKey('psyche_conversa_sessao_id', $_SESSION);
+    }
+
+    public function testAutenticarComCredenciaisIncorretasReexibeFormularioComErro(): void
+    {
+        $controller = new ConversaController(new HttpClientStub());
+        $resposta = $controller->autenticar(Request::criar('POST', '/conversa/entrar', [], [
+            'email' => HttpClientStub::SUJEITO_EMAIL_PADRAO,
+            'senha' => 'errada',
+        ]));
+
+        $this->assertSame(422, $resposta->status);
+        $this->assertStringContainsString('E-mail ou senha inválidos', $resposta->corpo);
+    }
+
+    public function testSairRemoveOCookieDePessoaERedireciona(): void
+    {
+        $_COOKIE['psyche_pessoa_id'] = 'pessoa-fixa';
+        $_SESSION['psyche_conversa_sessao_id'] = 'sessao-fixa';
+
+        $controller = new ConversaController(new HttpClientStub());
+        $resposta = $controller->sair(Request::criar('POST', '/conversa/sair'));
+
+        $this->assertSame(302, $resposta->status);
+        $this->assertSame('/conversa', $resposta->headers['Location']);
+        $this->assertArrayNotHasKey('psyche_pessoa_id', $_COOKIE);
+        $this->assertArrayNotHasKey('psyche_conversa_sessao_id', $_SESSION);
+    }
 }

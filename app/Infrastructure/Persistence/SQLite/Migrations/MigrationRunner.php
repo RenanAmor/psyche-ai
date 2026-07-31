@@ -45,6 +45,7 @@ final class MigrationRunner
             new CreateMemoriaSessoesTable(),
             new AddCriadoEmToEventosDiscursivosTable(),
             new CreateAnalistasTable(),
+            new AddContaToSujeitosTable(),
         ];
     }
 

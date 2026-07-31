@@ -11,6 +11,8 @@ interface SujeitoRepository extends RepositoryInterface
 {
     public function findById(string $id): ?Sujeito;
 
+    public function findByEmail(string $email): ?Sujeito;
+
     /**
      * @return Sujeito[]
      */
