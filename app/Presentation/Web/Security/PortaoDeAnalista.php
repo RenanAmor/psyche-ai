@@ -15,13 +15,16 @@ use PsycheAI\Presentation\Web\Http\Response;
  * (`/`, `/sujeitos*`, `/sessoes*`, `/discursos*`, `/memorias*`,
  * `/eventos-discursivos`).
  *
- * Deliberadamente sem entidade de Domínio e sem persistência própria: é
- * um portão de sessão simples, comparando a senha recebida com
- * `PSYCHEAI_SENHA_ANALISTA` via `hash_equals()` (comparação em tempo
- * constante). A chave de sessão `psyche_analista_autenticado` (distinta
+ * Sem entidade de Domínio nem persistência própria — permanece um portão
+ * de sessão simples. Desde a Sprint 18 (Plataforma), a verificação de
+ * credencial em si não é mais responsabilidade desta classe: ela só
+ * abre/fecha/consulta a sessão (`psyche_analista_autenticado`, distinta
  * de `psyche_pessoa_id`/`psyche_conversa_sessao_id`, usadas pelo
- * Sujeito) é deliberada: a Sprint 18 (Plataforma, contas reais) pode
- * apagar esta classe inteira sem nenhuma dívida de migração.
+ * Sujeito). Quem verifica a senha é a API REST, via
+ * `POST /auth/login` (`AnalistaApplicationService::autenticar()`,
+ * contas reais em vez da antiga `PSYCHEAI_SENHA_ANALISTA` única) —
+ * `AutenticacaoAnalistaController` chama a API e só então abre a sessão
+ * aqui.
  *
  * API REST (`Presentation/Routes.php`) não é protegida por este portão
  * nesta passada — só é chamada servidor-a-servidor por `ApiHttpClient`,
@@ -30,6 +33,7 @@ use PsycheAI\Presentation\Web\Http\Response;
 final class PortaoDeAnalista
 {
     private const CHAVE_SESSAO = 'psyche_analista_autenticado';
+    private const CHAVE_ANALISTA_ID = 'psyche_analista_id';
     private const ROTA_ENTRAR = '/entrar';
 
     public static function estaAutenticado(): bool
@@ -37,22 +41,22 @@ final class PortaoDeAnalista
         return ($_SESSION[self::CHAVE_SESSAO] ?? false) === true;
     }
 
-    public static function autenticar(string $senha): bool
+    public static function abrirSessao(string $analistaId): void
     {
-        $senhaEsperada = (string) (getenv('PSYCHEAI_SENHA_ANALISTA') ?: '');
-
-        if ($senhaEsperada === '' || !hash_equals($senhaEsperada, $senha)) {
-            return false;
-        }
-
         $_SESSION[self::CHAVE_SESSAO] = true;
+        $_SESSION[self::CHAVE_ANALISTA_ID] = $analistaId;
+    }
 
-        return true;
+    public static function analistaId(): ?string
+    {
+        $id = $_SESSION[self::CHAVE_ANALISTA_ID] ?? null;
+
+        return is_string($id) ? $id : null;
     }
 
     public static function sair(): void
     {
-        unset($_SESSION[self::CHAVE_SESSAO]);
+        unset($_SESSION[self::CHAVE_SESSAO], $_SESSION[self::CHAVE_ANALISTA_ID]);
     }
 
     /**

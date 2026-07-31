@@ -15,6 +15,7 @@ use PsycheAI\Presentation\Web\Components\FormComponent;
         '/entrar',
         'POST',
         [
+            ['nome' => 'email', 'rotulo' => 'E-mail', 'tipo' => 'email'],
             ['nome' => 'senha', 'rotulo' => 'Senha', 'tipo' => 'password'],
         ],
         'Entrar'

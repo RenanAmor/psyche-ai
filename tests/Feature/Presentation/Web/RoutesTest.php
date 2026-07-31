@@ -26,18 +26,14 @@ use PsycheAI\Tests\Support\ObservacoesHttpClientFake;
  */
 final class RoutesTest extends TestCase
 {
-    private const SENHA_TESTE = 'senha-de-teste';
-
     protected function setUp(): void
     {
         $_SESSION = [];
-        putenv('PSYCHEAI_SENHA_ANALISTA=' . self::SENHA_TESTE);
-        PortaoDeAnalista::autenticar(self::SENHA_TESTE);
+        PortaoDeAnalista::abrirSessao(HttpClientStub::ANALISTA_ID_PADRAO);
     }
 
     protected function tearDown(): void
     {
-        putenv('PSYCHEAI_SENHA_ANALISTA');
         $_SESSION = [];
     }
 
@@ -187,13 +183,19 @@ final class RoutesTest extends TestCase
         $router = $this->criarRouter();
 
         $comSenhaErrada = $router->despachar(
-            Request::criar('POST', '/entrar', [], ['senha' => 'errada'])
+            Request::criar('POST', '/entrar', [], [
+                'email' => HttpClientStub::ANALISTA_EMAIL_PADRAO,
+                'senha' => 'errada',
+            ])
         );
         $this->assertSame(422, $comSenhaErrada->status);
         $this->assertFalse(PortaoDeAnalista::estaAutenticado());
 
         $comSenhaCerta = $router->despachar(
-            Request::criar('POST', '/entrar', [], ['senha' => self::SENHA_TESTE])
+            Request::criar('POST', '/entrar', [], [
+                'email' => HttpClientStub::ANALISTA_EMAIL_PADRAO,
+                'senha' => HttpClientStub::ANALISTA_SENHA_PADRAO,
+            ])
         );
         $this->assertSame(302, $comSenhaCerta->status);
         $this->assertSame('/', $comSenhaCerta->headers['Location']);

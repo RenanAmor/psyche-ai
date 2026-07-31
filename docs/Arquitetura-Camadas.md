@@ -369,6 +369,55 @@ quando cruza ≥2 sessões.
 
 ---
 
+## Sprint 18 — Plataforma: contas reais de analista
+
+Substitui a senha única de `PSYCHEAI_SENHA_ANALISTA`
+(`Presentation/Web/Security/PortaoDeAnalista`, revisão pós-Sprint 16) por
+contas reais — exatamente a dívida que aquela revisão já previa e
+desenhou para ser paga sem migração. Escopo desta passagem, alinhado
+antes com o usuário: só a conta do analista (um único papel, sem
+permissões/administração granulares); o Sujeito em `/conversa*` continua
+anônimo por cookie, sem conta — "dois públicos, duas regras" (revisão
+pós-Sprint 16) permanece valendo.
+
+- **`Analista`, não um conceito do Modelo Computacional do Discurso.**
+  `Domain/Entities/Analista` (com `Domain/ValueObjects/Email` novo) é uma
+  conta de acesso ao sistema, sem nenhum significado psicanalítico —
+  paralela a Sujeito/Sessao/Discurso na camada, mas fora do vocabulário
+  teórico das duas Ontologias. `verificarSenha()` (`password_verify`)
+  fica na Entidade, não vaza para fora da fronteira de Domínio.
+  `Application/DTOs/AnalistaDTO` nunca expõe `senhaHash`.
+- **API REST ganha seu primeiro endpoint de autenticação.**
+  `POST /auth/login` (`Presentation/Controllers/AutenticacaoController`,
+  `AnalistaApplicationService::autenticar()`) devolve `{id, email}` em
+  200 ou 401 (`HttpException::naoAutorizado()`, novo) — nunca distingue,
+  na resposta, "e-mail não existe" de "senha errada". Sem endpoint de
+  cadastro exposto por HTTP nesta passagem (ver CLI abaixo).
+- **A Web nunca fala com o banco.** Mesmo padrão do resto do sistema:
+  `Presentation/Web/Controllers/AutenticacaoAnalistaController` chama
+  `POST /auth/login` via `HttpClientInterface` (o mesmo cliente injetado
+  em todo Controller Web) — nunca importa `AnalistaApplicationService`
+  nem qualquer repositório diretamente. `ApiHttpClient::erroParaStatus()`
+  passa a mapear 401 para o mesmo `ErrorType::VALIDACAO` de 400/409/422.
+- **`PortaoDeAnalista` perde a verificação de senha, mantém a sessão.**
+  `autenticar(string $senha): bool` foi removido; `abrirSessao(string
+  $analistaId): void` (chamado só depois que a API confirma a credencial)
+  e `analistaId(): ?string` são novos. `estaAutenticado()`, `sair()` e
+  `proteger()` continuam intocados — nenhuma rota protegida precisou
+  mudar em `Web/Routes.php`.
+- **Provisionamento via CLI, não tela de cadastro.** `bin/criar-analista.php
+  <email> <senha>` bootstrapa `ApplicationServiceProvider::comSQLite()`
+  direto (mesmo padrão de composição de `public/index.php`), sem rota
+  HTTP — decisão explícita do usuário: o único uso real hoje é o próprio
+  dono do sistema, então uma tela de registro público seria superfície de
+  ataque sem necessidade real.
+- **Fora de escopo nesta passagem** (ver `docs/Roadmap.md`, "Sprints
+  futuras"): múltiplos papéis/permissões, telas de administração de
+  conta, e contas reais para o Sujeito — ficam para quando (se) o produto
+  precisar delas.
+
+---
+
 # Camada de Aplicação
 
 Responsável por coordenar os casos de uso.

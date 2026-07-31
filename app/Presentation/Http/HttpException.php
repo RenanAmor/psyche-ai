@@ -57,6 +57,11 @@ final class HttpException extends RuntimeException
         return new self($mensagem, 409);
     }
 
+    public static function naoAutorizado(string $mensagem): self
+    {
+        return new self($mensagem, 401);
+    }
+
     /**
      * @param string[] $erros
      */

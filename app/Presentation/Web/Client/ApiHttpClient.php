@@ -136,7 +136,7 @@ final class ApiHttpClient implements HttpClientInterface
                 'Recurso não encontrado',
                 $mensagemApi !== '' ? $mensagemApi : sprintf('O recurso "%s" solicitado não existe ou foi removido.', $recurso)
             ),
-            in_array($status, [400, 409, 422], true) => new ErrorViewModel(
+            in_array($status, [400, 401, 409, 422], true) => new ErrorViewModel(
                 ErrorType::VALIDACAO,
                 'Dados inválidos',
                 $mensagemApi !== '' ? $mensagemApi : 'Corrija os campos indicados antes de continuar.'

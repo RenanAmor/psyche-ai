@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PsycheAI\Infrastructure\Providers;
 
 use PDO;
+use PsycheAI\Application\Services\AnalistaApplicationService;
 use PsycheAI\Application\Services\ConsolidacaoApplicationService;
 use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Application\Services\LinhaDoTempoApplicationService;
@@ -19,6 +20,7 @@ use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
 use PsycheAI\Infrastructure\Persistence\SQLite\Migrations\MigrationRunner;
+use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteAnalistaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteMemoriaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
@@ -45,6 +47,7 @@ final class ApplicationServiceProvider
         private readonly LinhaDoTempoApplicationService $linhaDoTempo,
         private readonly ConsolidacaoApplicationService $consolidacao,
         private readonly ObservacaoApplicationService $observacoes,
+        private readonly AnalistaApplicationService $analistas,
         private readonly SujeitoRepository $sujeitoRepository
     ) {
     }
@@ -67,6 +70,8 @@ final class ApplicationServiceProvider
         $sessaoRepository = new SQLiteSessaoRepository($pdo);
         $discursoRepository = new SQLiteDiscursoRepository($pdo);
         $memoriaRepository = new SQLiteMemoriaRepository($pdo);
+        $analistaRepository = new SQLiteAnalistaRepository($pdo);
+        $uuidGenerator ??= new RandomUuidGenerator();
 
         return new self(
             new SujeitoApplicationService($sujeitoRepository),
@@ -75,12 +80,13 @@ final class ApplicationServiceProvider
             new MemoriaApplicationService($memoriaRepository),
             new MensagemApplicationService(
                 $sessaoRepository,
-                $uuidGenerator ?? new RandomUuidGenerator(),
+                $uuidGenerator,
                 $respostaAutomatica ?? new RespostaEcoRecorrenciaService($sujeitoRepository)
             ),
             new LinhaDoTempoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
             new ConsolidacaoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
             new ObservacaoApplicationService($sujeitoRepository),
+            new AnalistaApplicationService($analistaRepository, $uuidGenerator),
             $sujeitoRepository
         );
     }
@@ -123,6 +129,11 @@ final class ApplicationServiceProvider
     public function observacoes(): ObservacaoApplicationService
     {
         return $this->observacoes;
+    }
+
+    public function analistas(): AnalistaApplicationService
+    {
+        return $this->analistas;
     }
 
     /**

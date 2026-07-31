@@ -8,60 +8,65 @@ use PHPUnit\Framework\TestCase;
 use PsycheAI\Presentation\Web\Controllers\AutenticacaoAnalistaController;
 use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
+use PsycheAI\Tests\Support\HttpClientStub;
 
 final class AutenticacaoAnalistaControllerTest extends TestCase
 {
-    private const SENHA = 'senha-correta';
-
     protected function setUp(): void
     {
         $_SESSION = [];
-        putenv('PSYCHEAI_SENHA_ANALISTA=' . self::SENHA);
     }
 
     protected function tearDown(): void
     {
-        putenv('PSYCHEAI_SENHA_ANALISTA');
         $_SESSION = [];
     }
 
     public function testEntrarExibeOFormulario(): void
     {
-        $controller = new AutenticacaoAnalistaController();
+        $controller = new AutenticacaoAnalistaController(new HttpClientStub());
 
         $resposta = $controller->entrar(Request::criar('GET', '/entrar'));
 
         $this->assertSame(200, $resposta->status);
         $this->assertStringContainsString('<form', $resposta->corpo);
+        $this->assertStringContainsString('email', $resposta->corpo);
         $this->assertStringContainsString('senha', $resposta->corpo);
     }
 
-    public function testAutenticarComSenhaCorretaRedirecionaParaODashboard(): void
+    public function testAutenticarComCredenciaisCorretasRedirecionaParaODashboard(): void
     {
-        $controller = new AutenticacaoAnalistaController();
+        $controller = new AutenticacaoAnalistaController(new HttpClientStub());
 
-        $resposta = $controller->autenticar(Request::criar('POST', '/entrar', [], ['senha' => self::SENHA]));
+        $resposta = $controller->autenticar(Request::criar('POST', '/entrar', [], [
+            'email' => HttpClientStub::ANALISTA_EMAIL_PADRAO,
+            'senha' => HttpClientStub::ANALISTA_SENHA_PADRAO,
+        ]));
 
         $this->assertSame(302, $resposta->status);
         $this->assertSame('/', $resposta->headers['Location']);
         $this->assertTrue(PortaoDeAnalista::estaAutenticado());
+        $this->assertSame(HttpClientStub::ANALISTA_ID_PADRAO, PortaoDeAnalista::analistaId());
     }
 
     public function testAutenticarComSenhaIncorretaReexibeOFormularioComErro(): void
     {
-        $controller = new AutenticacaoAnalistaController();
+        $controller = new AutenticacaoAnalistaController(new HttpClientStub());
 
-        $resposta = $controller->autenticar(Request::criar('POST', '/entrar', [], ['senha' => 'errada']));
+        $resposta = $controller->autenticar(Request::criar('POST', '/entrar', [], [
+            'email' => HttpClientStub::ANALISTA_EMAIL_PADRAO,
+            'senha' => 'errada',
+        ]));
 
         $this->assertSame(422, $resposta->status);
-        $this->assertStringContainsString('Senha inválida', $resposta->corpo);
+        $this->assertStringContainsString('E-mail ou senha inválidos', $resposta->corpo);
         $this->assertFalse(PortaoDeAnalista::estaAutenticado());
     }
 
     public function testSairDesautenticaERedirecionaParaEntrar(): void
     {
-        PortaoDeAnalista::autenticar(self::SENHA);
-        $controller = new AutenticacaoAnalistaController();
+        PortaoDeAnalista::abrirSessao(HttpClientStub::ANALISTA_ID_PADRAO);
+        $controller = new AutenticacaoAnalistaController(new HttpClientStub());
 
         $resposta = $controller->sair(Request::criar('POST', '/sair'));
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PsycheAI\Presentation;
 
 use PsycheAI\Infrastructure\Providers\ApplicationServiceProvider;
+use PsycheAI\Presentation\Controllers\AutenticacaoController;
 use PsycheAI\Presentation\Controllers\DiscursoController;
 use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
 use PsycheAI\Presentation\Controllers\LinhaDoTempoController;
@@ -34,6 +35,9 @@ final class Routes
         $mensagens = new MensagemController($provider->mensagens());
         $linhaDoTempo = new LinhaDoTempoController($provider->linhaDoTempo(), $provider->consolidacao());
         $observacoes = new ObservacaoController($provider->observacoes());
+        $autenticacao = new AutenticacaoController($provider->analistas());
+
+        $router->post('/auth/login', [$autenticacao, 'autenticar']);
 
         $router->post('/subjects', [$sujeitos, 'criar']);
         $router->get('/subjects', [$sujeitos, 'listar']);

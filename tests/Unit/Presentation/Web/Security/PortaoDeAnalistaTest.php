@@ -11,60 +11,42 @@ use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
 
 final class PortaoDeAnalistaTest extends TestCase
 {
-    private const SENHA = 'segredo-do-analista';
-
     protected function setUp(): void
     {
         $_SESSION = [];
-        putenv('PSYCHEAI_SENHA_ANALISTA=' . self::SENHA);
     }
 
     protected function tearDown(): void
     {
-        putenv('PSYCHEAI_SENHA_ANALISTA');
         $_SESSION = [];
     }
 
     public function testNaoEstaAutenticadoPorPadrao(): void
     {
         $this->assertFalse(PortaoDeAnalista::estaAutenticado());
+        $this->assertNull(PortaoDeAnalista::analistaId());
     }
 
-    public function testAutenticarComSenhaCorretaMarcaSessaoComoAutenticada(): void
+    public function testAbrirSessaoMarcaComoAutenticadoEGuardaOId(): void
     {
-        $resultado = PortaoDeAnalista::autenticar(self::SENHA);
+        PortaoDeAnalista::abrirSessao('analista-1');
 
-        $this->assertTrue($resultado);
         $this->assertTrue(PortaoDeAnalista::estaAutenticado());
-    }
-
-    public function testAutenticarComSenhaIncorretaNaoMarcaSessao(): void
-    {
-        $resultado = PortaoDeAnalista::autenticar('senha-errada');
-
-        $this->assertFalse($resultado);
-        $this->assertFalse(PortaoDeAnalista::estaAutenticado());
-    }
-
-    public function testAutenticarSemSenhaConfiguradaNoAmbienteFalhaSempre(): void
-    {
-        putenv('PSYCHEAI_SENHA_ANALISTA');
-
-        $this->assertFalse(PortaoDeAnalista::autenticar(''));
-        $this->assertFalse(PortaoDeAnalista::autenticar(self::SENHA));
+        $this->assertSame('analista-1', PortaoDeAnalista::analistaId());
     }
 
     public function testSairRemoveAAutenticacaoDaSessao(): void
     {
-        PortaoDeAnalista::autenticar(self::SENHA);
+        PortaoDeAnalista::abrirSessao('analista-1');
         PortaoDeAnalista::sair();
 
         $this->assertFalse(PortaoDeAnalista::estaAutenticado());
+        $this->assertNull(PortaoDeAnalista::analistaId());
     }
 
     public function testProtegerDelegaParaOHandlerQuandoAutenticado(): void
     {
-        PortaoDeAnalista::autenticar(self::SENHA);
+        PortaoDeAnalista::abrirSessao('analista-1');
 
         $handler = static fn (Request $request): Response => Response::ok('conteúdo protegido');
         $protegido = PortaoDeAnalista::proteger($handler);

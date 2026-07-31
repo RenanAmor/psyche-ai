@@ -61,6 +61,8 @@ psyche-ai/
 │           ├── Views/
 │           └── Routes.php
 │
+├── bin/
+│   └── criar-analista.php
 ├── config/
 ├── docs/
 ├── public/
@@ -182,6 +184,11 @@ instanciá-la implicitamente esconderia essa dependência. Ainda sem
 wiring em `ApplicationServiceProvider`/endpoint — ver Infrastructure
 abaixo.
 
+Desde a Sprint 18 (Plataforma), `AnalistaApplicationService` (`criar`,
+`buscarPorEmail`, `autenticar`) segue o mesmo desenho — depende só de
+`AnalistaRepository` e `UuidGeneratorInterface` — usando a nova tríade
+`UseCases/CadastrarAnalista/` para a construção validada da Entidade.
+
 ### UseCases
 
 Cada caso de uso possui sua própria pasta com um `Command`, um `Handler`
@@ -217,6 +224,12 @@ As implementações pertencem às camadas de Aplicação ou Infraestrutura.
 
 Entidades com identidade própria.
 
+Desde a Sprint 18 (Plataforma), `Analista` é a primeira Entidade que não
+representa um conceito do Modelo Computacional do Discurso — é a conta de
+acesso ao sistema (analista/administrador), sem nenhum significado
+psicanalítico, ao lado de Sujeito/Sessao/Discurso/EventoDiscursivo.
+`verificarSenha()` (`password_verify`) vive na própria Entidade.
+
 ---
 
 ### Events
@@ -236,6 +249,10 @@ Exceções específicas do domínio.
 Interfaces dos repositórios do domínio.
 
 Nenhum acesso ao banco de dados deve ser implementado nesta camada.
+
+Desde a Sprint 18, `AnalistaRepository` (`findById`, `findByEmail`,
+`save`) segue o mesmo desenho de `SujeitoRepository` — implementado por
+`SQLiteAnalistaRepository`.
 
 ---
 
@@ -270,6 +287,10 @@ um enum nativo (`^8.2`) — vocabulário fechado de
 `NaoClassificado` (fallback determinístico). Puro vocabulário, sem
 lógica nem dependência — mesmo precedente de `Presentation/Web/Errors/ErrorType`,
 mas o primeiro enum na camada de Domínio.
+
+Desde a Sprint 18, `Email` valida formato via `FILTER_VALIDATE_EMAIL` —
+usado por `Analista`, mesmo padrão de validação simples de
+`Identificador`/`NomeSujeito`.
 
 ---
 
@@ -328,11 +349,14 @@ Contém a primeira implementação concreta de persistência do sistema, em
 - `Migrations/`: uma classe `Migration` por tabela (`CreateSujeitosTable`,
   `CreateSessoesTable`, `CreateDiscursosTable`,
   `CreateEventosDiscursivosTable`, `CreateMemoriasLongitudinaisTable`,
-  `CreateMemoriaSessoesTable`) e `MigrationRunner`, que as aplica de forma
-  ordenada e idempotente, registrando o histórico em `schema_migrations`.
+  `CreateMemoriaSessoesTable`, `AddCriadoEmToEventosDiscursivosTable`,
+  `CreateAnalistasTable` desde a Sprint 18) e `MigrationRunner`, que as
+  aplica de forma ordenada e idempotente, registrando o histórico em
+  `schema_migrations`.
 - `Repositories/`: adaptadores `SQLiteSujeitoRepository`,
-  `SQLiteSessaoRepository`, `SQLiteDiscursoRepository` e
-  `SQLiteMemoriaRepository`, que implementam os respectivos Repositórios do
+  `SQLiteSessaoRepository`, `SQLiteDiscursoRepository`,
+  `SQLiteMemoriaRepository` e, desde a Sprint 18, `SQLiteAnalistaRepository`
+  — que implementam os respectivos Repositórios do
   Domínio usando PDO puro. `SessaoMapper`, `DiscursoMapper` e
   `EventoDiscursivoMapper` são hidratadores internos, compartilhados entre
   os repositórios para persistir/carregar os agregados em cascata
@@ -434,6 +458,14 @@ desta Sprint — `GET /subjects/{id}/observations` (com
 `minimoDeRecorrencia`) — sobre `ObservacaoApplicationService`, devolvendo
 as Recorrências e Observações recalculadas via `ObservacaoResponse`.
 
+Desde a Sprint 18 (Plataforma), `AutenticacaoController` expõe o primeiro
+endpoint de autenticação da API — `POST /auth/login` (com
+`AutenticarAnalistaRequest`, `email`/`senha` obrigatórios) — sobre
+`AnalistaApplicationService::autenticar()`, devolvendo `{id, email}` via
+`AnalistaResponse` (200) ou 401 (`HttpException::naoAutorizado()`, novo)
+quando a credencial é inválida. Sem endpoint de cadastro exposto por
+HTTP — ver `bin/criar-analista.php` na raiz do projeto.
+
 ### Web
 
 Interface web (HTML) do PsycheAI, construída na Sprint 11A de forma
@@ -478,14 +510,18 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   sete seções do menu lateral (Dashboard, Conversa, Sujeitos, Sessões,
   Discursos, Memórias, Eventos Discursivos), compartilhada entre a
   Sidebar e `Routes.php`.
-- `Security/`: desde a revisão pós-Sprint 16, `PortaoDeAnalista` —
-  `estaAutenticado()`, `autenticar(string $senha)` (compara com
-  `getenv('PSYCHEAI_SENHA_ANALISTA')` via `hash_equals()`), `sair()` e
+- `Security/`: `PortaoDeAnalista` — `estaAutenticado()`,
+  `abrirSessao(string $analistaId)`, `analistaId()`, `sair()` e
   `proteger(callable $handler): Closure`, que embrulha um handler para
   redirecionar (302) a `/entrar` quando a sessão
   (`psyche_analista_autenticado`) não está autenticada. Sem entidade de
-  Domínio nem persistência própria — descartável sem dívida quando a
-  Sprint 18 (Plataforma) substituí-lo por contas reais.
+  Domínio nem persistência própria — continua um portão de sessão
+  simples. Até a Sprint 18, `autenticar(string $senha)` comparava com
+  `getenv('PSYCHEAI_SENHA_ANALISTA')` via `hash_equals()`; desde a
+  Sprint 18 (Plataforma), a verificação de credencial saiu daqui —
+  `AutenticacaoAnalistaController` chama `POST /auth/login` na API REST
+  (contas reais, `AnalistaApplicationService`) e só então chama
+  `abrirSessao()`.
 - `Components/`: componentes reutilizáveis orientados a dados —
   `TableComponent` (com estado vazio automático via
   `EmptyStateComponent`), `CardComponent`, `ButtonComponent`,
@@ -553,10 +589,13 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   /sujeitos/{id}/observacoes/grafo-circuito`), que serve o circuito
   reformatado em nós/arestas (JSON) para o grafo em D3 da view. Também
   desde a revisão pós-Sprint 16,
-  `AutenticacaoAnalistaController` (novo) implementa a tela de
+  `AutenticacaoAnalistaController` implementa a tela de
   entrada/saída do Portão do Analista (`GET/POST /entrar`,
   `POST /sair`) — não protegida por `PortaoDeAnalista::proteger()`, por
-  ser justamente a porta de acesso a ele.
+  ser justamente a porta de acesso a ele. Desde a Sprint 18, recebe
+  `HttpClientInterface` (mesmo cliente de todo Controller Web) e chama
+  `POST /auth/login` para verificar a credencial, em vez de decidir isso
+  localmente.
 - `Views/`: `layout.php` (com `partials/header.php` e
   `partials/sidebar.php`), uma view por seção, `carregando.php`,
   `errors/error.php` e, desde a Sprint 12, `conversa/index.php` — monta

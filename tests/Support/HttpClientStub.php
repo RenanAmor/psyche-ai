@@ -20,6 +20,15 @@ use PsycheAI\Presentation\Web\Errors\ErrorViewModelFactory;
  */
 final class HttpClientStub implements HttpClientInterface
 {
+    /**
+     * Credenciais simuladas do endpoint `POST /auth/login` (Sprint 18) —
+     * usadas por qualquer teste de Web que precise passar pelo fluxo real
+     * de login sem subir a API de verdade.
+     */
+    public const ANALISTA_ID_PADRAO = 'analista-teste';
+    public const ANALISTA_EMAIL_PADRAO = 'analista@psyche.ai';
+    public const ANALISTA_SENHA_PADRAO = 'senha-de-teste';
+
     private const RECURSOS_PADRAO = [
         'subjects' => [
             ['id' => 'sub-001', 'nome' => 'Sujeito A', 'quantidadeDeSessoes' => 3],
@@ -97,9 +106,28 @@ final class HttpClientStub implements HttpClientInterface
             return ApiResponse::falha($this->erroPara($this->falhaForcada, $chave));
         }
 
+        if ($chave === 'auth/login') {
+            return $this->autenticar($dados);
+        }
+
         $this->armazenamento[$chave][] = $dados;
 
         return ApiResponse::sucesso($dados);
+    }
+
+    /**
+     * @param array<string, string> $dados
+     */
+    private function autenticar(array $dados): ApiResponse
+    {
+        $credenciaisValidas = ($dados['email'] ?? null) === self::ANALISTA_EMAIL_PADRAO
+            && ($dados['senha'] ?? null) === self::ANALISTA_SENHA_PADRAO;
+
+        if (!$credenciaisValidas) {
+            return ApiResponse::falha(ErrorViewModelFactory::validacao(['credenciais' => 'E-mail ou senha inválidos.']));
+        }
+
+        return ApiResponse::sucesso(['id' => self::ANALISTA_ID_PADRAO, 'email' => self::ANALISTA_EMAIL_PADRAO]);
     }
 
     /**

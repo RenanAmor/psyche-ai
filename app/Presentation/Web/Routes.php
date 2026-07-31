@@ -54,7 +54,7 @@ final class Routes
         $historico = new HistoricoSujeitoController($httpClient);
         $observacoes = new ObservacoesSujeitoController($httpClient);
         $erros = new ErrorController();
-        $autenticacao = new AutenticacaoAnalistaController();
+        $autenticacao = new AutenticacaoAnalistaController($httpClient);
 
         $router->get('/', PortaoDeAnalista::proteger($dashboard->index(...)));
 

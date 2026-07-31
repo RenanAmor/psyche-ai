@@ -862,14 +862,70 @@ nenhum endpoint ou tela expõe o rótulo do Motor Freud ainda — fica para
 depois, quando a Application Service Provider ganhar o wiring completo;
 nenhuma chamada de LLM entra no Motor Lacan.
 
-## Sprint 18 — Plataforma (escopo alto nível)
+## Sprint 18 — Plataforma: contas reais de analista (2026-07-30)
 
-Autenticação real (substitui o Sujeito "visitante" fixo), usuários,
-permissões, administração e publicação — totalmente greenfield, sem
-nenhum código de auth/usuário/permissão hoje. Deve substituir
-`Presentation/Web/Security/PortaoDeAnalista` (revisão pós-Sprint 16,
-acima) por contas reais — ele foi desenhado deliberadamente para ser
-descartável sem dívida de migração nesse momento.
+Escopo desta passagem, alinhado com o usuário antes de implementar (o
+plano completo, "autenticação real, usuários, permissões, administração,
+publicação", é grande demais para uma sprint só): substitui a senha
+única `PSYCHEAI_SENHA_ANALISTA` por contas reais de analista — um único
+papel, sem permissões/administração granulares ainda. O Sujeito que fala
+em `/conversa*` continua anônimo por cookie, sem conta — "dois públicos,
+duas regras" (revisão pós-Sprint 16) permanece valendo.
+
+- [x] `Domain/ValueObjects/Email` (novo) + `Domain/Entities/Analista`
+      (novo): conta de acesso ao sistema, sem nenhum significado
+      psicanalítico — fora do vocabulário teórico das Ontologias, ao
+      contrário de Sujeito/Sessao/Discurso. `verificarSenha()`
+      (`password_verify`) fica na Entidade; `senhaHash` nunca sai da
+      fronteira de Domínio (nem em `AnalistaDTO`).
+- [x] `Domain/Repositories/AnalistaRepository` +
+      `Infrastructure/Persistence/SQLite/Repositories/SQLiteAnalistaRepository`
+      + migration `CreateAnalistasTable` (versão `0008`, tabela
+      `analistas`, e-mail com `UNIQUE`).
+- [x] `Application/UseCases/CadastrarAnalista/{Command,Handler,Result}`
+      (mesmo padrão de `CadastrarSujeito`: Handler puro, valida via
+      Value Objects, `ComandoInvalidoException` em caso de e-mail
+      inválido ou senha vazia) + `Application/Services/AnalistaApplicationService`
+      (`criar`, `buscarPorEmail`, `autenticar` — este último nunca
+      distingue "e-mail não existe" de "senha errada" no retorno, para
+      não vazar quais e-mails têm conta).
+- [x] API REST ganha `POST /auth/login`
+      (`Presentation/Controllers/AutenticacaoController`): 200 com
+      `{id, email}` ou 401 (`HttpException::naoAutorizado()`, novo).
+      Sem endpoint de cadastro exposto por HTTP nesta passagem — ver CLI
+      abaixo.
+- [x] `Presentation/Web/Security/PortaoDeAnalista`: `autenticar(string
+      $senha): bool` (comparava com `getenv('PSYCHEAI_SENHA_ANALISTA')`)
+      foi removido; `abrirSessao(string $analistaId): void` (chamado só
+      depois que a API confirma a credencial) e `analistaId(): ?string`
+      são novos. `estaAutenticado()`, `sair()` e `proteger()` continuam
+      intocados — nenhuma rota protegida mudou em `Web/Routes.php`.
+- [x] `Presentation/Web/Controllers/AutenticacaoAnalistaController` passa
+      a chamar `POST /auth/login` via `HttpClientInterface` (mesmo
+      cliente injetado em todo Controller Web) — a Web continua nunca
+      falando com o banco diretamente. Formulário de `/entrar` ganha
+      campo de e-mail. `ApiHttpClient::erroParaStatus()` passa a mapear
+      401 para o mesmo `ErrorType::VALIDACAO` de 400/409/422.
+- [x] `bin/criar-analista.php <email> <senha>` (novo): provisiona contas
+      via terminal, bootstrapando `ApplicationServiceProvider::comSQLite()`
+      direto (mesmo padrão de composição de `public/index.php`), sem rota
+      HTTP — decisão explícita do usuário: o único uso real hoje é o
+      próprio dono do sistema, uma tela de cadastro público seria
+      superfície de ataque sem necessidade real.
+- [x] Testes, tudo aditivo: `EmailTest`, `AnalistaTest`,
+      `CadastrarAnalistaHandlerTest`, `SQLiteAnalistaRepositoryTest`,
+      `AnalistaApplicationServiceTest`, `AutenticacaoEndpointsTest`
+      (API), `PortaoDeAnalistaTest`/`AutenticacaoAnalistaControllerTest`/`RoutesTest`
+      reescritos para o novo fluxo (Web), `HttpClientStub` ganha suporte
+      a `auth/login`. Verificado também de ponta a ponta com os
+      servidores reais (`php -S` + `curl`): login errado → 422, login
+      certo → sessão + redirecionamento, rota protegida → 200 com
+      sessão/302 sem ela, logout → sessão encerrada. 483 testes, 1200
+      asserções (eram 457/1147 ao final da Sprint 19) — zero regressão.
+
+**Explicitamente fora de escopo nesta passagem** (ver "Sprints futuras"
+abaixo): múltiplos papéis/permissões, telas de administração de conta, e
+contas reais para o Sujeito.
 
 ## Sprint 19 — Camada de Visualização Gráfica: Fundação + Grafo do Circuito/Trajeto
 
@@ -964,6 +1020,13 @@ quatro discursos, sem nós Borromeanos (ver "Sprints futuras" abaixo).
   provavelmente não cabe em nó/aresta simples (topologia de enlace RSI)
   — viabilidade em D3 puro vs. lib de topologia dedicada só deve ser
   decidida quando a sprint de ontologia correspondente existir.
+- **Papéis/permissões e administração de conta** — adiados na Sprint 18
+  acima por escolha explícita de escopo (só a conta única de analista
+  nesta passagem); entra quando o produto precisar de mais de um papel
+  de acesso.
+- **Contas reais para o Sujeito** — hoje continua anônimo por cookie
+  (`psyche_pessoa_id`, Sprint 17); a Sprint 18 deliberadamente não mexeu
+  nisso, mantendo "dois públicos, duas regras" (revisão pós-Sprint 16).
 - Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura), a partir do Modelo Computacional do Discurso.
 - Especificação técnica do Evento Discursivo (formato de registro, granularidade, critérios de segmentação) — ver [Modelo-Computacional-Discurso.md (3.2)](Modelo-Computacional-Discurso.md#32-por-que-uma-unidade-própria).
 - Consolidação da bibliografia freudiana estruturada em [Ontologia-Freud.md (6)](Ontologia-Freud.md#6-referências) e da bibliografia lacaniana estruturada em [Ontologia-Lacan.md (6)](Ontologia-Lacan.md#6-referências).
