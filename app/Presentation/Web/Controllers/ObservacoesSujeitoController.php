@@ -11,6 +11,7 @@ use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Response;
 use PsycheAI\Presentation\Web\Http\ViewRenderer;
 use PsycheAI\Presentation\Web\ViewModels\CircuitoRecorrenciaViewModel;
+use PsycheAI\Presentation\Web\ViewModels\GrafoCircuitoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\ObservacaoViewModel;
 use PsycheAI\Presentation\Web\ViewModels\RecorrenciaViewModel;
 use PsycheAI\Presentation\Web\ViewModels\SujeitoViewModel;
@@ -32,6 +33,12 @@ use PsycheAI\Presentation\Web\ViewModels\SujeitoViewModel;
  * bifurcada) com o circuito/trajeto de cada Recorrencia
  * (GET /subjects/{id}/observations/circuito?vocabulario=lacan) via
  * CircuitoTrajetoComponent — "mapear a pulsão, todo o caminho".
+ *
+ * Desde a Sprint 19 ("Camada de Visualização Gráfica"), `grafoCircuito()`
+ * serve o mesmo dado do circuito reformatado em nós/arestas (JSON) para o
+ * grafo desenhado em D3 no navegador — extensão puramente de Presentation,
+ * sem nenhum conceito lacaniano novo (não é a cadeia de significantes de
+ * Lacan, ver Ontologia-Lacan.md §4).
  */
 final class ObservacoesSujeitoController
 {
@@ -102,6 +109,41 @@ final class ObservacoesSujeitoController
         );
 
         return Response::ok($html);
+    }
+
+    /**
+     * Serve os mesmos dados de `mostrar()`/`circuito` já reformatados em
+     * nós/arestas para o script D3 da view (Sprint 19, "Camada de
+     * Visualização Gráfica") — rota Web (não API REST) porque a página já
+     * fica atrás de `PortaoDeAnalista` e o `fetch()` do navegador precisa
+     * do mesmo cookie de sessão, não de uma chamada servidor-a-servidor.
+     */
+    public function grafoCircuito(Request $request): Response
+    {
+        $sujeitoId = (string) $request->routeParam('id', '');
+
+        $circuitoResposta = $this->httpClient->get(
+            'subjects/' . $sujeitoId . '/observations/circuito',
+            ['vocabulario' => 'lacan']
+        );
+
+        if (!$circuitoResposta->sucesso) {
+            return Response::json(
+                ['sucesso' => false, 'alerta' => $this->erroDe($circuitoResposta)->mensagem],
+                502
+            );
+        }
+
+        /** @var array<string, mixed> $dadosCircuito */
+        $dadosCircuito = $circuitoResposta->dados;
+
+        $circuitos = CircuitoRecorrenciaViewModel::fromArrayList(
+            is_array($dadosCircuito['circuitos'] ?? null) ? $dadosCircuito['circuitos'] : []
+        );
+
+        $grafo = GrafoCircuitoViewModel::apartirDosCircuitos($circuitos)->toArray();
+
+        return Response::json(['sucesso' => true, ...$grafo]);
     }
 
     private function erroDe(ApiResponse $resposta): ErrorViewModel

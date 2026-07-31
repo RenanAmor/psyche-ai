@@ -69,6 +69,57 @@ final class ObservacoesSujeitoControllerTest extends TestCase
         );
     }
 
+    public function testGrafoCircuitoRetornaNosEArestasComoJson(): void
+    {
+        $fake = new ObservacoesHttpClientFake(
+            recursos: self::SUJEITOS_PADRAO,
+            circuitos: [[
+                'id' => '1',
+                'descricao' => 'lapso',
+                'frequencia' => 2,
+                'rotuloLacaniano' => 'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
+                'ocorrencias' => [
+                    ['sessaoId' => 'sessao-1', 'discursoId' => 'discurso-1', 'eventoId' => 'evento-1', 'momento' => '2026-01-10 10:00:00', 'posicao' => 0],
+                    ['sessaoId' => 'sessao-2', 'discursoId' => 'discurso-2', 'eventoId' => 'evento-2', 'momento' => '2026-01-20 10:00:00', 'posicao' => 0],
+                ],
+            ]]
+        );
+
+        $controller = new ObservacoesSujeitoController($fake);
+        $resposta = $controller->grafoCircuito(Request::criar('GET', '/sujeitos/sub-001/observacoes/grafo-circuito')->comRouteParams(['id' => 'sub-001']));
+
+        $this->assertSame(200, $resposta->status);
+
+        $dados = json_decode($resposta->corpo, true);
+
+        $this->assertTrue($dados['sucesso']);
+        $this->assertCount(2, $dados['nos']);
+        $this->assertCount(1, $dados['arestas']);
+        $this->assertSame('sessao-1', $dados['arestas'][0]['origem']);
+        $this->assertSame('sessao-2', $dados['arestas'][0]['destino']);
+        $this->assertSame(
+            'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
+            $dados['arestas'][0]['rotuloLacaniano']
+        );
+    }
+
+    public function testGrafoCircuitoRetornaErroDeComunicacaoQuandoOCircuitoFalha(): void
+    {
+        $fake = new ObservacoesHttpClientFake(
+            recursos: self::SUJEITOS_PADRAO,
+            falhaNoCircuito: ErrorType::COMUNICACAO
+        );
+
+        $controller = new ObservacoesSujeitoController($fake);
+        $resposta = $controller->grafoCircuito(Request::criar('GET', '/sujeitos/sub-001/observacoes/grafo-circuito')->comRouteParams(['id' => 'sub-001']));
+
+        $this->assertSame(502, $resposta->status);
+
+        $dados = json_decode($resposta->corpo, true);
+
+        $this->assertFalse($dados['sucesso']);
+    }
+
     public function testExibeErroDeComunicacaoQuandoOCircuitoFalha(): void
     {
         $fake = new ObservacoesHttpClientFake(

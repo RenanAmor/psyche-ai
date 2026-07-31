@@ -871,9 +871,99 @@ nenhum código de auth/usuário/permissão hoje. Deve substituir
 acima) por contas reais — ele foi desenhado deliberadamente para ser
 descartável sem dívida de migração nesse momento.
 
+## Sprint 19 — Camada de Visualização Gráfica: Fundação + Grafo do Circuito/Trajeto
+
+O usuário pediu, como direção de produto, poder ver graficamente os
+diagramas formais que Lacan propôs (Esquema L, Esquema R, Grafo do
+Desejo, os quatro discursos e nós Borromeanos, além da cadeia de
+significantes). Investigação prévia confirmou que nenhum desses seis
+conceitos tem base hoje — nem ontológica
+([Ontologia-Lacan.md §2/§4](Ontologia-Lacan.md#2-escopo-teórico)) nem
+estrutural — e que a única visualização viável imediatamente é o
+circuito/trajeto (revisão pós-Sprint 16), que já tem dado real
+(`OcorrenciaRecorrencia`). Esta sprint entrega só isso; as demais cinco
+visualizações entram como backlog abaixo, cada uma gated atrás de sua
+própria sprint de ontologia.
+
+**Peça única — Grafo do Circuito/Trajeto.** Zero alteração em
+Domain/Application/API REST — prova de que a sprint não introduz nenhuma
+afirmação ontológica nova, só uma nova serialização do dado que a revisão
+pós-Sprint 16 já autorizou:
+
+- `Presentation/Web/ViewModels/GrafoCircuitoViewModel.php` (novo):
+  `apartirDosCircuitos(CircuitoRecorrenciaViewModel[]): self` produz nós
+  (uma Sessão distinta por `sessaoId`, deduplicada através de todos os
+  circuitos) e arestas (um par consecutivo de ocorrências por
+  Recorrencia, carregando `rotuloLacaniano` nullable); `toArray()` serve
+  de payload a `Response::json()`.
+- `ObservacoesSujeitoController::grafoCircuito()` (novo método, mesma
+  classe — não bifurca): chama
+  `GET subjects/{id}/observations/circuito?vocabulario=lacan` (a mesma
+  chamada que `mostrar()` já faz) e devolve o grafo via
+  `Response::json()`; erro de comunicação vira
+  `Response::json(['sucesso' => false, ...], 502)`, mesmo padrão de
+  `ConversaController::mensagens()`.
+- Rota nova `GET /sujeitos/{id}/observacoes/grafo-circuito`, protegida
+  por `PortaoDeAnalista::proteger()` como toda rota de análise — só o
+  analista autenticado acessa (nunca o Sujeito em `/conversa*`).
+- `observacoes/mostrar.php` mantém `CircuitoTrajetoComponent` como
+  fallback textual sempre renderizado no servidor, e acrescenta um
+  container + `<script src="https://d3js.org/d3.v7.min.js">` +
+  `<script src="/assets/js/grafo-circuito.js" defer>` — SVG desenhado no
+  navegador (D3 via CDN, sem bundler/Node), nós = Sessões em ordem
+  cronológica, arestas sólidas (constatação de recorrência) ou
+  tracejadas com rótulo visível (quando o Motor Lacan já reclassificou
+  como "estrutura candidata: circuito") — nunca uma interpretação
+  confirmada (Regra 10).
+- Testes: novo `GrafoCircuitoViewModelTest` (dedução de nós, contagem de
+  arestas, `rotuloLacaniano` nulo, lista vazia); casos novos em
+  `ObservacoesSujeitoControllerTest` (`grafoCircuito()` sucesso e erro
+  502) e `RoutesTest` (rota protegida redireciona a `/entrar` sem
+  sessão; fluxo funcional completo através do Router). JS não ganha
+  framework de teste novo — script deliberadamente sem lógica de
+  negócio, verificação manual de ponta a ponta. Suíte completa sem
+  regressões: 457 testes, 1147 asserções (eram 449 testes e 1124
+  asserções ao final da revisão anterior).
+- Atualização do Roadmap e `Arquitetura-Camadas.md`
+  ("Camada de Visualização Gráfica — Grafo do Circuito/Trajeto (Sprint
+  19)"). `Ontologia-Lacan.md` não é alterada — nenhum conceito lacaniano
+  novo está sendo ontologizado.
+
+Escopo desta sprint é exclusivamente o grafo do circuito/trajeto — sem
+cadeia de significantes formal, sem Esquema L/R, sem Grafo do Desejo, sem
+quatro discursos, sem nós Borromeanos (ver "Sprints futuras" abaixo).
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
-- Os quatro discursos lacanianos (mestre/universitário/histérica/analista, Seminário 17) — adiados na revisão das Sprints 15-16 acima por falta de base ontológica e estrutural; exigem uma sprint própria de ontologia (nos moldes das Sprints 2-3) antes de qualquer código.
+- **Cadeia de significantes (Lacan) como matema formal** (S1↔S2,
+  metáfora/metonímia como grafo) — distinta do circuito já
+  implementado (Sprint 19, acima);
+  [Ontologia-Lacan.md §4](Ontologia-Lacan.md#4-relações-conceituais)
+  afirma que nenhuma representação computacional desses conceitos está
+  definida; exige sprint de ontologia computacional decidindo como (ou
+  se) S1/S2 se ancoram em `EventoDiscursivo` antes de qualquer
+  nó/aresta.
+- **Esquema L + Esquema R (agrupados)** — sem menção nominal em nenhum
+  doc hoje; Esquema R compartilha os vértices de L (a-a'-S-Outro), o que
+  justifica ontologizar e desenhar os dois numa sprint só; exige sprint
+  de ontologia própria definindo os vértices e o que cada um
+  representaria estruturalmente no discurso registrado.
+- **Grafo do Desejo** — o mais complexo dos formalismos lacanianos
+  (múltiplos andares, $◊D, S(Ⱥ)); zero base ontológica ou estrutural
+  hoje; exige sprint de ontologia própria, possivelmente faseada por
+  andar dado o tamanho do aparato formal.
+- **Quatro discursos lacanianos** (mestre/universitário/histérica/analista,
+  Seminário 17) — adiados na revisão das Sprints 15-16 acima por falta de
+  base ontológica e estrutural; requer não só ontologia mas também
+  mudança estrutural em `EventoDiscursivo` (interlocutor, papel de
+  enunciação, laço social — hoje inexistentes) antes de qualquer código.
+- **Nós Borromeanos** —
+  [Ontologia-Lacan.md §2](Ontologia-Lacan.md#2-escopo-teórico) já declara
+  essa formalização fora do escopo atual ("formalizações posteriores");
+  além da sprint de ontologia própria, é a única das cinco que
+  provavelmente não cabe em nó/aresta simples (topologia de enlace RSI)
+  — viabilidade em D3 puro vs. lib de topologia dedicada só deve ser
+  decidida quando a sprint de ontologia correspondente existir.
 - Definição de arquitetura técnica detalhada (camadas de domínio, aplicação e infraestrutura), a partir do Modelo Computacional do Discurso.
 - Especificação técnica do Evento Discursivo (formato de registro, granularidade, critérios de segmentação) — ver [Modelo-Computacional-Discurso.md (3.2)](Modelo-Computacional-Discurso.md#32-por-que-uma-unidade-própria).
 - Consolidação da bibliografia freudiana estruturada em [Ontologia-Freud.md (6)](Ontologia-Freud.md#6-referências) e da bibliografia lacaniana estruturada em [Ontologia-Lacan.md (6)](Ontologia-Lacan.md#6-referências).

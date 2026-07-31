@@ -65,7 +65,10 @@ psyche-ai/
 ├── docs/
 ├── public/
 │   └── web/
-│       └── index.php
+│       ├── index.php
+│       └── assets/
+│           └── js/
+│               └── grafo-circuito.js
 ├── storage/
 │   ├── cache/
 │   ├── data/
@@ -467,7 +470,10 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   `ConsolidacaoViewModel` projetam as respostas de
   `GET /subjects/{id}/timeline` e `GET /subjects/{id}/consolidation`.
   Desde a Sprint 14, `RecorrenciaViewModel` e `ObservacaoViewModel`
-  projetam a resposta de `GET /subjects/{id}/observations`.
+  projetam a resposta de `GET /subjects/{id}/observations`. Desde a
+  Sprint 19, `GrafoCircuitoViewModel` reformata
+  `CircuitoRecorrenciaViewModel[]` (o mesmo dado do circuito/trajeto) em
+  nós/arestas para o grafo desenhado em D3 no navegador.
 - `Navigation/`: `NavigationItem` e `NavigationMenu`, fonte única das
   sete seções do menu lateral (Dashboard, Conversa, Sujeitos, Sessões,
   Discursos, Memórias, Eventos Discursivos), compartilhada entre a
@@ -542,7 +548,11 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   lado, evitando reabrir `HistoricoSujeitoController` para isso. Desde a
   revisão pós-Sprint 16, o mesmo Controller também combina
   `GET /subjects/{id}/observations/circuito`, exibindo o circuito/trajeto
-  de cada Recorrencia. Também desde essa revisão,
+  de cada Recorrencia. Desde a Sprint 19, o mesmo Controller ganha
+  `grafoCircuito()` (rota `GET
+  /sujeitos/{id}/observacoes/grafo-circuito`), que serve o circuito
+  reformatado em nós/arestas (JSON) para o grafo em D3 da view. Também
+  desde a revisão pós-Sprint 16,
   `AutenticacaoAnalistaController` (novo) implementa a tela de
   entrada/saída do Portão do Analista (`GET/POST /entrar`,
   `POST /sair`) — não protegida por `PortaoDeAnalista::proteger()`, por
@@ -575,15 +585,23 @@ Controllers/Requests/Responses/Http já existentes na raiz de
   lista as Recorrências e Observações do Discourse Engine em duas
   `TableComponent`, com um link "Ver Observações" adicionado em
   `historico/mostrar.php`. Desde a revisão pós-Sprint 16, a mesma view
-  ganha uma terceira seção com `CircuitoTrajetoComponent`. Também desde
-  essa revisão, `autenticacao/entrar.php` monta o formulário de senha do
-  Portão do Analista com `FormComponent`/`AlertComponent`.
+  ganha uma terceira seção com `CircuitoTrajetoComponent`. Desde a
+  Sprint 19, a mesma view acrescenta, quando há circuitos, um container
+  para o grafo D3 (`<div id="grafo-circuito">`) e os `<script>` do CDN
+  do D3 e de `grafo-circuito.js` — a lista de `CircuitoTrajetoComponent`
+  permanece como fallback textual sempre renderizado pelo servidor.
+  Também desde a revisão pós-Sprint 16, `autenticacao/entrar.php` monta
+  o formulário de senha do Portão do Analista com
+  `FormComponent`/`AlertComponent`.
 - `Routes.php`: registra todas as rotas internas sobre um `Router`,
   reaproveitando os mesmos caminhos do `NavigationMenu`. Desde a revisão
   pós-Sprint 16, todo handler de coleta/análise (`/`, `/sujeitos*`,
   `/sessoes*`, `/discursos*`, `/memorias*`, `/eventos-discursivos`) é
   envolvido por `Security\PortaoDeAnalista::proteger()` no momento do
   registro; `/conversa*`, `/erros/*`, `/entrar` e `/sair` ficam de fora.
+  Desde a Sprint 19, `/sujeitos/{id}/observacoes/grafo-circuito` (JSON do
+  grafo, consumido pelo `fetch()` de `grafo-circuito.js`) entra no mesmo
+  grupo protegido.
 - `public/web/index.php`: front controller da interface web,
   independente de `public/index.php` (API REST). Desde a Sprint 12,
   chama `session_start()` antes de despachar a requisição, para que

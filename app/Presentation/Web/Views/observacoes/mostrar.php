@@ -60,8 +60,29 @@ $linhasObservacoes = array_map(
         'Nenhum circuito encontrado no discurso deste sujeito.'
     ) ?>
 
+    <?php if ($circuitos !== []): ?>
+    <h3>Circuito / Trajeto — visualização gráfica</h3>
+    <p class="texto-auxiliar">
+        Mesmo trajeto acima, como grafo: nós são Sessões, arestas ligam
+        ocorrências consecutivas de uma Recorrência. Se o grafo não
+        carregar, a lista acima continua sendo a fonte de dado.
+    </p>
+    <div
+        id="grafo-circuito"
+        data-endpoint="/sujeitos/<?= Html::e($sujeito->id) ?>/observacoes/grafo-circuito"
+    ></div>
+    <p class="legenda-grafo-circuito">
+        Tracejado = leitura lacaniana, estrutura candidata — nunca uma
+        interpretação confirmada (Regra 10).
+    </p>
+    <?php endif; ?>
+
     <div class="pagina-detalhe-acoes">
         <?= ButtonComponent::link('Voltar ao Histórico', '/sujeitos/' . $sujeito->id . '/historico', 'secundario') ?>
         <?= ButtonComponent::link('Voltar ao Sujeito', '/sujeitos/' . $sujeito->id, 'secundario') ?>
     </div>
 </section>
+<?php if ($circuitos !== []): ?>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/assets/js/grafo-circuito.js" defer></script>
+<?php endif; ?>

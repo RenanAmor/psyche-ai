@@ -11,6 +11,7 @@ use PsycheAI\Presentation\Web\Navigation\NavigationMenu;
 use PsycheAI\Presentation\Web\Routes;
 use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
 use PsycheAI\Tests\Support\HttpClientStub;
+use PsycheAI\Tests\Support\ObservacoesHttpClientFake;
 
 /**
  * Garante que a navegação é funcional de ponta a ponta: cada rota do
@@ -132,6 +133,42 @@ final class RoutesTest extends TestCase
 
         $this->assertSame(302, $resposta->status);
         $this->assertSame('/entrar', $resposta->headers['Location']);
+    }
+
+    public function testRotaDoGrafoCircuitoProtegidaSemSessaoRedirecionaParaEntrar(): void
+    {
+        $_SESSION = [];
+
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/sujeitos/sub-001/observacoes/grafo-circuito'));
+
+        $this->assertSame(302, $resposta->status);
+        $this->assertSame('/entrar', $resposta->headers['Location']);
+    }
+
+    public function testRotaDoGrafoCircuitoFuncionalRetornaJson(): void
+    {
+        $router = new Router();
+        Routes::registrar($router, new ObservacoesHttpClientFake(
+            recursos: ['subjects' => [['id' => 'sub-001', 'nome' => 'Sujeito A', 'quantidadeDeSessoes' => 2]]],
+            circuitos: [[
+                'id' => '1',
+                'descricao' => 'lapso',
+                'frequencia' => 2,
+                'ocorrencias' => [
+                    ['sessaoId' => 'sessao-1', 'discursoId' => 'd1', 'eventoId' => 'e1', 'momento' => '2026-01-10 10:00:00', 'posicao' => 0],
+                    ['sessaoId' => 'sessao-2', 'discursoId' => 'd2', 'eventoId' => 'e2', 'momento' => '2026-01-20 10:00:00', 'posicao' => 0],
+                ],
+            ]]
+        ));
+
+        $resposta = $router->despachar(Request::criar('GET', '/sujeitos/sub-001/observacoes/grafo-circuito'));
+
+        $this->assertSame(200, $resposta->status);
+
+        $dados = json_decode($resposta->corpo, true);
+
+        $this->assertTrue($dados['sucesso']);
+        $this->assertCount(2, $dados['nos']);
     }
 
     public function testRotaDeEntrarNaoEProtegida(): void

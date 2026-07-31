@@ -61,6 +61,7 @@ final class Routes
         self::registrarCrud($router, '/sujeitos', $sujeitos);
         $router->get('/sujeitos/{id}/historico', PortaoDeAnalista::proteger($historico->mostrar(...)));
         $router->get('/sujeitos/{id}/observacoes', PortaoDeAnalista::proteger($observacoes->mostrar(...)));
+        $router->get('/sujeitos/{id}/observacoes/grafo-circuito', PortaoDeAnalista::proteger($observacoes->grafoCircuito(...)));
         self::registrarCrud($router, '/sessoes', $sessoes);
         self::registrarCrud($router, '/discursos', $discursos);
         self::registrarCrud($router, '/memorias', $memorias);

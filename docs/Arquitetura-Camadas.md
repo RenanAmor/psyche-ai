@@ -332,6 +332,43 @@ não fornece.
 
 ---
 
+## Camada de Visualização Gráfica — Grafo do Circuito/Trajeto (Sprint 19)
+
+Extensão estritamente de Presentation/Web sobre o circuito/trajeto já
+exposto pela revisão pós-Sprint 16 — zero mudança em Domain, Application
+ou API REST. Não é a cadeia de significantes lacaniana:
+[Ontologia-Lacan.md §4](Ontologia-Lacan.md#4-relações-conceituais) não
+define nenhuma representação computacional para ela ainda; o dado é
+Freud-side (recorrência através de Sessões), só rotulado pelo Motor Lacan
+quando cruza ≥2 sessões.
+
+- **Stack**: SVG + D3.js via CDN, sem bundler/Node — decisão deliberada
+  para não introduzir pipeline de build num projeto 100% PHP server-side.
+  `public/web/assets/js/grafo-circuito.js` é servido como arquivo
+  estático (mesmo docroot do front controller da Web,
+  `public/web/index.php`), sem passar pelo `Router`.
+- **Nova rota Web, não API**: `GET
+  /sujeitos/{id}/observacoes/grafo-circuito`
+  (`ObservacoesSujeitoController::grafoCircuito()`), protegida por
+  `PortaoDeAnalista::proteger()` como toda rota de análise. É Web (não
+  `Presentation/Routes.php`, a API REST) porque o `fetch()` do navegador
+  precisa do mesmo cookie de sessão da página — a API REST só é chamada
+  servidor-a-servidor.
+- **`GrafoCircuitoViewModel`** reformata `CircuitoRecorrenciaViewModel[]`
+  (o mesmo dado que `CircuitoTrajetoComponent` já lista como texto) em
+  nós (Sessões distintas) e arestas (elo entre ocorrências consecutivas
+  de uma Recorrencia), servido via `Response::json()`.
+- **Fallback textual preservado**: `CircuitoTrajetoComponent` continua
+  renderizado no servidor, sempre — se o CDN do D3 falhar, o analista não
+  perde o dado.
+- **Codificação visual do princípio ético**: aresta tracejada + rótulo
+  visível quando `rotuloLacaniano` não é nulo (Motor Lacan já
+  reclassificou como "estrutura candidata: circuito"); traço sólido
+  quando é só constatação de recorrência (Motor Freud). Nunca apresentado
+  como interpretação confirmada (Regra 10).
+
+---
+
 # Camada de Aplicação
 
 Responsável por coordenar os casos de uso.
