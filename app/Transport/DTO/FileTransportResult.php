@@ -9,16 +9,21 @@ namespace PsycheAI\Transport\DTO;
  * protegido) para produção.
  *
  * status possíveis:
- * - transported: arquivo enviado e verificado com sucesso.
- * - already_current: produção já tinha o mesmo conteúdo (tamanho igual).
- * - conflict: já existe arquivo remoto com tamanho diferente do local —
- *   upload abortado para não sobrescrever silenciosamente. Arquivos
- *   remotos com o mesmo tamanho são tratados como already_current sem
- *   download de verificação (diferente do Collector369, que confirma por
- *   hash mesmo com tamanho igual — aqui a árvore tem milhares de arquivos
- *   de vendor/, e download+hash em cada um tornaria o transporte
- *   impraticavelmente lento; a verificação por hash continua acontecendo
- *   sempre logo após um upload novo, para detectar corrupção na transferência).
+ * - transported: arquivo enviado (novo ou substituindo um remoto de
+ *   tamanho diferente) e verificado com sucesso — local é sempre a fonte
+ *   da verdade, então tamanho remoto diferente do local é tratado como
+ *   "o arquivo mudou desde o último deploy" e sobrescrito, não como
+ *   conflito (diferente do transporte do Collector369, onde cada nome de
+ *   arquivo já embute um timestamp e uma colisão de nome é uma anomalia
+ *   real que exige investigação humana — aqui os caminhos são fixos,
+ *   é código versionado em git, e mudar é o caso normal de um redeploy).
+ * - already_current: produção já tinha o mesmo tamanho do arquivo local,
+ *   tratado como idêntico sem download de verificação (diferente do
+ *   Collector369, que confirma por hash mesmo com tamanho igual — aqui a
+ *   árvore tem milhares de arquivos de vendor/, e download+hash em cada
+ *   um tornaria o transporte impraticavelmente lento; a verificação por
+ *   hash continua acontecendo sempre logo após um upload/substituição,
+ *   para detectar corrupção na transferência).
  * - error: falha técnica (conexão, integridade pós-upload, rename etc.).
  * - storage_dir_ensured: subdiretório protegido de storage/ garantido
  *   (criado ou já existente) — nenhum arquivo é tocado dentro dele.
@@ -50,11 +55,6 @@ final class FileTransportResult
             'already_current',
             'Produção já está atualizada (mesmo tamanho do arquivo local).',
         );
-    }
-
-    public static function conflict(string $relativePath, string $message): self
-    {
-        return new self($relativePath, 'conflict', $message);
     }
 
     public static function error(string $relativePath, string $message): self

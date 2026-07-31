@@ -100,7 +100,7 @@ final class ProductionTransportTest extends TestCase
         self::assertSame(0, $ftp->putCalls);
     }
 
-    public function testConflictWhenRemoteSizeDiffersAndDoesNotOverwrite(): void
+    public function testOverwritesWhenRemoteSizeDiffersBecauseLocalIsAlwaysAuthoritative(): void
     {
         $this->writeLocalFile('app/Foo.php', '<?php // conteudo-local-mais-longo');
 
@@ -110,9 +110,9 @@ final class ProductionTransportTest extends TestCase
         $outcome = $this->makeTransport($ftp)->run();
 
         $result = $this->findResult($outcome, 'app/Foo.php');
-        self::assertSame('conflict', $result->status);
-        self::assertSame(0, $ftp->putCalls);
-        self::assertSame('<?php // curto', $ftp->files['/app/Foo.php']);
+        self::assertSame('transported', $result->status);
+        self::assertSame(1, $ftp->putCalls);
+        self::assertSame('<?php // conteudo-local-mais-longo', $ftp->files['/app/Foo.php']);
     }
 
     public function testRemovesOrphanTmpFileBeforeUploading(): void

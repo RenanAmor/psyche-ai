@@ -28,13 +28,17 @@ O Collector369 transporta **um arquivo por provider**. Aqui é uma **árvore int
 - **Verificação por hash só acontece uma vez por arquivo, não a cada execução.** O Collector369 baixa e compara hash SHA-256 mesmo quando o tamanho remoto já bate com o local, porque lá é um arquivo só, ocasional, com dado financeiro. Aqui a árvore tem milhares de arquivos (`vendor/` sozinho passa de 3800) — repetir download+hash em todos a cada redeploy tornaria o comando impraticavelmente lento. Em vez disso:
   - Arquivo remoto **não existe**: upload para `.tmp_`, confirma tamanho, baixa de volta e compara hash contra o local, só então `ftp_rename` para o nome final — mesma garantia contra corrupção de transferência que o Collector369 tem.
   - Arquivo remoto **já existe com o mesmo tamanho**: tratado como `already_current` sem download — aceita-se esse nível de confiança para código/dependências (ao contrário de dado financeiro, colisão de tamanho com conteúdo diferente em código versionado é um cenário extremamente improvável).
-  - Arquivo remoto **já existe com tamanho diferente**: `conflict`, upload abortado, nada é sobrescrito — investigação humana necessária, mesma postura do Collector369.
+  - Arquivo remoto **já existe com tamanho diferente**: **sobrescrito**, pela mesma rotina seguro de `.tmp` + verificação de hash + rename. Isso é deliberadamente diferente do Collector369, onde essa mesma situação é `conflict` (aborta, exige investigação humana) — lá cada nome de arquivo já embute um timestamp, então uma colisão de nome com conteúdo diferente é uma anomalia real. Aqui os caminhos são fixos (é código versionado em git, não dado com timestamp): tamanho diferente é só "o arquivo mudou desde o último deploy", o caso normal de uma redeploy. Tratar isso como conflito bloquearia toda atualização de código depois do primeiro deploy — um bug real descoberto na prática (ver seção 5.1) antes de chegar à primeira versão publicada deste documento.
 
 ## 5. Descoberta em produção: a sessão FTP tem limite
 
 Confirmado contra o FTP real (não só teoria): as duas primeiras execuções completas do transporte pararam por volta do mesmo número de comandos FTP (entre ~150 e ~300, contando `size`/`put`/`get`/`rename`/`mkdir`), independente de quais arquivos estavam sendo processados no momento — sintoma de que a conta `u196460065.psycheai` (ou a Hostinger em geral) derruba a sessão depois de um certo volume de comandos/conexões de dados PASV, não por erro de rede aleatório. Com milhares de arquivos (`vendor/` sozinho passa de 3800), uma única sessão persistente do início ao fim sempre estoura esse limite.
 
 Mitigação: `ProductionTransport` reconecta periodicamente (a cada `reconnectEveryFiles` itens processados, padrão 20) em vez de manter uma conexão só. Cada arquivo já processado com sucesso antes de uma queda continua íntegro (o desenho de `.tmp` + rename garante isso); reexecutar o comando depois de uma falha parcial é sempre seguro — os arquivos já publicados batem em tamanho (`already_current`, sem novo upload) e só os que faltaram são reenviados.
+
+## 5.1. Bug descoberto no primeiro redeploy real: "conflict" bloqueava atualização de código
+
+A primeira versão deste transporte copiou a semântica de `conflict` do Collector369 ao pé da letra: tamanho remoto diferente do local → aborta, exige investigação humana. Isso só se revelou um bug ao tentar corrigir a incompatibilidade de PHP (seção 4 de `Integracao-PsycheAI.md`) e reenviar um `composer.lock` com conteúdo genuinamente diferente — o transporte reportou `conflict` e recusou a atualizar, porque a única diferença entre os dois casos (dado com timestamp vs. código versionado) não tinha sido considerada na primeira versão. Corrigido removendo o status `conflict`: tamanho remoto diferente agora é sempre tratado como "arquivo mudou, sobrescrever" (mesma rotina segura de `.tmp` + hash + rename), nunca mais um bloqueio.
 
 ## 6. Upload seguro por arquivo
 
@@ -46,7 +50,7 @@ Rodar o comando de novo depois de um deploy já publicado (ou de uma queda de se
 
 ## 8. Testes
 
-`tests/Unit/Transport/ProductionTransportTest.php`, com `FakeFtpClient` (`tests/Support/FakeFtpClient.php`) — sem rede real. Cobre: upload da árvore incluída, exclusão de `tests/`/`docs/`/`README.md`/`.git`/`.env`, proteção total de `storage/` (arquivos locais ali nunca sobem, mesmo existindo), `already_current`/`conflict` por tamanho, limpeza de `.tmp` órfão, detecção de corrupção pós-upload, retry de conexão, reconexão periódica e callback de progresso.
+`tests/Unit/Transport/ProductionTransportTest.php`, com `FakeFtpClient` (`tests/Support/FakeFtpClient.php`) — sem rede real. Cobre: upload da árvore incluída, exclusão de `tests/`/`docs/`/`README.md`/`.git`/`.env`, proteção total de `storage/` (arquivos locais ali nunca sobem, mesmo existindo), `already_current` por tamanho, sobrescrita quando o tamanho remoto difere, limpeza de `.tmp` órfão, detecção de corrupção pós-upload, retry de conexão, reconexão periódica e callback de progresso.
 
 ## 9. O que este documento não cobre
 

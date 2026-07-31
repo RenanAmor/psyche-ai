@@ -21,6 +21,16 @@ use PsycheAI\Transport\Ftp\FtpClientInterface;
  * (criados se ainda não existirem), porque é onde vive o SQLite e o áudio
  * gravado de sujeitos reais em produção; sobrescrever isso a cada deploy
  * apagaria dados de sessões de análise já em andamento.
+ *
+ * Diferente do Collector369 também na resolução de "já existe remoto com
+ * tamanho diferente": lá isso é `conflict` (aborta, exige investigação
+ * humana), porque cada nome de arquivo já embute um timestamp — uma
+ * colisão de nome ali é uma anomalia real. Aqui os caminhos são fixos
+ * (é código, não dado com timestamp): tamanho diferente é simplesmente
+ * "o arquivo mudou desde o último deploy", o caso normal e esperado de
+ * uma redeploy. O local (git-controlado) é sempre a fonte da verdade e
+ * sobrescreve — pela mesma rotina segura de `.tmp` + verificação de hash
+ * + rename usada para arquivos novos.
  */
 final class ProductionTransport
 {
@@ -179,13 +189,8 @@ final class ProductionTransport
         $localSize = filesize($localFile);
         $remoteSize = $this->ftp->size($remoteFinal);
 
-        if ($remoteSize >= 0) {
-            return $remoteSize === $localSize
-                ? FileTransportResult::alreadyCurrent($relativePath)
-                : FileTransportResult::conflict(
-                    $relativePath,
-                    "Conflito: '{$remoteFinal}' já existe em produção com tamanho diferente do arquivo local ({$remoteSize} vs {$localSize} bytes). Upload abortado — nada foi sobrescrito.",
-                );
+        if ($remoteSize >= 0 && $remoteSize === $localSize) {
+            return FileTransportResult::alreadyCurrent($relativePath);
         }
 
         return $this->uploadViaTemporaryFile($localFile, $relativePath, $remoteTmp, $remoteFinal, $localSize);

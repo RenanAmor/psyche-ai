@@ -40,12 +40,12 @@ $transport = new ProductionTransport(
     remoteRoot: getenv('PRODUCTION_FTP_REMOTE_PATH') ?: '/',
 );
 
-$contadores = ['transported' => 0, 'already_current' => 0, 'conflict' => 0, 'error' => 0, 'storage_dir_ensured' => 0];
+$contadores = ['transported' => 0, 'already_current' => 0, 'error' => 0, 'storage_dir_ensured' => 0];
 
 $outcome = $transport->run(function (FileTransportResult $result) use (&$contadores): void {
     $contadores[$result->status] = ($contadores[$result->status] ?? 0) + 1;
 
-    $stream = in_array($result->status, ['error', 'conflict'], true) ? STDERR : STDOUT;
+    $stream = $result->status === 'error' ? STDERR : STDOUT;
     fwrite($stream, "[{$result->status}] {$result->relativePath}\n");
 });
 
@@ -56,15 +56,14 @@ if (!$outcome->connected) {
 }
 
 fwrite(STDOUT, sprintf(
-    "\nResumo: %d transportado(s), %d já atualizado(s), %d conflito(s), %d erro(s), %d diretório(s) protegido(s) garantido(s).\n",
+    "\nResumo: %d transportado(s), %d já atualizado(s), %d erro(s), %d diretório(s) protegido(s) garantido(s).\n",
     $contadores['transported'],
     $contadores['already_current'],
-    $contadores['conflict'],
     $contadores['error'],
     $contadores['storage_dir_ensured'],
 ));
 
-exit(($contadores['conflict'] > 0 || $contadores['error'] > 0) ? 1 : 0);
+exit($contadores['error'] > 0 ? 1 : 0);
 
 /**
  * Loader mínimo de .env (KEY=VALUE por linha, # para comentário) — o
