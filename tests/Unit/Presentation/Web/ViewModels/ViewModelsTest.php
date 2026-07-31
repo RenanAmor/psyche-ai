@@ -222,6 +222,7 @@ final class ViewModelsTest extends TestCase
             'descricao' => 'lapso',
             'frequencia' => 2,
             'rotuloLacaniano' => 'Estrutura candidata: circuito.',
+            'fundamentacaoTeorica' => 'Circuito: o mesmo conteúdo reaparece em ≥2 sessões.',
             'ocorrencias' => [
                 ['sessaoId' => 'sessao-1', 'discursoId' => 'd1', 'eventoId' => 'e1', 'momento' => '2026-01-10 10:00:00', 'posicao' => 0],
                 ['sessaoId' => 'sessao-2', 'discursoId' => 'd2', 'eventoId' => 'e2', 'momento' => '2026-01-20 10:00:00', 'posicao' => 0],
@@ -231,6 +232,7 @@ final class ViewModelsTest extends TestCase
         $this->assertSame('lapso', $vm->descricao);
         $this->assertSame(2, $vm->frequencia);
         $this->assertSame('Estrutura candidata: circuito.', $vm->rotuloLacaniano);
+        $this->assertSame('Circuito: o mesmo conteúdo reaparece em ≥2 sessões.', $vm->fundamentacaoTeorica);
         $this->assertCount(2, $vm->ocorrencias);
         $this->assertSame('Sessão 2026-01-10 10:00:00 → Sessão 2026-01-20 10:00:00', $vm->trajeto());
     }
@@ -244,6 +246,7 @@ final class ViewModelsTest extends TestCase
         $this->assertSame(0, $vm->frequencia);
         $this->assertSame([], $vm->ocorrencias);
         $this->assertNull($vm->rotuloLacaniano);
+        $this->assertNull($vm->fundamentacaoTeorica);
         $this->assertSame('', $vm->trajeto());
     }
 

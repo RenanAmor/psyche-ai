@@ -30,11 +30,16 @@ final class CircuitoTrajetoComponent
                 ? sprintf(' <span class="rotulo-lacaniano">(%s)</span>', Html::e($circuito->rotuloLacaniano))
                 : '';
 
+            $fundamentacao = $circuito->fundamentacaoTeorica !== null
+                ? sprintf(' <small class="fundamentacao-lacaniana">%s</small>', Html::e($circuito->fundamentacaoTeorica))
+                : '';
+
             $itens .= sprintf(
-                '<li><strong>%s</strong>: %s%s</li>',
+                '<li><strong>%s</strong>: %s%s%s</li>',
                 Html::e($circuito->descricao),
                 Html::e($circuito->trajeto()),
-                $rotulo
+                $rotulo,
+                $fundamentacao
             );
         }
 

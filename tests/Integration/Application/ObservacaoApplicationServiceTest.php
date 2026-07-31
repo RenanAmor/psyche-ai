@@ -10,6 +10,9 @@ use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Application\Services\ObservacaoApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
+use PsycheAI\Application\UseCases\ClassificarFormacaoFreudiana\ClassificarFormacaoFreudianaHandler;
+use PsycheAI\Domain\ValueObjects\TipoFormacaoFreudiana;
+use PsycheAI\Infrastructure\Contracts\ClassificadorEstruturalInterface;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSujeitoRepository;
@@ -46,6 +49,16 @@ final class ObservacaoApplicationServiceTest extends SQLiteTestCase
         // vazam recorrências do outro.
         $sujeitos->criar('sujeito-2', 'Sujeito Dois');
         $sessoes->criar('sujeito-2', 'sessao-x', new DateTimeImmutable('2026-01-15 10:00:00'));
+
+        // Terceiro Sujeito: recorrência dentro de uma única Sessão (não
+        // atravessa Sessões distintas) — usado para testar o ramo 2 da
+        // regra de precedência (classificação via Motor Freud/LLM), que
+        // só se aplica quando não há circuito.
+        $sujeitos->criar('sujeito-3', 'Sujeito Três');
+        $sessoes->criar('sujeito-3', 'sessao-unica', new DateTimeImmutable('2026-01-10 10:00:00'));
+        $discursos->criar('sessao-unica', 'discurso-3', 'Conteúdo C');
+        $discursos->adicionarEvento('discurso-3', 'evento-4', 'trocadilho', 0);
+        $discursos->adicionarEvento('discurso-3', 'evento-5', 'trocadilho', 1);
     }
 
     public function testConsultarLancaExcecaoQuandoSujeitoNaoExiste(): void
@@ -148,6 +161,83 @@ final class ObservacaoApplicationServiceTest extends SQLiteTestCase
     {
         $resultado = $this->service->consultarCircuito('sujeito-1', null, true);
 
+        self::assertSame(
+            'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
+            $resultado->circuitos[0]->rotuloLacaniano
+        );
+    }
+
+    public function testConsultarCircuitoSemLeituraLacanianaDevolveFundamentacaoNula(): void
+    {
+        $resultado = $this->service->consultarCircuito('sujeito-1');
+
+        self::assertNull($resultado->circuitos[0]->fundamentacaoTeorica);
+    }
+
+    public function testConsultarCircuitoComLeituraLacanianaIncluiFundamentacaoDoCircuito(): void
+    {
+        $resultado = $this->service->consultarCircuito('sujeito-1', null, true);
+
+        self::assertStringContainsString('Circuito', $resultado->circuitos[0]->fundamentacaoTeorica);
+    }
+
+    public function testConsultarCircuitoSemCircuitoESemClassificadorCaiNoRotuloPadrao(): void
+    {
+        $resultado = $this->service->consultarCircuito('sujeito-3', null, true);
+
+        self::assertSame(
+            'Estrutura candidata: deslize metonímico.',
+            $resultado->circuitos[0]->rotuloLacaniano
+        );
+        self::assertStringContainsString('Deslize metonímico', $resultado->circuitos[0]->fundamentacaoTeorica);
+    }
+
+    public function testConsultarCircuitoSemCircuitoUsaClassificadorFreudianoQuandoDisponivel(): void
+    {
+        $classificador = new class implements ClassificadorEstruturalInterface {
+            public function classificar(string $conteudo): TipoFormacaoFreudiana
+            {
+                return TipoFormacaoFreudiana::Chiste;
+            }
+        };
+
+        $sujeitoRepository = new SQLiteSujeitoRepository($this->pdo);
+        $service = new ObservacaoApplicationService(
+            sujeitoRepository: $sujeitoRepository,
+            classificarFormacaoFreudiana: new ClassificarFormacaoFreudianaHandler($classificador)
+        );
+
+        $resultado = $service->consultarCircuito('sujeito-3', null, true);
+
+        self::assertSame(
+            'Estrutura candidata: metáfora — condensação.',
+            $resultado->circuitos[0]->rotuloLacaniano
+        );
+        self::assertStringContainsString('Metáfora', $resultado->circuitos[0]->fundamentacaoTeorica);
+    }
+
+    public function testConsultarCircuitoNaoChamaOClassificadorQuandoJaHaCircuito(): void
+    {
+        $classificador = new class implements ClassificadorEstruturalInterface {
+            public bool $chamado = false;
+
+            public function classificar(string $conteudo): TipoFormacaoFreudiana
+            {
+                $this->chamado = true;
+
+                return TipoFormacaoFreudiana::Chiste;
+            }
+        };
+
+        $sujeitoRepository = new SQLiteSujeitoRepository($this->pdo);
+        $service = new ObservacaoApplicationService(
+            sujeitoRepository: $sujeitoRepository,
+            classificarFormacaoFreudiana: new ClassificarFormacaoFreudianaHandler($classificador)
+        );
+
+        $resultado = $service->consultarCircuito('sujeito-1', null, true);
+
+        self::assertFalse($classificador->chamado);
         self::assertSame(
             'Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.',
             $resultado->circuitos[0]->rotuloLacaniano

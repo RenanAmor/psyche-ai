@@ -14,7 +14,10 @@ use PsycheAI\Application\Services\MensagemApplicationService;
 use PsycheAI\Application\Services\ObservacaoApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
+use PsycheAI\Application\UseCases\ClassificarFormacaoFreudiana\ClassificarFormacaoFreudianaHandler;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
+use PsycheAI\Infrastructure\AI\AnthropicLLMService;
+use PsycheAI\Infrastructure\AI\ClassificadorFreudianoLLM;
 use PsycheAI\Infrastructure\AI\RespostaEcoRecorrenciaService;
 use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
@@ -62,7 +65,8 @@ final class ApplicationServiceProvider
     public static function comPDO(
         PDO $pdo,
         ?UuidGeneratorInterface $uuidGenerator = null,
-        ?RespostaAutomaticaInterface $respostaAutomatica = null
+        ?RespostaAutomaticaInterface $respostaAutomatica = null,
+        ?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana = null
     ): self {
         MigrationRunner::comMigrationsPadrao($pdo)->run();
 
@@ -72,6 +76,9 @@ final class ApplicationServiceProvider
         $memoriaRepository = new SQLiteMemoriaRepository($pdo);
         $analistaRepository = new SQLiteAnalistaRepository($pdo);
         $uuidGenerator ??= new RandomUuidGenerator();
+        $classificarFormacaoFreudiana ??= new ClassificarFormacaoFreudianaHandler(
+            new ClassificadorFreudianoLLM(new AnthropicLLMService())
+        );
 
         return new self(
             new SujeitoApplicationService($sujeitoRepository),
@@ -85,7 +92,10 @@ final class ApplicationServiceProvider
             ),
             new LinhaDoTempoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
             new ConsolidacaoApplicationService($sujeitoRepository, $memoriaRepository, $sessaoRepository),
-            new ObservacaoApplicationService($sujeitoRepository),
+            new ObservacaoApplicationService(
+                sujeitoRepository: $sujeitoRepository,
+                classificarFormacaoFreudiana: $classificarFormacaoFreudiana
+            ),
             new AnalistaApplicationService($analistaRepository, $uuidGenerator),
             $sujeitoRepository
         );

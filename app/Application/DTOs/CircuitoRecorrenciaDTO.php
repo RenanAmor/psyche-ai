@@ -17,21 +17,27 @@ final class CircuitoRecorrenciaDTO
         public readonly string $descricao,
         public readonly int $frequencia,
         public readonly array $ocorrencias,
-        public readonly ?string $rotuloLacaniano = null
+        public readonly ?string $rotuloLacaniano = null,
+        public readonly ?string $fundamentacaoTeorica = null
     ) {
     }
 
     /**
      * @param OcorrenciaRecorrencia[] $ocorrencias
      */
-    public static function fromRecorrencia(Recorrencia $recorrencia, array $ocorrencias, ?string $rotuloLacaniano = null): self
-    {
+    public static function fromRecorrencia(
+        Recorrencia $recorrencia,
+        array $ocorrencias,
+        ?string $rotuloLacaniano = null,
+        ?string $fundamentacaoTeorica = null
+    ): self {
         return new self(
             id: $recorrencia->id()->valor(),
             descricao: $recorrencia->descricao()->valor(),
             frequencia: $recorrencia->frequencia()->valor(),
             ocorrencias: array_map(OcorrenciaCircuitoDTO::fromEntity(...), $ocorrencias),
-            rotuloLacaniano: $rotuloLacaniano
+            rotuloLacaniano: $rotuloLacaniano,
+            fundamentacaoTeorica: $fundamentacaoTeorica
         );
     }
 }

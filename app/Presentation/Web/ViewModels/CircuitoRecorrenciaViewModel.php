@@ -20,7 +20,8 @@ final class CircuitoRecorrenciaViewModel
         public readonly string $descricao,
         public readonly int $frequencia,
         public readonly array $ocorrencias,
-        public readonly ?string $rotuloLacaniano = null
+        public readonly ?string $rotuloLacaniano = null,
+        public readonly ?string $fundamentacaoTeorica = null
     ) {
     }
 
@@ -36,7 +37,8 @@ final class CircuitoRecorrenciaViewModel
             ocorrencias: OcorrenciaCircuitoViewModel::fromArrayList(
                 is_array($dados['ocorrencias'] ?? null) ? $dados['ocorrencias'] : []
             ),
-            rotuloLacaniano: isset($dados['rotuloLacaniano']) ? (string) $dados['rotuloLacaniano'] : null
+            rotuloLacaniano: isset($dados['rotuloLacaniano']) ? (string) $dados['rotuloLacaniano'] : null,
+            fundamentacaoTeorica: isset($dados['fundamentacaoTeorica']) ? (string) $dados['fundamentacaoTeorica'] : null
         );
     }
 

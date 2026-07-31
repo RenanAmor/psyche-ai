@@ -989,6 +989,70 @@ Escopo desta sprint é exclusivamente o grafo do circuito/trajeto — sem
 cadeia de significantes formal, sem Esquema L/R, sem Grafo do Desejo, sem
 quatro discursos, sem nós Borromeanos (ver "Sprints futuras" abaixo).
 
+## Motor Lacan — fundamentação teórica para o analista (2026-07-30)
+
+Decisão do usuário, a partir de uma conversa teórica sobre a leitura
+que Lacan faz do *Projeto para uma Psicologia Científica* de Freud, o
+limite do significante e a distinção Sujeito/Analista: as telas do
+**analista** passam a poder mostrar a regra da ontologia que fundamenta
+cada rótulo lacaniano — nunca uma leitura clínica do conteúdo do
+sujeito específico, que continua exclusiva do analista. Formalizado
+como **Regra 11** em [Regras-Dominio.md](Regras-Dominio.md). O Sujeito
+em `/conversa*` não muda em nada.
+
+Ao implementar, ficou explícito que dois rótulos lacanianos coexistiam:
+o estrutural sem LLM (`reclassificar()`/`reclassificarComTrajeto()` —
+"deslize metonímico"/"circuito", já exposto) e o baseado no Motor Freud
+via LLM (`reclassificarPorTipoFreudiano()` — "metáfora"/"formação de
+compromisso indeterminada"), que **nunca havia sido ligado a nenhum
+endpoint** desde a revisão do Motor Freud (commit `c734795`) — lacuna
+fechada nesta passagem.
+
+- [x] `ReclassificadorLacaniano::fundamentacaoPara(string $rotulo):
+      string` (novo, Domain): tabela de lookup determinística — sem LLM
+      — sobre os 4 rótulos já existentes, citando a regra de
+      `Ontologia-Lacan.md §3`/`§4`/`§3.7` que os fundamenta. Não altera
+      nenhum método existente.
+- [x] `ObservacaoApplicationService::consultarCircuito()` ganha regra de
+      precedência para o rótulo único de cada Recorrência, quando
+      `comLeituraLacaniana=true`: (1) circuito (≥2 sessões) tem
+      prioridade e **não chama o Motor Freud/LLM** — economia de
+      custo/latência, já que o circuito é a leitura mais rica
+      disponível; (2) senão, classifica o conteúdo via
+      `ClassificarFormacaoFreudianaHandler` (já existia, nunca fora
+      usado) e reclassifica com `reclassificarPorTipoFreudiano()`; (3)
+      sem classificador disponível ou `NaoClassificado`, cai no rótulo
+      padrão de sempre. Novo parâmetro construtor opcional
+      `?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana`
+      (mesmo padrão de `?RespostaAutomaticaInterface $respostaAutomatica`
+      em `ApplicationServiceProvider::comPDO()`), para testes injetarem
+      um classificador stub sem chamada de rede real.
+- [x] `ApplicationServiceProvider::comPDO()` passa a instanciar
+      `ClassificadorFreudianoLLM` + `AnthropicLLMService` como default
+      do novo parâmetro — fecha a lacuna "nunca ligado a endpoint
+      algum". Sem `ANTHROPIC_API_KEY` configurada, o classificador já
+      captura qualquer falha (`Throwable`) e cai em `NaoClassificado`
+      (comportamento existente de `ClassificadorFreudianoLLM`), então
+      nenhum teste depende da chave — mas o caminho só é de fato
+      exercitado quando a Recorrência não está em circuito.
+- [x] `CircuitoRecorrenciaDTO`/`CircuitoRecorrenciaViewModel` ganham
+      `?string $fundamentacaoTeorica`; `CircuitoResponse::toArray()`
+      propaga o campo no JSON; `CircuitoTrajetoComponent` exibe a
+      fundamentação junto do rótulo (`<small
+      class="fundamentacao-lacaniana">`), só quando não-nula.
+- [x] Testes, tudo aditivo: casos novos em
+      `ReclassificadorLacanianoTest`, `ObservacaoApplicationServiceTest`
+      (cobrindo os 3 ramos da precedência, com classificador stub —
+      inclui um teste confirmando que o classificador **não** é
+      chamado quando já há circuito), `ViewModelsTest`,
+      `CircuitoTrajetoComponentTest`. Suíte completa sem regressão:
+      492 testes, 1218 asserções (eram 483/1200 ao final da Sprint 18).
+
+Escopo desta passagem é exclusivamente o rótulo único por Recorrência
+em `consultarCircuito()` — não altera `consultar()` (sem circuito, que
+continua usando só `reclassificar()`), não mexe na conversa do sujeito,
+não introduz papéis/permissões novas.
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
 - **Cadeia de significantes (Lacan) como matema formal** (S1↔S2,

@@ -324,11 +324,12 @@ não fornece.
   indeterminado entre as duas), fiel a
   [Ontologia-Lacan.md §4](Ontologia-Lacan.md#4-relações-conceituais).
   Nenhuma chamada a modelo entra no Motor Lacan.
-- **Sem endpoint/tela ainda.** Esta revisão fica em
-  Domain/Infrastructure/Application — a exposição via API/tela é
-  deliberadamente adiada para não colidir com o trabalho simultâneo da
-  revisão anterior (Portão do Analista/Circuito), ver
-  docs/Roadmap.md.
+- **Sem endpoint/tela nesta revisão.** Fica em
+  Domain/Infrastructure/Application — a exposição via API/tela foi
+  deliberadamente adiada aqui para não colidir com o trabalho simultâneo
+  da revisão anterior (Portão do Analista/Circuito). Ligada ao
+  composition root só na revisão "Motor Lacan — fundamentação teórica
+  para o analista", ver seção própria abaixo e docs/Roadmap.md.
 
 ---
 
@@ -415,6 +416,42 @@ pós-Sprint 16) permanece valendo.
   futuras"): múltiplos papéis/permissões, telas de administração de
   conta, e contas reais para o Sujeito — ficam para quando (se) o produto
   precisar delas.
+
+---
+
+## Motor Lacan — fundamentação teórica para o analista (2026-07-30)
+
+Fecha a lacuna deixada na revisão do Motor Freud/LLM ("Sem
+endpoint/tela nesta revisão", acima): `ClassificadorFreudianoLLM` +
+`AnthropicLLMService` passam a ser instanciados por padrão em
+`ApplicationServiceProvider::comPDO()`, e
+`ReclassificadorLacaniano::reclassificarPorTipoFreudiano()` — até aqui
+uma tabela de lookup nunca chamada por nenhuma camada superior — passa
+a ser usada de fato em `ObservacaoApplicationService::consultarCircuito()`.
+
+- **Um rótulo único por Recorrência, com regra de precedência.** Quando
+  `comLeituraLacaniana=true`: circuito (≥2 sessões) tem prioridade e
+  **não chama o Motor Freud/LLM** — economia de custo/latência, já que
+  o circuito já é a leitura mais rica disponível; senão, classifica via
+  `ClassificarFormacaoFreudianaHandler` e reclassifica com
+  `reclassificarPorTipoFreudiano()`; sem classificador ou
+  `NaoClassificado`, cai no rótulo padrão de sempre.
+- **Nova porta injetável, mesmo padrão de `$respostaAutomatica`.**
+  `ObservacaoApplicationService` ganha parâmetro construtor opcional
+  `?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana`
+  — permite testes injetarem um classificador stub, sem chamada de rede
+  real. `ApplicationServiceProvider::comPDO()` monta o default
+  concreto; sem `ANTHROPIC_API_KEY`, `ClassificadorFreudianoLLM` já
+  captura a falha e cai em `NaoClassificado` (comportamento existente).
+- **Fundamentação é exclusiva do analista (Regra 11,
+  Regras-Dominio.md).** `ReclassificadorLacaniano::fundamentacaoPara()`
+  (novo, Domain, tabela de lookup determinística sem LLM) devolve a
+  regra da ontologia que gerou o rótulo — nunca uma leitura do que ele
+  significaria para o sujeito específico, que continua exclusiva do
+  analista (Regra 10). Propaga por `CircuitoRecorrenciaDTO` →
+  `CircuitoResponse`/`CircuitoRecorrenciaViewModel` →
+  `CircuitoTrajetoComponent` (`<small class="fundamentacao-lacaniana">`).
+  A conversa do sujeito (`/conversa*`) não muda em nada.
 
 ---
 

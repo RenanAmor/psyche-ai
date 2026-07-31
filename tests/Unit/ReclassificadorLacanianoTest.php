@@ -159,4 +159,31 @@ final class ReclassificadorLacanianoTest extends TestCase
 
         $this->assertSame('Estrutura candidata: deslize metonímico.', $rotulo);
     }
+
+    public function testFundamentacaoParaDevolveATeoriaParaCadaUmDosQuatroRotulos(): void
+    {
+        $reclassificador = new ReclassificadorLacaniano();
+
+        $this->assertStringContainsString(
+            'Deslize metonímico',
+            $reclassificador->fundamentacaoPara('Estrutura candidata: deslize metonímico.')
+        );
+        $this->assertStringContainsString(
+            'Circuito',
+            $reclassificador->fundamentacaoPara('Estrutura candidata: circuito — o tema retorna ao mesmo ponto através de sessões distintas.')
+        );
+        $this->assertStringContainsString(
+            'Metáfora',
+            $reclassificador->fundamentacaoPara('Estrutura candidata: metáfora — condensação.')
+        );
+        $this->assertStringContainsString(
+            'Formação de compromisso',
+            $reclassificador->fundamentacaoPara('Estrutura candidata: formação de compromisso — a determinar entre metáfora e metonímia.')
+        );
+    }
+
+    public function testFundamentacaoParaDevolveStringVaziaParaRotuloDesconhecido(): void
+    {
+        $this->assertSame('', (new ReclassificadorLacaniano())->fundamentacaoPara('rótulo qualquer'));
+    }
 }

@@ -11,12 +11,16 @@ use PsycheAI\Application\DTOs\ObservacaoDTO;
 use PsycheAI\Application\DTOs\ObservacaoResultadoDTO;
 use PsycheAI\Application\DTOs\RecorrenciaDTO;
 use PsycheAI\Application\Exceptions\RecursoNaoEncontradoException;
+use PsycheAI\Application\UseCases\ClassificarFormacaoFreudiana\ClassificarFormacaoFreudianaCommand;
+use PsycheAI\Application\UseCases\ClassificarFormacaoFreudiana\ClassificarFormacaoFreudianaHandler;
 use PsycheAI\Application\UseCases\DetectarCircuitoRecorrencia\DetectarCircuitoRecorrenciaCommand;
 use PsycheAI\Application\UseCases\DetectarCircuitoRecorrencia\DetectarCircuitoRecorrenciaHandler;
 use PsycheAI\Domain\Entities\Observacao;
 use PsycheAI\Domain\Entities\Recorrencia;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
 use PsycheAI\Domain\Services\ReclassificadorLacaniano;
+use PsycheAI\Domain\ValueObjects\OcorrenciaRecorrencia;
+use PsycheAI\Domain\ValueObjects\TipoFormacaoFreudiana;
 
 /**
  * Expõe o Discourse Engine (Sprint 14) e o Motor Freud (Sprint 15): recalcula,
@@ -42,6 +46,18 @@ use PsycheAI\Domain\Services\ReclassificadorLacaniano;
  * DetectarCircuitoRecorrenciaHandler) para expor quando/onde cada uma
  * reaparece através das Sessões — sem introduzir nenhuma Recorrencia que
  * o Motor Freud não tenha trazido.
+ *
+ * Fundamentação teórica (Regra 11, Regras-Dominio.md): quando
+ * $comLeituraLacaniana é true, cada Recorrencia recebe também a regra
+ * da ontologia que fundamenta seu rótulo
+ * (ReclassificadorLacaniano::fundamentacaoPara()) — exclusivo das telas
+ * do analista, nunca da conversa do sujeito. Regra de precedência para
+ * o rótulo único (rotularComFundamentacao()): circuito (≥2 sessões) tem
+ * prioridade e não chama o Motor Freud/LLM (a leitura de circuito já é
+ * a mais rica disponível); senão, classifica o conteúdo via
+ * ClassificarFormacaoFreudianaHandler (Motor Freud/LLM) e reclassifica
+ * com reclassificarPorTipoFreudiano(); sem classificador disponível (ou
+ * NaoClassificado), cai no rótulo padrão de sempre.
  */
 final class ObservacaoApplicationService implements ApplicationServiceInterface
 {
@@ -49,7 +65,8 @@ final class ObservacaoApplicationService implements ApplicationServiceInterface
         private readonly SujeitoRepository $sujeitoRepository,
         private readonly CicloDeObservacaoService $cicloDeObservacao = new CicloDeObservacaoService(),
         private readonly ReclassificadorLacaniano $reclassificadorLacaniano = new ReclassificadorLacaniano(),
-        private readonly DetectarCircuitoRecorrenciaHandler $detectarCircuitoRecorrencia = new DetectarCircuitoRecorrenciaHandler()
+        private readonly DetectarCircuitoRecorrenciaHandler $detectarCircuitoRecorrencia = new DetectarCircuitoRecorrenciaHandler(),
+        private readonly ?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana = null
     ) {
     }
 
@@ -103,20 +120,55 @@ final class ObservacaoApplicationService implements ApplicationServiceInterface
             ->handle(new DetectarCircuitoRecorrenciaCommand($resultado->memoria(), $resultado->recorrencias()))
             ->circuitosPorRecorrencia();
 
-        $rotulosLacanianos = $comLeituraLacaniana
-            ? $this->reclassificadorLacaniano->reclassificarComTrajeto($resultado->recorrencias(), $circuitosPorRecorrencia)
-            : [];
-
         return new CircuitoResultadoDTO(
             sujeitoId: $sujeitoId,
             circuitos: array_map(
-                static fn (Recorrencia $recorrencia): CircuitoRecorrenciaDTO => CircuitoRecorrenciaDTO::fromRecorrencia(
-                    $recorrencia,
-                    $circuitosPorRecorrencia[$recorrencia->id()->valor()] ?? [],
-                    $rotulosLacanianos[$recorrencia->id()->valor()] ?? null
-                ),
+                function (Recorrencia $recorrencia) use ($circuitosPorRecorrencia, $comLeituraLacaniana): CircuitoRecorrenciaDTO {
+                    $ocorrencias = $circuitosPorRecorrencia[$recorrencia->id()->valor()] ?? [];
+
+                    [$rotulo, $fundamentacao] = $comLeituraLacaniana
+                        ? $this->rotularComFundamentacao($recorrencia, $ocorrencias)
+                        : [null, null];
+
+                    return CircuitoRecorrenciaDTO::fromRecorrencia($recorrencia, $ocorrencias, $rotulo, $fundamentacao);
+                },
                 $resultado->recorrencias()
             )
         );
+    }
+
+    /**
+     * Regra de precedência para o rótulo único (ver docblock da classe):
+     * circuito primeiro (não chama o Motor Freud/LLM), senão classifica
+     * via LLM e reclassifica com vocabulário lacaniano, senão cai no
+     * rótulo padrão.
+     *
+     * @param OcorrenciaRecorrencia[] $ocorrencias
+     * @return array{0: string, 1: string}
+     */
+    private function rotularComFundamentacao(Recorrencia $recorrencia, array $ocorrencias): array
+    {
+        $sessoesDistintas = array_unique(array_map(
+            static fn (OcorrenciaRecorrencia $ocorrencia): string => $ocorrencia->sessaoId(),
+            $ocorrencias
+        ));
+
+        if (count($sessoesDistintas) >= 2) {
+            $id = $recorrencia->id()->valor();
+            $rotulo = $this->reclassificadorLacaniano
+                ->reclassificarComTrajeto([$recorrencia], [$id => $ocorrencias])[$id];
+
+            return [$rotulo, $this->reclassificadorLacaniano->fundamentacaoPara($rotulo)];
+        }
+
+        $tipo = $this->classificarFormacaoFreudiana !== null
+            ? $this->classificarFormacaoFreudiana
+                ->handle(new ClassificarFormacaoFreudianaCommand($recorrencia->descricao()->valor()))
+                ->tipo()
+            : TipoFormacaoFreudiana::NaoClassificado;
+
+        $rotulo = $this->reclassificadorLacaniano->reclassificarPorTipoFreudiano($tipo);
+
+        return [$rotulo, $this->reclassificadorLacaniano->fundamentacaoPara($rotulo)];
     }
 }

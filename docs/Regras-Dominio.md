@@ -78,6 +78,14 @@ Toda interpretação permanece responsabilidade exclusiva do analista.
 
 ---
 
+# Regra 11
+
+O sistema distingue dois públicos: o sujeito, que nunca recebe interpretação — apenas pergunta, conforme o modo de enunciação socrático (Documento-Mestre.md §6.7) —, e o analista, que pode receber a fundamentação teórica de cada rótulo estrutural.
+
+Fundamentação teórica é a regra da ontologia que gerou o rótulo (ex.: "metáfora porque Chiste/Sonho correspondem a condensação, Ontologia-Lacan.md §4"). Nunca é uma leitura do que o rótulo significa para aquele sujeito específico — isso continua exclusivo do analista, conforme a Regra 10.
+
+---
+
 # Princípios Gerais
 
 - Preservação integral do discurso.

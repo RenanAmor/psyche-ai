@@ -48,6 +48,36 @@ final class CircuitoTrajetoComponentTest extends TestCase
         $this->assertStringContainsString('Estrutura candidata: circuito.', $html);
     }
 
+    public function testRenderizaAFundamentacaoTeoricaQuandoPresente(): void
+    {
+        $circuitos = CircuitoRecorrenciaViewModel::fromArrayList([
+            [
+                'id' => '1',
+                'descricao' => 'lapso',
+                'frequencia' => 2,
+                'rotuloLacaniano' => 'Estrutura candidata: circuito.',
+                'fundamentacaoTeorica' => 'Circuito: o mesmo conteúdo reaparece em ≥2 sessões.',
+                'ocorrencias' => [],
+            ],
+        ]);
+
+        $html = CircuitoTrajetoComponent::render($circuitos);
+
+        $this->assertStringContainsString('fundamentacao-lacaniana', $html);
+        $this->assertStringContainsString('Circuito: o mesmo conteúdo reaparece em ≥2 sessões.', $html);
+    }
+
+    public function testNaoRenderizaFundamentacaoQuandoAusente(): void
+    {
+        $circuitos = CircuitoRecorrenciaViewModel::fromArrayList([
+            ['id' => '1', 'descricao' => 'lapso', 'frequencia' => 2, 'ocorrencias' => []],
+        ]);
+
+        $html = CircuitoTrajetoComponent::render($circuitos);
+
+        $this->assertStringNotContainsString('fundamentacao-lacaniana', $html);
+    }
+
     public function testEscapaConteudo(): void
     {
         $circuitos = CircuitoRecorrenciaViewModel::fromArrayList([

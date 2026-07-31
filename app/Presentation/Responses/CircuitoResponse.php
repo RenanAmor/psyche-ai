@@ -43,6 +43,7 @@ final class CircuitoResponse
                     'descricao' => $circuito->descricao,
                     'frequencia' => $circuito->frequencia,
                     'rotuloLacaniano' => $circuito->rotuloLacaniano,
+                    'fundamentacaoTeorica' => $circuito->fundamentacaoTeorica,
                     'ocorrencias' => array_map(
                         static fn (OcorrenciaCircuitoDTO $ocorrencia): array => [
                             'sessaoId' => $ocorrencia->sessaoId,

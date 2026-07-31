@@ -32,6 +32,22 @@ final class ReclassificadorLacaniano implements DomainServiceInterface
     private const ROTULO_FORMACAO_DE_COMPROMISSO = 'Estrutura candidata: formação de compromisso — a determinar entre metáfora e metonímia.';
 
     /**
+     * Fundamentação teórica de cada rótulo (Regra 11, Regras-Dominio.md):
+     * a regra da ontologia que gerou o rótulo, nunca uma leitura do que
+     * ele significaria para o sujeito específico — isso permanece
+     * exclusivo do analista (Regra 10). Exposta apenas nas telas do
+     * analista, nunca na conversa do sujeito (Documento-Mestre.md §6.7).
+     * Tabela de lookup determinística, sem LLM — mesmo princípio de
+     * reclassificarPorTipoFreudiano().
+     */
+    private const FUNDAMENTACAO = [
+        self::ROTULO => 'Deslize metonímico: o tema desliza dentro do próprio discurso, sem substituição entre conteúdos distintos (Ontologia-Lacan.md §3.4/§4).',
+        self::ROTULO_CIRCUITO => 'Circuito: o mesmo conteúdo normalizado reaparece em ≥2 sessões distintas — leitura de Repetição (Ontologia-Freud.md) como Real, o que insiste e retorna ao mesmo lugar (Ontologia-Lacan.md §3.7/§4).',
+        self::ROTULO_METAFORA => 'Metáfora: Chiste e Sonho são as vias em que Freud localiza a condensação, relida por Lacan como substituição de um significante por outro (Ontologia-Lacan.md §3.3/§4).',
+        self::ROTULO_FORMACAO_DE_COMPROMISSO => 'Formação de compromisso é a categoria geral (Ontologia-Freud.md §3.5) e não permite decidir entre metáfora e metonímia sem mais informação — a fundamentação reflete essa indeterminação, nunca a resolve por conta própria.',
+    ];
+
+    /**
      * @param Recorrencia[] $recorrencias
      * @return array<string,string> id da Recorrencia => rótulo lacaniano
      */
@@ -111,5 +127,16 @@ final class ReclassificadorLacaniano implements DomainServiceInterface
             TipoFormacaoFreudiana::FormacaoDeCompromisso => self::ROTULO_FORMACAO_DE_COMPROMISSO,
             TipoFormacaoFreudiana::NaoClassificado => self::ROTULO,
         };
+    }
+
+    /**
+     * Fundamentação teórica de um rótulo já produzido por este serviço
+     * (reclassificar()/reclassificarComTrajeto()/reclassificarPorTipoFreudiano())
+     * — nunca de um rótulo arbitrário externo. Regra 11
+     * (Regras-Dominio.md): exclusivo das telas do analista.
+     */
+    public function fundamentacaoPara(string $rotulo): string
+    {
+        return self::FUNDAMENTACAO[$rotulo] ?? '';
     }
 }
