@@ -23,14 +23,23 @@ use PsycheAI\Transport\Ftp\FtpClientInterface;
  * apagaria dados de sessões de análise já em andamento.
  *
  * Diferente do Collector369 também na resolução de "já existe remoto com
- * tamanho diferente": lá isso é `conflict` (aborta, exige investigação
+ * conteúdo diferente": lá isso é `conflict` (aborta, exige investigação
  * humana), porque cada nome de arquivo já embute um timestamp — uma
  * colisão de nome ali é uma anomalia real. Aqui os caminhos são fixos
- * (é código, não dado com timestamp): tamanho diferente é simplesmente
+ * (é código, não dado com timestamp): conteúdo diferente é simplesmente
  * "o arquivo mudou desde o último deploy", o caso normal e esperado de
  * uma redeploy. O local (git-controlado) é sempre a fonte da verdade e
  * sobrescreve — pela mesma rotina segura de `.tmp` + verificação de hash
  * + rename usada para arquivos novos.
+ *
+ * Verificação de hash sempre acontece para arquivo remoto já existente,
+ * mesmo com tamanho igual ao local — uma versão anterior comparava só
+ * o tamanho por performance (a árvore tem milhares de arquivos), mas
+ * isso causou um bug real em produção: `vendor/composer/platform_check.php`
+ * mudou de conteúdo (versão mínima de PHP exigida) sem mudar de tamanho
+ * — "8.4.1" e "8.2.0" têm o mesmo número de caracteres — e ficou
+ * silenciosamente desatualizado por várias execuções. Colisão de
+ * tamanho com conteúdo diferente não é tão improvável quanto parecia.
  */
 final class ProductionTransport
 {
@@ -189,7 +198,7 @@ final class ProductionTransport
         $localSize = filesize($localFile);
         $remoteSize = $this->ftp->size($remoteFinal);
 
-        if ($remoteSize >= 0 && $remoteSize === $localSize) {
+        if ($remoteSize >= 0 && $this->contentsMatch($localFile, $remoteFinal)) {
             return FileTransportResult::alreadyCurrent($relativePath);
         }
 
