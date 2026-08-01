@@ -1,6 +1,8 @@
 # Modelo Observacional — Psyche AI
 
-> Versão 0.1 — criado na Sprint 25 (Biblioteca Teórica). Define o que, do discurso registrado, pode em princípio ser observado pelo PsycheAI, e o que conta como sucesso científico dessa observação — distinto de, e independente de, sucesso terapêutico. Complementa [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado (Evento Discursivo, Sessão, temporalidade); este documento trata do objetivo e do critério de qualidade da observação, não da sua estrutura de dados.
+> Versão 0.2 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional). Define o que, do discurso registrado, pode em princípio ser observado pelo PsycheAI, e o que conta como sucesso científico dessa observação — distinto de, e independente de, sucesso terapêutico. Complementa [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado (Evento Discursivo, Sessão, temporalidade); este documento trata do objetivo e do critério de qualidade da observação, não da sua estrutura de dados.
+>
+> Este documento registra os **princípios gerais** da observação. Para o detalhamento conceito a conceito — fenômeno observado, evidências observáveis, dados necessários/opcionais, limites e automação, um documento por cada um dos 21 conceitos canônicos da Biblioteca Teórica — ver o catálogo em [Modelo-Observacional/](Modelo-Observacional/README.md), novo nesta Sprint 26.
 
 ## 1. Objetivo da observação
 
@@ -35,9 +37,15 @@ O status do caso jamais altera o valor científico dos dados coletados — todo 
 - Não define estrutura de dados (isso é [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md)).
 - Não define vocabulário conceitual psicanalítico (isso são as Ontologias e a [Biblioteca Teórica](Biblioteca-Teorica/README.md)).
 - Não interpreta nem avalia o resultado clínico de nenhum caso — pelo contrário, existe para impedir que o sistema faça isso.
+- Não detalha, conceito a conceito, o que pode ou não ser observado — isso é o catálogo em [Modelo-Observacional/](Modelo-Observacional/README.md).
+
+## 5. Catálogo por conceito
+
+Adicionado na Sprint 26 — [Modelo-Observacional/](Modelo-Observacional/README.md) traduz cada um dos 21 conceitos canônicos da Biblioteca Teórica ([Ontologia-Freud.md §3](Ontologia-Freud.md#3-conceitos-fundamentais) + [Ontologia-Lacan.md §3](Ontologia-Lacan.md#3-conceitos-fundamentais)) em fenômeno observável computacionalmente, com evidências, dados necessários/opcionais, limites explícitos e as cinco perguntas Sim/Não de automação e confirmação/validação já em uso na Aplicação Computacional da Biblioteca Teórica. Nenhum motor novo pode ser desenvolvido sem que o conceito que ele operacionaliza tenha seu Modelo Observacional documentado ali primeiro — mesma obrigatoriedade já registrada em [Arquitetura-Cientifica.md §1](Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória).
 
 ## Referências cruzadas do projeto
 
+- [Modelo-Observacional/README.md](Modelo-Observacional/README.md)
 - [Documento-Mestre.md](Documento-Mestre.md)
 - [Arquitetura-Cientifica.md](Arquitetura-Cientifica.md)
 - [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md)

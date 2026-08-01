@@ -1270,6 +1270,28 @@ de obra foi escrita; nenhum conceito foi resumido de forma opinativa;
 que já existe no código real (auditável) ou é fundamentação teórica de
 fundo — nunca uma intenção de implementação futura apresentada como fato.
 
+## Sprint 26 — Modelo Observacional
+
+**Origem**: pedido do usuário para construir o Modelo Observacional oficial do PsycheAI — a camada que transforma os conceitos da Biblioteca Teórica em fenômenos observáveis computacionalmente, obrigatória para toda implementação futura. Nenhum conceito pode chegar à implementação sem antes possuir seu Modelo Observacional documentado. Objetivo científico da Sprint: responder, para cada um dos 21 conceitos canônicos, o que exatamente pode ser observado, o que nunca poderá ser observado, quais evidências computacionais podem ser produzidas e quais limites da observação computacional devem ser respeitados.
+
+- [x] `docs/Modelo-Observacional/` (novo): estrutura de primeiro nível — `README.md` (catálogo, panorama auditado contra o código real), `Freud/README.md` e `Lacan/README.md` (síntese por motor) e `Conceitos/` com os 21 documentos, um por conceito canônico (os dez de [Ontologia-Freud.md §3](Ontologia-Freud.md#3-conceitos-fundamentais) + os onze de [Ontologia-Lacan.md §3](Ontologia-Lacan.md#3-conceitos-fundamentais)), mesmo escopo 1:1 de [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/).
+- [x] **Modelo único de documento por conceito**: Fenômeno observado (descrição, nunca interpretação), Evidências observáveis (repetições, mudanças discursivas, recorrências, interrupções, atos falhos/sonhos/lapsos relatados, mudanças de posição subjetiva — sempre como evidência, nunca como diagnóstico), Dados necessários, Dados opcionais, Eventos relacionados, Limites da observação (o sistema nunca afirma significado, intenção, desejo, significante, diagnóstico ou hipótese clínica), as cinco perguntas Sim/Não já em uso na Biblioteca Teórica (observação/organização/classificação automática, confirmação do sujeito, validação do analista), Evidências produzidas e Componentes envolvidos (Motor Freud, Motor Lacan, Memória Discursiva, Interface do Sujeito, Interface do Analista, Timeline, Circuito Pulsional, demais motores).
+- [x] **Auditoria contra o código real**, mesma base já estabelecida pela Biblioteca Teórica: **Repetição** é o único conceito observado, organizado e classificado automaticamente por conta própria (`DetectorRecorrencias`, circuito, grafo D3); **Ato falho/Chiste/Sonhos/Formação de compromisso** são observados e classificados via `ClassificadorFreudianoLLM`/`TipoFormacaoFreudiana`; **Metonímia** é o único rótulo lacaniano efetivamente produzido, e apenas por reclassificação de uma observação já feita pelo Motor Freud — nunca observa por conta própria; **Metáfora** está mapeada na tabela de reclassificação mas nunca é disparada pelo detector atual; **Inconsciente/Recalque/Pulsão/Desejo (Freud)/Transferência** são fundamentação teórica de fundo, sem observação própria; os nove conceitos lacanianos restantes (Significante, Cadeia significante, os três Registros RSI, Outro, Falta, Objeto a, Desejo lacaniano) não têm nenhuma representação computacional definida nesta versão — nenhum componente inventado.
+- [x] `docs/Modelo-Observacional.md` (existente, Sprint 25): estendido para v0.2 com novo §5 apontando para o catálogo por conceito, sem alterar os princípios já registrados (Objetivo da observação, Neutralidade Observacional, Status do Caso).
+- [x] `docs/Documento-Mestre.md` (§6.0) e `docs/Arquitetura-Cientifica.md` (§1): cadeia de rastreabilidade obrigatória atualizada para referenciar `Modelo-Observacional/` como o detalhamento conceito a conceito da camada "Modelo Observacional", complementando (sem substituir) `Modelo-Observacional.md`.
+- [x] Validação: todos os links internos dos 24 novos documentos (README + Freud/README + Lacan/README + 21 Conceitos) e das quatro edições em documentos existentes resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Atualização do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente documental — sem novo motor, sem
+alteração de código de Domínio/Aplicação/Infraestrutura/Apresentação, sem
+API nova, sem migration, sem banco de dados, sem teste alterado. Nenhuma
+interpretação foi escrita; nenhum diagnóstico ou hipótese clínica foi
+introduzido em nenhum documento; cada afirmação sobre o que é efetivamente
+observado, organizado ou classificado decorre diretamente da Aplicação
+Computacional já auditada na Biblioteca Teórica (Sprint 25) — nenhum
+componente ou comportamento novo foi atribuído ao sistema nesta Sprint.
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
 - **Cadeia de significantes (Lacan) como matema formal** (S1↔S2,

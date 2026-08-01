@@ -1,6 +1,6 @@
 # Arquitetura Científica — Psyche AI
 
-> Versão 0.1 — criado na Sprint 25 (Biblioteca Teórica). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
+> Versão 0.2 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
 
 ## 1. Cadeia de rastreabilidade obrigatória
 
@@ -11,7 +11,7 @@ Biblioteca Teórica → Modelo Observacional → Representação Computacional �
 ```
 
 - **Biblioteca Teórica**: [Biblioteca-Teorica/](Biblioteca-Teorica/README.md).
-- **Modelo Observacional**: [Modelo-Observacional.md](Modelo-Observacional.md) — o que, do discurso registrado, pode em princípio ser observado, e o que conta como sucesso científico da observação (distinto de sucesso clínico). Complementa, sem substituir, [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado.
+- **Modelo Observacional**: [Modelo-Observacional.md](Modelo-Observacional.md) — princípios gerais: o que, do discurso registrado, pode em princípio ser observado, e o que conta como sucesso científico da observação (distinto de sucesso clínico). Complementa, sem substituir, [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado. Detalhamento conceito a conceito — fenômeno observado, evidências observáveis, dados necessários/opcionais, limites explícitos — em [Modelo-Observacional/](Modelo-Observacional/README.md) (Sprint 26), um documento por cada um dos 21 conceitos canônicos da Biblioteca Teórica. Nenhum motor novo pode ser desenvolvido sem que essa camada esteja documentada primeiro.
 - **Representação Computacional**: seção obrigatória de todo documento de Conceito em [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/).
 - **Ontologia**: [Ontologia-Freud.md](Ontologia-Freud.md) / [Ontologia-Lacan.md](Ontologia-Lacan.md).
 - **Modelo Computacional**: seção "Aplicação Computacional" de cada documento de Conceito.
@@ -60,6 +60,7 @@ Nenhum dado é descartado por representar um caso interrompido. Ver [Modelo-Obse
 - [Documento-Mestre.md](Documento-Mestre.md)
 - [Arquitetura.md](Arquitetura.md)
 - [Modelo-Observacional.md](Modelo-Observacional.md)
+- [Modelo-Observacional/README.md](Modelo-Observacional/README.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
 - [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md)
 - [Regras-Dominio.md](Regras-Dominio.md)
