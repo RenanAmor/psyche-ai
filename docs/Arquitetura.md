@@ -1,9 +1,10 @@
 # Arquitetura — Psyche AI
 
-> Versão 0.3 — Sprint 4 (Fundação Arquitetural); §4 acrescentada na Sprint 14 para
+> Versão 0.4 — Sprint 4 (Fundação Arquitetural); §4 acrescentada na Sprint 14 para
 > resolver a âncora `#4-visão-arquitetural-de-longo-prazo--motores-conceituais`
 > citada por `Ontologia-Freud.md` e `Ontologia-Lacan.md` desde a Sprint 2/3, que
-> nunca existira de fato neste documento.
+> nunca existira de fato neste documento; §9 (Base Científica e Princípios de
+> Representação) acrescentada na Sprint da Biblioteca Teórica.
 
 Este documento define a arquitetura conceitual do PsycheAI. O detalhamento
 técnico das camadas, componentes e decisões por sprint vive em
@@ -188,3 +189,66 @@ planejados para as Sprints 15 e 16.
 Ver as sprints planejadas em [Roadmap.md](Roadmap.md): Motor Freud
 (Sprint 15), Motor Lacan (Sprint 16), Interface Conversacional
 (Sprint 17) e Plataforma/autenticação (Sprint 18).
+
+---
+
+# 9. Base Científica e Princípios de Representação (Biblioteca Teórica)
+
+Adicionado na Sprint da Biblioteca Teórica — princípio permanente da arquitetura, não específico de uma sprint.
+
+## 9.1 Cadeia de rastreabilidade obrigatória
+
+Nenhuma camada abaixo pode ser pulada ao implementar ou estender qualquer motor:
+
+```text
+Biblioteca Teórica
+        │
+        ▼
+Modelo Observacional
+        │
+        ▼
+Representação Computacional
+        │
+        ▼
+Ontologia
+        │
+        ▼
+Modelo Computacional
+        │
+        ▼
+Implementação
+        │
+        ▼
+Testes
+```
+
+A fundamentação científica (autores, obras, conceitos) vive em
+[Biblioteca-Teorica/](Biblioteca-Teorica/README.md); o "Modelo
+Computacional" de cada conceito é a seção "Aplicação Computacional" do seu
+documento em [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/);
+como o conceito pode aparecer computacionalmente ao Sujeito e ao Analista é
+a seção "Representação Computacional" do mesmo documento — ver
+[Biblioteca-Teorica/Modelo-de-Documento.md](Biblioteca-Teorica/Modelo-de-Documento.md).
+Nenhum motor novo é desenvolvido sem que essa cadeia já exista para o(s)
+conceito(s) que ele operacionaliza.
+
+## 9.2 Separação de interface entre Sujeito e Analista
+
+Princípio já em prática desde `PortaoDeAnalista` (Sprint 18) e a Regra 11
+de [Regras-Dominio.md](Regras-Dominio.md), formalizado nesta Sprint como
+princípio permanente também em [Documento-Mestre.md §5](Documento-Mestre.md#5-princípios-éticos):
+
+- O Sujeito (`/conversa*`) nunca visualiza significantes, recorrências,
+  circuito pulsional, hipóteses, classificações, escrita lacaniana ou
+  qualquer estrutura produzida pelos motores.
+- O Analista (rotas atrás do Portão) pode visualizar essas estruturas,
+  como apoio à escuta clínica — nunca como diagnóstico automático.
+
+## 9.3 A escrita lacaniana pertence ao analista
+
+A capacidade do sistema de representar estruturalmente o discurso segundo
+a teoria lacaniana (hoje: rótulo "deslize metonímico"/"circuito" de
+`ReclassificadorLacaniano`) existe exclusivamente para a interface do
+Analista. Essa representação nunca é utilizada para compor a resposta ao
+Sujeito — a superfície de conversa (`RespostaSocraticaService`) já é
+isolada dela desde a Sprint 23.

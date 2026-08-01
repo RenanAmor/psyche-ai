@@ -1,6 +1,6 @@
 # Documento Mestre — Psyche AI
 
-> Versão 0.3 — Sprint 0 (Fundação); §6-7 reescritos na Sprint 14 para substituir as instruções editoriais pendentes por conteúdo final; §6.7 e modo socrático em §7 adicionados após a Sprint 17.
+> Versão 0.6 — Sprint 0 (Fundação); §6-7 reescritos na Sprint 14 para substituir as instruções editoriais pendentes por conteúdo final; §6.7 e modo socrático em §7 adicionados após a Sprint 17; §6.0 (Objetivo Científico do PsycheAI, cadeia de rastreabilidade obrigatória, Princípio da Neutralidade Observacional) e dois novos princípios em §5 (separação Sujeito/Analista; escrita lacaniana exclusiva do analista) adicionados na Sprint da Biblioteca Teórica.
 > Este documento estabelece os fundamentos institucionais do projeto e o modelo teórico fundamental adotado (§6-7).
 
 ## 1. Visão
@@ -41,8 +41,38 @@ Essas frentes serão desenvolvidas em sprints subsequentes, com documentação p
 - **Transparência**: limitações e natureza assistiva do sistema devem ser sempre comunicadas de forma clara.
 - **Responsabilidade**: decisões técnicas devem considerar o impacto potencial sobre pessoas em situação de vulnerabilidade.
 - **Rigor técnico e teórico**: qualquer aplicação de conceitos psicológicos/psicanalíticos deve ser feita com cuidado e fundamentação, evitando simplificações que distorçam o campo teórico de origem.
+- **Separação de interface entre Sujeito e Analista**: a interface do Sujeito e a interface do Analista são sistemas distintos. O Sujeito nunca visualiza significantes, recorrências, circuito pulsional, hipóteses, classificações, escrita lacaniana ou qualquer estrutura produzida pelos motores — apenas o Analista pode visualizar essas estruturas, como apoio à escuta clínica (já em prática desde `PortaoDeAnalista`, Sprint 18, e a Regra 11 de [Regras-Dominio.md](Regras-Dominio.md); formalizado como princípio permanente da arquitetura na Sprint da Biblioteca Teórica).
+- **A escrita lacaniana pertence ao analista, não ao sujeito**: a capacidade do sistema de representar estruturalmente o discurso segundo a teoria lacaniana existe exclusivamente para a interface do Analista; essa representação nunca é utilizada para dialogar com o Sujeito.
 
 ## 6. Modelo Teórico Fundamental
+
+### 6.0 Objetivo Científico do PsycheAI
+
+O PsycheAI nasce inspirado no projeto freudiano de construir uma Psicologia Científica. A hipótese de trabalho da plataforma é que tecnologias computacionais atuais permitem registrar, organizar e analisar longitudinalmente regularidades do discurso humano descritas pela teoria psicanalítica, preservando rigorosamente a distinção entre observação computacional e interpretação clínica. O sistema não pretende substituir o analista nem produzir interpretações automáticas. Seu propósito é construir uma base observacional digital, rastreável e auditável, capaz de apoiar a investigação científica do discurso e oferecer novas ferramentas para o trabalho clínico.
+
+A fundamentação científica dessa hipótese de trabalho — autores, obras, conceitos e sua rastreabilidade até cada motor do sistema — é mantida na [Biblioteca Teórica](Biblioteca-Teorica/README.md), parte da arquitetura do PsycheAI desde a Sprint que a instituiu. Nenhum conceito é implementado no código sem fundamentação científica correspondente registrada ali (ver [Biblioteca-Teorica/Modelo-de-Documento.md](Biblioteca-Teorica/Modelo-de-Documento.md#campos-obrigatórios--documento-de-conceito)).
+
+Toda implementação futura deve seguir obrigatoriamente a cadeia de rastreabilidade abaixo, sem pular nenhuma camada:
+
+```
+Biblioteca Teórica → Modelo Observacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
+```
+
+- **Biblioteca Teórica**: autores, obras e conceitos catalogados em [Biblioteca-Teorica/](Biblioteca-Teorica/README.md).
+- **Modelo Observacional**: o que, do discurso registrado, pode em princípio ser observado — [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md).
+- **Representação Computacional**: como um conceito pode aparecer para o Sujeito e para o Analista, com seus limites de cada lado — seção obrigatória de todo documento de Conceito (ver [Biblioteca-Teorica/Modelo-de-Documento.md](Biblioteca-Teorica/Modelo-de-Documento.md#campos-obrigatórios--documento-de-conceito)).
+- **Ontologia**: vocabulário conceitual fixado em [Ontologia-Freud.md](Ontologia-Freud.md) e [Ontologia-Lacan.md](Ontologia-Lacan.md).
+- **Modelo Computacional**: a seção "Aplicação Computacional" de cada documento de Conceito.
+- **Implementação**: código real em `app/`.
+- **Testes**: suíte automatizada correspondente.
+
+Esta cadeia é um princípio permanente da arquitetura do PsycheAI, não uma orientação de uma única Sprint. Ver [Arquitetura-Cientifica.md](Arquitetura-Cientifica.md) para a versão consolidada de todos os princípios científicos permanentes.
+
+### Princípio da Neutralidade Observacional
+
+O PsycheAI não mede o sucesso de sua operação pelo desfecho clínico. Sua finalidade é produzir observações computacionais rigorosas do discurso humano. Casos concluídos, interrompidos, abandonados, inconclusivos ou considerados fracassos clínicos possuem igualmente valor científico para a plataforma — a qualidade científica do PsycheAI é medida pela qualidade dos dados observados, organizados, representados e preservados, nunca pelo resultado clínico. Nenhum dado é descartado por representar um caso interrompido.
+
+Este princípio é inspirado diretamente na própria história da psicanálise: vários dos casos clínicos que Freud publicou e que fundamentaram a teoria — catalogados em [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md) — não foram casos de sucesso terapêutico, mas situações de impasse, interrupção ou resultado parcial cujo valor esteve na qualidade da observação, não no desfecho. Ver a formalização computacional (Status do Caso) em [Modelo-Observacional.md §3](Modelo-Observacional.md#3-status-do-caso) e o detalhamento completo em [Arquitetura-Cientifica.md §4](Arquitetura-Cientifica.md#4-princípio-da-neutralidade-observacional).
 
 ### 6.1 Princípio fundador
 
