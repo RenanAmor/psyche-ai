@@ -1,6 +1,6 @@
 # Arquitetura Científica — Psyche AI
 
-> Versão 0.2 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
+> Versão 0.3 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional) e na Sprint 28 (ECO — Estrutura Computacional de Observação, §5). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
 
 ## 1. Cadeia de rastreabilidade obrigatória
 
@@ -56,6 +56,12 @@ Todos os componentes do sistema devem respeitar este princípio. A plataforma pr
 
 Nenhum dado é descartado por representar um caso interrompido. Ver [Modelo-Observacional.md](Modelo-Observacional.md) para o "Status do Caso" que formaliza esse princípio na representação computacional.
 
+## 5. ECO — identidade da interface conversacional
+
+Adicionado na Sprint 28 — princípio permanente. A ECO (Estrutura Computacional de Observação) é a interface conversacional exclusiva do PsycheAI diante do sujeito — a materialização do "modo de enunciação" já registrado em [Documento-Mestre.md §6.7/§7](Documento-Mestre.md#67-modo-de-enunciação-o-método-socrático). O sujeito nunca conversa diretamente com o Discourse Engine, o Motor Freud ou o Motor Lacan — apenas com a ECO, que aplica o método socrático (maiêutica) para sustentar a associação livre, sem jamais interpretar, aconselhar, diagnosticar ou substituir o analista.
+
+Identidade completa — manifesto, princípios permanentes, método socrático, posição clínica, fluxo conversacional, separação Sujeito/Analista aplicada à conversa e ética — documentada em [ECO/README.md](ECO/README.md). Os princípios de separação de interface (§2 acima) e a proibição de escrita lacaniana na conversa com o sujeito (§3 acima) valem integralmente para a ECO — este §5 não os substitui, apenas consolida sua aplicação específica à camada conversacional.
+
 ## Referências cruzadas do projeto
 
 - [Documento-Mestre.md](Documento-Mestre.md)
@@ -63,6 +69,7 @@ Nenhum dado é descartado por representar um caso interrompido. Ver [Modelo-Obse
 - [Modelo-Observacional.md](Modelo-Observacional.md)
 - [Modelo-Observacional/README.md](Modelo-Observacional/README.md)
 - [Modelo-Relacional/README.md](Modelo-Relacional/README.md)
+- [ECO/README.md](ECO/README.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
 - [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md)
 - [Regras-Dominio.md](Regras-Dominio.md)

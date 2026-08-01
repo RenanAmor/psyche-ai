@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.19 — Sprint 25: Biblioteca Teórica (Base de Conhecimento Científico)
+> Versão 0.20 — Sprint 28: ECO (Estrutura Computacional de Observação)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -1315,6 +1315,25 @@ interpretação foi escrita; nenhuma obra foi resumida de forma opinativa;
 toda relação documentada decorre diretamente da prosa relacional já
 registrada nas duas Ontologias ou dos metadados já catalogados na
 Biblioteca Teórica — nenhuma relação foi inventada nesta Sprint.
+
+## Sprint 28 — ECO (Estrutura Computacional de Observação)
+
+**Origem**: pedido do usuário para definir oficialmente a ECO como a interface conversacional do PsycheAI — a camada que representa exclusivamente a presença da plataforma diante do sujeito, que nunca conversa diretamente com os motores. Objetivo científico da Sprint: documentar completamente a identidade da ECO (manifesto, princípios permanentes, método socrático, posição clínica, fluxo conversacional, separação Sujeito/Analista aplicada à conversa e ética), sem alterar nenhum comportamento conversacional existente.
+
+- [x] `docs/ECO/` (novo): `README.md` (índice, posição na cadeia de rastreabilidade), `Manifesto.md` (o que é a ECO, por que esse nome, e o mapeamento explícito de que ela não é um componente novo, mas o nome oficial da camada conversacional já em produção desde a Sprint 12), `Principios.md` (missão permanente — sustentar um espaço de associação livre — e os cinco princípios: jamais interpretar, jamais aconselhar, jamais diagnosticar, jamais conduzir a respostas esperadas, jamais ocupar o lugar do analista), `Metodo-Socratico.md` (a Maiêutica Socrática, com exemplos de perguntas permitidas e proibidas e comportamentos proibidos), `Posicao-Clinica.md` (a ECO não é terapia, não é análise, não substitui o analista, sustenta o espaço da fala), `Fluxo-Conversacional.md` (as nove etapas — início, abertura, associação livre, perguntas, silêncio, mudança de tema, retorno de temas, encerramento, nova sessão — cada uma marcada como já implementada, com o componente real correspondente, ou como especificação para sprint futura), `Interface-Sujeito.md` (o que o sujeito visualiza — conversa, histórico de sessões, configurações pessoais, consentimentos — e o que nunca visualiza — motores, recorrências, significantes, classificações, grafos, estruturas lacanianas, hipóteses, observações), `Interface-Analista.md` (o que o analista pode visualizar fora da ECO — memória longitudinal, recorrências, formações freudianas, representações lacanianas, timelines, circuitos, grafos, indicadores, observações computacionais), `Limites-da-ECO.md` (os dez limites permanentes consolidados em um único documento de referência) e `Etica.md` (a ECO nunca produzirá interpretações clínicas; toda interpretação pertence ao sujeito e ao analista).
+- [x] **Auditoria contra o código real**, mesma disciplina já estabelecida pela Biblioteca Teórica/Modelo Observacional/Modelo Relacional: cada componente citado (`ConversaController`, `RespostaSocraticaService`, `GeradorDePerguntaSocraticaLLM`, `RespostaEcoRecorrenciaService`, `PortaoDeAnalista`) já existia em produção antes desta Sprint. Em `Fluxo-Conversacional.md` e `Interface-Sujeito.md`, cada afirmação é marcada explicitamente como "implementado" (com o componente real) ou "especificação para sprint futura" — silêncio, mudança de tema, retorno de temas cross-sessão, histórico próprio do sujeito e consentimentos não têm tratamento dedicado hoje; nenhum desses comportamentos foi implementado por esta Sprint, que é exclusivamente documental.
+- [x] `docs/Documento-Mestre.md` (§7): o "Modo socrático" já registrado desde a Sprint 17 ganha identidade oficial — ECO — Estrutura Computacional de Observação — com referência cruzada para `ECO/README.md`; versão do documento avançada para 0.8.
+- [x] `docs/Arquitetura-Cientifica.md`: novo §5 "ECO — identidade da interface conversacional", consolidando que os princípios de separação Sujeito/Analista (§2) e de escrita lacaniana exclusiva do analista (§3) valem integralmente para a ECO; versão avançada para 0.3.
+- [x] Validação: todos os links internos dos dez novos documentos de `docs/ECO/` e das duas edições em documentos existentes resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Atualização do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente documental e arquitetônico — sem
+alteração de código de Domínio/Aplicação/Infraestrutura/Apresentação, sem
+API nova, sem migration, sem banco de dados, sem teste alterado, sem novo
+comportamento conversacional. Nenhuma interpretação foi escrita; nenhum
+componente foi inventado; cada afirmação sobre o que a ECO já faz decorre
+diretamente do código já auditado nas Sprints 12, 17, 20, 22-24.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

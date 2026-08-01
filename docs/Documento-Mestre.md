@@ -1,6 +1,6 @@
 # Documento Mestre — Psyche AI
 
-> Versão 0.7 — Sprint 0 (Fundação); §6-7 reescritos na Sprint 14 para substituir as instruções editoriais pendentes por conteúdo final; §6.7 e modo socrático em §7 adicionados após a Sprint 17; §6.0 (Objetivo Científico do PsycheAI, cadeia de rastreabilidade obrigatória, Princípio da Neutralidade Observacional) e dois novos princípios em §5 (separação Sujeito/Analista; escrita lacaniana exclusiva do analista) adicionados na Sprint 25 (Biblioteca Teórica); §6.0 atualizado na Sprint 26 (Modelo Observacional) para referenciar o catálogo por conceito.
+> Versão 0.8 — Sprint 0 (Fundação); §6-7 reescritos na Sprint 14 para substituir as instruções editoriais pendentes por conteúdo final; §6.7 e modo socrático em §7 adicionados após a Sprint 17; §6.0 (Objetivo Científico do PsycheAI, cadeia de rastreabilidade obrigatória, Princípio da Neutralidade Observacional) e dois novos princípios em §5 (separação Sujeito/Analista; escrita lacaniana exclusiva do analista) adicionados na Sprint 25 (Biblioteca Teórica); §6.0 atualizado na Sprint 26 (Modelo Observacional) para referenciar o catálogo por conceito; §7 atualizado na Sprint 28 (ECO) para nomear oficialmente o modo socrático como ECO — Estrutura Computacional de Observação.
 > Este documento estabelece os fundamentos institucionais do projeto e o modelo teórico fundamental adotado (§6-7).
 
 ## 1. Visão
@@ -121,6 +121,6 @@ Do ponto de vista conceitual, o sistema é composto por três motores e um modo 
 - **Discourse Engine**: organiza o discurso e expõe as recorrências detectadas ao longo do tempo, sem hierarquizar importância nem interpretar conteúdo — implementado desde a Sprint 14 do [Roadmap.md](Roadmap.md).
 - **Freud Engine**: aplica "atenção flutuante" sobre o que o Discourse Engine expõe, trazendo apenas o que se repete, sem hipótese — planejado para a Sprint 15.
 - **Lacan Engine**: reclassifica as mesmas recorrências trazidas pelo Freud Engine com vocabulário lacaniano, sem acrescentar leitura de sentido nem afirmar estatuto de significante confirmado — planejado para a Sprint 16.
-- **Modo socrático**: camada de enunciação que transforma o que os motores acima trazem em pergunta dirigida ao sujeito, nunca em afirmação — ver §6.7.
+- **Modo socrático**: camada de enunciação que transforma o que os motores acima trazem em pergunta dirigida ao sujeito, nunca em afirmação — ver §6.7. A partir da Sprint 28, essa camada tem identidade oficial: **ECO — Estrutura Computacional de Observação**, a única interface conversacional com a qual o sujeito interage — nunca com os motores diretamente. Identidade completa (manifesto, princípios permanentes, método socrático, posição clínica, fluxo conversacional, separação Sujeito/Analista e ética) documentada em [ECO/README.md](ECO/README.md).
 
 Nenhum dos três motores produz hipótese, diagnóstico ou identifica significante automaticamente — apenas o analista ou o próprio sujeito confirma qualquer leitura (ver [Regras-Dominio.md](Regras-Dominio.md)).
