@@ -1292,6 +1292,30 @@ observado, organizado ou classificado decorre diretamente da Aplicação
 Computacional já auditada na Biblioteca Teórica (Sprint 25) — nenhum
 componente ou comportamento novo foi atribuído ao sistema nesta Sprint.
 
+## Sprint 27 — Modelo Relacional
+
+**Origem**: pedido do usuário para construir o Modelo Relacional oficial do PsycheAI — a camada que documenta como todos os conceitos da Biblioteca Teórica se relacionam entre si, sustentando o futuro Motor de Representação. Nenhuma relação podia ser criada sem fundamentação explícita na literatura já catalogada. Objetivo científico da Sprint: para cada um dos 21 conceitos canônicos, mapear conceitos antecedentes, consequentes e relacionados; relações estruturais, temporais, observacionais, de dependência, bidirecionais e não observáveis computacionalmente — cada uma com obra, autor, capítulo, intensidade e natureza — e consolidar tudo em matrizes e na especificação de grafos científicos.
+
+- [x] `docs/Modelo-Relacional/` (novo): estrutura de primeiro nível — `README.md` (o que o Modelo é, critério de relacionamento, panorama desta Sprint), `Freud/README.md` e `Lacan/README.md` (síntese por agrupamento conceitual, incluindo a tabela completa "Como a Ontologia Lacan reorganiza a Ontologia Freud"), `Conceitos/` com os 21 documentos (mesmo escopo 1:1 de [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/) e [Modelo-Observacional/Conceitos/](Modelo-Observacional/Conceitos/)), `Matrizes/` (seis matrizes) e `Grafos/` (cinco especificações, sem implementação).
+- [x] **Modelo único de documento por conceito**: Relações Científicas (conceitos antecedentes/consequentes/relacionados; relações estruturais/temporais/observacionais/de dependência/bidirecionais/não observáveis computacionalmente), Fundamentação (obra, autor, capítulo, tipo da relação, por relação), Intensidade (Fundamental/Forte/Moderada/Fraca/Contextual), Natureza (Estrutural/Clínica/Observacional/Linguística/Temporal/Topológica), Observabilidade (as quatro perguntas Sim/Não) e Motores envolvidos.
+- [x] **Fonte exclusiva das relações**: a prosa relacional já registrada em [Ontologia-Freud.md §3–4](Ontologia-Freud.md#3-conceitos-fundamentais) e [Ontologia-Lacan.md §3–4](Ontologia-Lacan.md#3-conceitos-fundamentais) (incluindo "Como a Ontologia Lacan reorganiza a Ontologia Freud") e o campo "Conceitos relacionados" de cada documento de [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/) — nenhuma obra nova foi consultada ou citada, nenhuma relação foi inferida sem essa origem explícita.
+- [x] **Seis matrizes** em `Matrizes/`: Conceito×Conceito (51 arestas, em três blocos: Freud×Freud, Lacan×Lacan, Freud×Lacan), Motor×Conceito, Conceito×Obra, Conceito×Autor, Conceito×Evidência e Conceito×Observabilidade — as quatro últimas derivadas diretamente dos campos já catalogados em [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/) e [Modelo-Observacional/Conceitos/](Modelo-Observacional/Conceitos/), sem nenhum dado novo.
+- [x] **Cinco grafos científicos especificados** em `Grafos/` — Grafo de Freud (10 nós), Grafo de Lacan (11 nós), Grafo Integrado (21 nós, 51 arestas), Grafo dos Motores (grafo bipartido conceito↔componente) e Grafo dos Conceitos (7 agrupamentos) — apenas nós, arestas e propriedades topológicas; nenhuma estrutura de dados, biblioteca de grafo ou endpoint foi criado.
+- [x] `docs/Documento-Mestre.md` (§6.0), `docs/Arquitetura-Cientifica.md` (§1), `docs/Arquitetura.md` (§9.1): cadeia de rastreabilidade obrigatória atualizada para incluir "Modelo Relacional" entre "Modelo Observacional" e "Representação Computacional".
+- [x] `docs/Modelo-Observacional.md` (existente, Sprint 25/26): estendido para v0.3 com novo §6 apontando para o Modelo Relacional como camada seguinte, sem alterar os princípios já registrados.
+- [x] `docs/Biblioteca-Teorica/README.md`: cadeia de rastreabilidade e referências cruzadas atualizadas para apontar para `Modelo-Relacional/`.
+- [x] Validação: todos os links internos dos novos documentos (README + Freud/README + Lacan/README + 21 Conceitos + 6 Matrizes + 6 Grafos, incluindo README de Grafos) e das seis edições em documentos existentes resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Atualização do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente científico: sem novo motor, sem
+alteração de código de Domínio/Aplicação/Infraestrutura/Apresentação, sem
+API nova, sem migration, sem banco de dados, sem teste alterado. Nenhuma
+interpretação foi escrita; nenhuma obra foi resumida de forma opinativa;
+toda relação documentada decorre diretamente da prosa relacional já
+registrada nas duas Ontologias ou dos metadados já catalogados na
+Biblioteca Teórica — nenhuma relação foi inventada nesta Sprint.
+
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
 - **Cadeia de significantes (Lacan) como matema formal** (S1↔S2,

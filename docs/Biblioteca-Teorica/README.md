@@ -9,10 +9,10 @@ Uma estrutura documental que organiza autores, obras e conceitos — e as relaç
 ## Cadeia de rastreabilidade
 
 ```
-Biblioteca Teórica → Modelo Observacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
+Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
 ```
 
-Nenhum conceito é implementado no código sem essa cadeia completa. Ver [Como-os-Motores-Usam-a-Biblioteca.md](Como-os-Motores-Usam-a-Biblioteca.md) para a explicação completa de como cada motor do PsycheAI se apoia nela.
+Nenhum conceito é implementado no código sem essa cadeia completa. Ver [Como-os-Motores-Usam-a-Biblioteca.md](Como-os-Motores-Usam-a-Biblioteca.md) para a explicação completa de como cada motor do PsycheAI se apoia nela. Como os 21 conceitos canônicos catalogados aqui se relacionam entre si — conceito a conceito, com fundamentação bibliográfica, intensidade, natureza e observabilidade de cada relação, mais matrizes e especificação de grafos — está em [../Modelo-Relacional/](../Modelo-Relacional/README.md) (Sprint 27), camada que sucede o [Modelo Observacional](../Modelo-Observacional/README.md) nesta cadeia.
 
 ## Estrutura
 
@@ -56,6 +56,7 @@ Nenhuma interpretação foi escrita. Nenhuma obra foi resumida de forma opinativ
 - [../Arquitetura.md](../Arquitetura.md)
 - [../Arquitetura-Cientifica.md](../Arquitetura-Cientifica.md)
 - [../Modelo-Observacional.md](../Modelo-Observacional.md)
+- [../Modelo-Relacional/README.md](../Modelo-Relacional/README.md)
 - [../Ontologia-Freud.md](../Ontologia-Freud.md)
 - [../Ontologia-Lacan.md](../Ontologia-Lacan.md)
 - [../Regras-Dominio.md](../Regras-Dominio.md)

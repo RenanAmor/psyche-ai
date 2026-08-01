@@ -55,11 +55,12 @@ A fundamentação científica dessa hipótese de trabalho — autores, obras, co
 Toda implementação futura deve seguir obrigatoriamente a cadeia de rastreabilidade abaixo, sem pular nenhuma camada:
 
 ```
-Biblioteca Teórica → Modelo Observacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
+Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
 ```
 
 - **Biblioteca Teórica**: autores, obras e conceitos catalogados em [Biblioteca-Teorica/](Biblioteca-Teorica/README.md).
 - **Modelo Observacional**: o que, do discurso registrado, pode em princípio ser observado — princípios gerais em [Modelo-Observacional.md](Modelo-Observacional.md) (estrutura de dados correspondente em [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md)); detalhamento conceito a conceito — fenômeno observado, evidências, dados, limites — em [Modelo-Observacional/](Modelo-Observacional/README.md) (Sprint 26).
+- **Modelo Relacional**: como os 21 conceitos canônicos se relacionam entre si — conceito a conceito, com fundamentação bibliográfica, intensidade, natureza e observabilidade de cada relação — em [Modelo-Relacional/](Modelo-Relacional/README.md) (Sprint 27), com matrizes (Conceito×Conceito, Motor×Conceito, Conceito×Obra, Conceito×Autor, Conceito×Evidência, Conceito×Observabilidade) e especificação de grafos científicos, sem implementação.
 - **Representação Computacional**: como um conceito pode aparecer para o Sujeito e para o Analista, com seus limites de cada lado — seção obrigatória de todo documento de Conceito (ver [Biblioteca-Teorica/Modelo-de-Documento.md](Biblioteca-Teorica/Modelo-de-Documento.md#campos-obrigatórios--documento-de-conceito)).
 - **Ontologia**: vocabulário conceitual fixado em [Ontologia-Freud.md](Ontologia-Freud.md) e [Ontologia-Lacan.md](Ontologia-Lacan.md).
 - **Modelo Computacional**: a seção "Aplicação Computacional" de cada documento de Conceito.

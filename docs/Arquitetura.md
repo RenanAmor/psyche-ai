@@ -207,6 +207,9 @@ Biblioteca Teórica
 Modelo Observacional
         │
         ▼
+Modelo Relacional
+        │
+        ▼
 Representação Computacional
         │
         ▼
@@ -223,8 +226,10 @@ Testes
 ```
 
 A fundamentação científica (autores, obras, conceitos) vive em
-[Biblioteca-Teorica/](Biblioteca-Teorica/README.md); o "Modelo
-Computacional" de cada conceito é a seção "Aplicação Computacional" do seu
+[Biblioteca-Teorica/](Biblioteca-Teorica/README.md); como os 21 conceitos
+canônicos se relacionam entre si — com fundamentação, intensidade, natureza
+e observabilidade de cada relação — é [Modelo-Relacional/](Modelo-Relacional/README.md);
+o "Modelo Computacional" de cada conceito é a seção "Aplicação Computacional" do seu
 documento em [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/);
 como o conceito pode aparecer computacionalmente ao Sujeito e ao Analista é
 a seção "Representação Computacional" do mesmo documento — ver

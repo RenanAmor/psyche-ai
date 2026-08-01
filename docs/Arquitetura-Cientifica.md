@@ -7,11 +7,12 @@
 Nenhuma camada abaixo pode ser pulada ao implementar ou estender qualquer motor (registrado também em [Documento-Mestre.md §6.0](Documento-Mestre.md#60-objetivo-científico-do-psycheai) e [Arquitetura.md §9.1](Arquitetura.md#91-cadeia-de-rastreabilidade-obrigatória)):
 
 ```
-Biblioteca Teórica → Modelo Observacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
+Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
 ```
 
 - **Biblioteca Teórica**: [Biblioteca-Teorica/](Biblioteca-Teorica/README.md).
 - **Modelo Observacional**: [Modelo-Observacional.md](Modelo-Observacional.md) — princípios gerais: o que, do discurso registrado, pode em princípio ser observado, e o que conta como sucesso científico da observação (distinto de sucesso clínico). Complementa, sem substituir, [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado. Detalhamento conceito a conceito — fenômeno observado, evidências observáveis, dados necessários/opcionais, limites explícitos — em [Modelo-Observacional/](Modelo-Observacional/README.md) (Sprint 26), um documento por cada um dos 21 conceitos canônicos da Biblioteca Teórica. Nenhum motor novo pode ser desenvolvido sem que essa camada esteja documentada primeiro.
+- **Modelo Relacional**: [Modelo-Relacional/](Modelo-Relacional/README.md) (Sprint 27) — como os 21 conceitos canônicos se relacionam entre si: conceitos antecedentes, consequentes, relacionados, relações estruturais/temporais/observacionais/de dependência/bidirecionais/não observáveis computacionalmente, cada uma com fundamentação bibliográfica, intensidade e natureza. Inclui seis matrizes (Conceito×Conceito, Motor×Conceito, Conceito×Obra, Conceito×Autor, Conceito×Evidência, Conceito×Observabilidade) e a especificação — sem implementação — de cinco grafos científicos. Nenhum Motor de Representação pode ser desenvolvido sem que essa camada esteja documentada primeiro.
 - **Representação Computacional**: seção obrigatória de todo documento de Conceito em [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/).
 - **Ontologia**: [Ontologia-Freud.md](Ontologia-Freud.md) / [Ontologia-Lacan.md](Ontologia-Lacan.md).
 - **Modelo Computacional**: seção "Aplicação Computacional" de cada documento de Conceito.
@@ -61,6 +62,7 @@ Nenhum dado é descartado por representar um caso interrompido. Ver [Modelo-Obse
 - [Arquitetura.md](Arquitetura.md)
 - [Modelo-Observacional.md](Modelo-Observacional.md)
 - [Modelo-Observacional/README.md](Modelo-Observacional/README.md)
+- [Modelo-Relacional/README.md](Modelo-Relacional/README.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
 - [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md)
 - [Regras-Dominio.md](Regras-Dominio.md)
