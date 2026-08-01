@@ -213,7 +213,7 @@
 - [Sándor Ferenczi](../Psicanalise/sandor-ferenczi.md) — Autor (Psicanálise), Sándor Ferenczi (1873–1933)
 - [Sócrates](../Referencias/socrates.md) — Autor (Referência Primária), Sócrates (c. 470–399 a.C.)
 - [Sófocles](../Referencias/sofocles.md) — Autor (Referência Primária), Sófocles (c. 497/496–406/405 a.C.)
-- [Søren Kierkegaard](../Referencias/s-ren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
+- [Søren Kierkegaard](../Referencias/soren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
 - [Talvez em Vincennes...](../Lacan/Outros-Escritos/talvez-em-vincennes.md) — Obra (Lacan — Outros Escritos), Jacques Lacan (1975)
 - [Televisão](../Lacan/Outros-Escritos/televisao.md) — Obra (Lacan — Outros Escritos), Jacques Lacan (1973)
 - [Totem e Tabu](../Freud/Obras/totem-e-tabu.md) — Obra (Freud), Sigmund Freud (1913)

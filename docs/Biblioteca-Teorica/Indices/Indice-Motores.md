@@ -228,7 +228,7 @@
 - [René Descartes](../Referencias/rene-descartes.md) — Autor (Referência Primária), René Descartes (1596–1650)
 - [Immanuel Kant](../Referencias/immanuel-kant.md) — Autor (Referência Primária), Immanuel Kant (1724–1804)
 - [Georg Wilhelm Friedrich Hegel](../Referencias/georg-wilhelm-friedrich-hegel.md) — Autor (Referência Primária), Georg Wilhelm Friedrich Hegel (1770–1831)
-- [Søren Kierkegaard](../Referencias/s-ren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
+- [Søren Kierkegaard](../Referencias/soren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
 - [Friedrich Nietzsche](../Referencias/friedrich-nietzsche.md) — Autor (Referência Primária), Friedrich Nietzsche (1844–1900)
 - [Martin Heidegger](../Referencias/martin-heidegger.md) — Autor (Referência Primária), Martin Heidegger (1889–1976)
 - [Alexandre Kojève](../Referencias/alexandre-kojeve.md) — Autor (Referência Primária), Alexandre Kojève (1902–1968)

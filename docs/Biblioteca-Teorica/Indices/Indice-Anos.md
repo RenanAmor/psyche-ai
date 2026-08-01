@@ -56,7 +56,7 @@
 
 ## 1813–1855
 
-- [Søren Kierkegaard](../Referencias/s-ren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard
+- [Søren Kierkegaard](../Referencias/soren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard
 
 ## 1821–1881
 

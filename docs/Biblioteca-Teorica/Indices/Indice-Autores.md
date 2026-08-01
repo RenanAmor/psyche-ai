@@ -348,7 +348,7 @@
 
 ## Søren Kierkegaard
 
-- Autor (Referência Primária): [Søren Kierkegaard](../Referencias/s-ren-kierkegaard.md) (1813–1855)
+- Autor (Referência Primária): [Søren Kierkegaard](../Referencias/soren-kierkegaard.md) (1813–1855)
 
 ## Wilfred Bion
 

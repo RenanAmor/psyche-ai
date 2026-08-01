@@ -40,7 +40,7 @@
 - [Inibições, Sintomas e Ansiedade](../Freud/Obras/inibicoes-sintomas-e-ansiedade.md) — Obra (Freud), Sigmund Freud (1926)
 - [Novas Conferências Introdutórias sobre Psicanálise](../Freud/Obras/novas-conferencias-introdutorias-sobre-psicanalise.md) — Obra (Freud), Sigmund Freud (1933)
 - [A Angústia (Seminário X)](../Lacan/Seminarios/a-angustia-seminario-x.md) — Obra (Lacan — Seminário), Jacques Lacan (1962–1963)
-- [Søren Kierkegaard](../Referencias/s-ren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
+- [Søren Kierkegaard](../Referencias/soren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
 
 ## Angústia de castração
 
@@ -463,7 +463,7 @@
 
 ## Existência
 
-- [Søren Kierkegaard](../Referencias/s-ren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
+- [Søren Kierkegaard](../Referencias/soren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
 
 ## Falo
 
@@ -1147,7 +1147,7 @@
 - [Além do Princípio do Prazer](../Freud/Obras/alem-do-principio-do-prazer.md) — Obra (Freud), Sigmund Freud (1920)
 - [Prefácio à Edição Inglesa do Seminário XI](../Lacan/Outros-Escritos/prefacio-a-edicao-inglesa-do-seminario-xi.md) — Obra (Lacan — Outros Escritos), Jacques Lacan (1976)
 - [Os Quatro Conceitos Fundamentais da Psicanálise (Seminário XI)](../Lacan/Seminarios/os-quatro-conceitos-fundamentais-da-psicanalise-seminario-xi.md) — Obra (Lacan — Seminário), Jacques Lacan (1964)
-- [Søren Kierkegaard](../Referencias/s-ren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
+- [Søren Kierkegaard](../Referencias/soren-kierkegaard.md) — Autor (Referência Primária), Søren Kierkegaard (1813–1855)
 - [Pulsão](../Conceitos/pulsao.md) — Conceito, Sigmund Freud (1915)
 - [Desejo (Freud)](../Conceitos/desejo-freud.md) — Conceito, Sigmund Freud (1900)
 - [Repetição](../Conceitos/repeticao.md) — Conceito, Sigmund Freud (1920)
