@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 1.2 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada); Decisões de Arquitetura Permanente pós-Sprint 30: Modos de Operação da Plataforma (ECO Conversacional/Clínica/Pesquisa) e Ética da Psicanálise (fundamentação da ECO)
+> Versão 1.3 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada); Decisões de Arquitetura Permanente pós-Sprint 30: Modos de Operação da Plataforma (ajustada para dois modos) e Ética da Psicanálise (fundamentação da ECO)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -1422,6 +1422,27 @@ Escopo desta decisão é exclusivamente documental — sem alteração de
 código de Domínio/Aplicação/Infraestrutura/Apresentação, sem API nova,
 sem migration, sem banco de dados, sem teste alterado, sem novo
 comportamento conversacional da ECO.
+
+## Ajuste de Arquitetura Permanente — Modos de Operação da Plataforma (consolidação para dois modos)
+
+**Não é uma sprint numerada** — registrada aqui como evolução permanente da arquitetura, a pedido explícito do usuário. **Não substitui** a decisão anterior ("Decisão de Arquitetura Permanente — Modos de Operação da Plataforma", acima) — apenas esclarece e simplifica o papel de cada modo de operação. O princípio de fundo permanece intacto: o objeto científico do PsycheAI continua sendo o discurso, e a arquitetura computacional (Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Representação Computacional → Ontologias → Modelo Computacional → Motores) permanece única, sem nenhum componente científico duplicado.
+
+**Origem**: a organização original em três modos (ECO Conversacional, ECO Clínica, ECO Pesquisa) foi consolidada em **dois modos**, esclarecendo que a única diferença entre eles é a origem do discurso e o público que utiliza a plataforma — nunca uma fundamentação científica paralela.
+
+- [x] **Modo 1 — destinado ao Sujeito**: Fluxo Sujeito → ECO → Captura de áudio → Transcrição → Motores → Representação Computacional → Interface do Analista. O discurso nasce dentro da própria plataforma. O Sujeito nunca acessa as representações produzidas. Corresponde ao antigo "Modo 1 — ECO Conversacional", com o fluxo detalhado para incluir a captura de áudio/transcrição já em produção desde a Sprint 22/24 dentro da própria conversa com a ECO.
+- [x] **Modo 2 — destinado a profissionais e pesquisadores**: Fluxo Material Discursivo → Importação → Transcrição (quando necessária) → Motores → Representação Computacional → Interface do Analista. O discurso é produzido fora da plataforma — gravações de áudio, vídeos, transcrições, textos, outros registros discursivos autorizados. A plataforma não participa da produção do discurso, apenas de sua observação computacional. Corresponde à fusão dos antigos "Modo 2 — ECO Clínica" e "Modo 3 — ECO Pesquisa": as exigências éticas de cada um (não intervenção durante sessão clínica; anonimização/consentimento/ética em pesquisa/proteção de dados para material de pesquisa) foram preservadas integralmente como condições que acompanham o material conforme sua origem, não como fluxos separados.
+- [x] `docs/Arquitetura-Cientifica.md` (versão 1.3, §8 reescrito: 8.0 Redefinição, 8.1 Modo 1, 8.2 Modo 2, 8.3 Princípio de independência de origem, 8.4 diagrama de convergência — "ambos os modos" —, 8.5 "a ECO não é toda a arquitetura").
+- [x] `docs/Documento-Mestre.md` (versão 1.3, §8 atualizado para descrever os dois modos).
+- [x] `docs/ECO/README.md` (versão 1.3, seção "A ECO não é toda a arquitetura do PsycheAI" atualizada para o Modo 2 único).
+- [x] `docs/Representacao-Computacional/README.md` (seção "Origem dos Dados": tabela de origem × modo atualizada, cada origem agora anotada com o modo ao qual pertence).
+- [x] Validação: todos os links internos das quatro edições resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta tarefa é exclusivamente documental — sem alteração de
+código de Domínio/Aplicação/Infraestrutura/Apresentação, sem API nova,
+sem migration, sem banco de dados, sem teste alterado. Nenhum princípio
+científico permanente foi revisto — apenas a organização dos modos de
+operação foi simplificada.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

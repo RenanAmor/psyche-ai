@@ -80,53 +80,53 @@ Qualquer alteração aos princípios permanentes registrados neste documento (§
 
 ## 8. Modos de Operação da Plataforma
 
-Adicionado como decisão de arquitetura permanente, imediatamente após a certificação da Base Científica v1.0 (§7) — não vinculada a uma sprint numerada, registrada como evolução permanente da arquitetura da plataforma. Consolida também em [Documento-Mestre.md §8](Documento-Mestre.md#8-modos-de-operação-da-plataforma).
+Adicionado como decisão de arquitetura permanente, imediatamente após a certificação da Base Científica v1.0 (§7) — não vinculada a uma sprint numerada, registrada como evolução permanente da arquitetura da plataforma. Consolida também em [Documento-Mestre.md §8](Documento-Mestre.md#8-modos-de-operação-da-plataforma). **Ajustado** por decisão de arquitetura permanente posterior: a organização original em três modos (ECO Conversacional, ECO Clínica, ECO Pesquisa) foi consolidada em **dois modos de operação** — o princípio de fundo (independência dos Motores em relação à origem do discurso, cadeia científica única) permanece inteiramente válido; o ajuste esclarece que a diferença entre os modos está exclusivamente na origem do discurso e no público que utiliza a plataforma, nunca em uma fundamentação científica paralela.
 
 ### 8.0 Redefinição do PsycheAI
 
 O PsycheAI deixa de ser definido como uma plataforma conversacional. Passa a ser definido como uma **Plataforma de Observação Computacional do Discurso**. A conversa deixa de ser a única forma de entrada de dados. Os Motores do PsycheAI tornam-se independentes da origem do material analisado.
 
-O objeto científico do PsycheAI é o discurso. Não importa como esse discurso chega à plataforma. A plataforma deve ser capaz de produzir a mesma representação computacional independentemente da origem dos dados.
+O objeto científico do PsycheAI é o discurso. Não importa como esse discurso chega à plataforma. A arquitetura computacional permanece única. A plataforma deve ser capaz de produzir a mesma representação computacional independentemente da origem dos dados. A única diferença entre os modos de operação é a origem do discurso e o público que utiliza a plataforma.
 
-### 8.1 Modo 1 — ECO Conversacional
+### 8.1 Modo 1 — destinado ao Sujeito
 
 - **Público**: Sujeito.
-- **Fluxo**: Sujeito → ECO → Motores → Representação Computacional → Interface do Analista.
+- **Fluxo**: Sujeito → ECO → Captura de áudio → Transcrição → Motores → Representação Computacional → Interface do Analista.
 - **Objetivo**: sustentar a associação livre.
+- O discurso **nasce dentro da própria plataforma**, na conversa com a ECO.
+- **O Sujeito nunca acessa as representações produzidas** — mesmo princípio permanente de separação Sujeito/Analista já registrado em [§2](#2-separação-de-interface-entre-sujeito-e-analista).
 
-Modo já em produção — nenhuma mudança de comportamento nesta decisão. Identidade completa em [ECO/README.md](ECO/README.md).
+Modo já em produção — nenhuma mudança de comportamento nesta decisão. A conversa com a ECO em si é implementada desde a Sprint 12; a captura de áudio de entrada, desde a Sprint 22 (`StorageInterface`/`TranscriptionInterface`); a voz de saída, desde a Sprint 24. Identidade completa em [ECO/README.md](ECO/README.md).
 
-### 8.2 Modo 2 — ECO Clínica
+### 8.2 Modo 2 — destinado a profissionais e pesquisadores
 
-- **Público**: Psicólogos, Psicanalistas, Profissionais autorizados.
-- **Fluxo**: Sessão Clínica → Áudio → Transcrição → Motores → Representação Computacional → Interface do Analista.
-- Neste modo, **a ECO não participa da sessão**. O profissional conduz integralmente o atendimento. O PsycheAI realiza apenas a observação posterior. **Nenhuma intervenção ocorre durante a sessão clínica.**
+- **Público**: Psicólogos, Psicanalistas, Profissionais autorizados, Pesquisadores.
+- **Fluxo**: Material Discursivo → Importação → Transcrição (quando necessária) → Motores → Representação Computacional → Interface do Analista.
+- **Entradas previstas**: gravações de áudio; vídeos; transcrições; textos; outros registros discursivos autorizados.
+- O discurso é **produzido fora da plataforma**. A plataforma recebe material já existente — **não participa da produção do discurso**, apenas realiza sua observação computacional.
 
-Modo especificado nesta decisão — **sem implementação**. Sujeito a toda a cadeia de rastreabilidade e aos princípios permanentes já registrados (§1-7). A captação de áudio de sessão já existe desde a Sprint 22 (`StorageInterface`, `TranscriptionInterface`, `StatusTranscricao` — Infrastructure/Contracts), mas sua aplicação a uma sessão clínica conduzida integralmente por um profissional, fora da conversa com a ECO, é especificação nova nesta decisão, sem componente de Aplicação ou Apresentação implementado.
+Duas exigências éticas permanentes, preservadas do desenho anterior deste modo, aplicam-se conforme a natureza do material importado — não são fluxos separados, mas condições que acompanham a mesma entrada "Material Discursivo" conforme sua origem:
 
-### 8.3 Modo 3 — ECO Pesquisa
+- Quando o material tem origem em **sessão clínica**: a plataforma não participa da condução do atendimento; o profissional conduz integralmente; a observação computacional é sempre posterior; nenhuma intervenção do PsycheAI ocorre durante a sessão.
+- Quando o material tem origem em **pesquisa**: deve respeitar integralmente anonimização, consentimento, ética em pesquisa e proteção de dados.
 
-- **Público**: Pesquisadores.
-- **Fluxo**: Sessões anonimizadas → Motores → Representação Computacional → Produção Científica.
-- Este modo deve respeitar integralmente: anonimização; consentimento; ética em pesquisa; proteção de dados.
+Modo especificado nesta decisão — **sem implementação**. Sujeito a toda a cadeia de rastreabilidade e aos princípios permanentes já registrados (§1-7). Nenhum componente de importação de material discursivo externo, transcrição desvinculada da conversa da ECO, anonimização de pesquisa ou exportação científica existe no código nesta data.
 
-Modo especificado nesta decisão — **sem implementação**. Nenhum mecanismo de anonimização, consentimento de pesquisa ou exportação para produção científica existe no código nesta data.
+### 8.3 Princípio arquitetônico permanente — independência de origem
 
-### 8.4 Princípio arquitetônico permanente — independência de origem
+Os Motores do PsycheAI não dependem da origem do discurso. Os Motores poderão receber, pelos dois modos acima, discurso oriundo de:
 
-Os Motores do PsycheAI não dependem da origem do discurso. Os Motores poderão receber futuramente:
-
-- conversa da ECO;
-- gravação de áudio;
-- vídeo;
-- transcrição;
-- texto;
-- documentos clínicos autorizados;
-- outras formas estruturadas de discurso.
+- conversa da ECO (Modo 1);
+- captura de áudio da própria conversa (Modo 1);
+- gravações de áudio importadas (Modo 2);
+- vídeos (Modo 2);
+- transcrições (Modo 1 ou 2);
+- textos (Modo 2);
+- outros registros discursivos autorizados (Modo 2).
 
 Todos os formatos deverão convergir para a mesma representação computacional — ver [Representacao-Computacional/README.md, "Origem dos Dados"](Representacao-Computacional/README.md#origem-dos-dados).
 
-### 8.5 Os três modos utilizam exatamente a mesma cadeia científica
+### 8.4 Ambos os modos utilizam exatamente a mesma cadeia científica
 
 ```
 Biblioteca Teórica
@@ -150,11 +150,11 @@ Modelo Computacional
 Motores
 ```
 
-Este diagrama **não substitui nem contradiz** a cadeia de rastreabilidade completa de [§1](#1-cadeia-de-rastreabilidade-obrigatória) (que segue até Implementação e Testes) — descreve o ponto em que os três modos convergem: independentemente de qual dos três alimenta os Motores, a fundamentação científica que sustenta a observação é idêntica, auditável pela mesma cadeia. A partir dos Motores, cada modo segue seu próprio fluxo de entrega (§8.1-8.3).
+Este diagrama **não substitui nem contradiz** a cadeia de rastreabilidade completa de [§1](#1-cadeia-de-rastreabilidade-obrigatória) (que segue até Implementação e Testes) — descreve o ponto em que os dois modos convergem: independentemente de qual dos dois alimenta os Motores, a fundamentação científica que sustenta a observação é idêntica, auditável pela mesma cadeia, sem nenhum componente científico duplicado. A partir dos Motores, cada modo segue seu próprio fluxo de entrega (§8.1-8.2).
 
-### 8.6 A ECO não é toda a arquitetura do PsycheAI
+### 8.5 A ECO não é toda a arquitetura do PsycheAI
 
-A ECO Conversacional é apenas uma interface da plataforma — a interface do Modo 1. Ela não representa toda a arquitetura do PsycheAI, que também compreende os Modos 2 (Clínica) e 3 (Pesquisa), nos quais a ECO não participa. Ver [ECO/README.md, "A ECO não é toda a arquitetura do PsycheAI"](ECO/README.md#a-eco-não-é-toda-a-arquitetura-do-psycheai).
+A ECO é a interface do Modo 1. Ela não representa toda a arquitetura do PsycheAI, que também compreende o Modo 2, no qual a ECO não participa — o discurso chega por importação de material já produzido fora da plataforma. Ver [ECO/README.md, "A ECO não é toda a arquitetura do PsycheAI"](ECO/README.md#a-eco-não-é-toda-a-arquitetura-do-psycheai).
 
 ## Referências cruzadas do projeto
 
