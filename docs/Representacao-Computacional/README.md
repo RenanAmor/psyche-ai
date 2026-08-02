@@ -1,6 +1,6 @@
 # Representação Computacional — Psyche AI
 
-> Sprint 29. Modelo oficial de Representação Computacional do PsycheAI: como toda observação produzida pelos motores (Discourse Engine, Motor Freud, Motor Lacan) é apresentada ao Analista e, de forma estritamente distinta, ao Sujeito. Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) entre o [Modelo Relacional](../Modelo-Relacional/README.md) (como os 21 conceitos canônicos se relacionam entre si) e a Ontologia (vocabulário conceitual fixado em [Ontologia-Freud.md](../Ontologia-Freud.md)/[Ontologia-Lacan.md](../Ontologia-Lacan.md)). Sprint exclusivamente científica: nenhum código, API, banco de dados ou teste foi alterado para produzir esta documentação.
+> Sprint 29; seção "Origem dos Dados" adicionada por decisão de arquitetura permanente pós-Sprint 30. Modelo oficial de Representação Computacional do PsycheAI: como toda observação produzida pelos motores (Discourse Engine, Motor Freud, Motor Lacan) é apresentada ao Analista e, de forma estritamente distinta, ao Sujeito. Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) entre o [Modelo Relacional](../Modelo-Relacional/README.md) (como os 21 conceitos canônicos se relacionam entre si) e a Ontologia (vocabulário conceitual fixado em [Ontologia-Freud.md](../Ontologia-Freud.md)/[Ontologia-Lacan.md](../Ontologia-Lacan.md)). Sprint exclusivamente científica: nenhum código, API, banco de dados ou teste foi alterado para produzir esta documentação.
 
 ## O que esta camada é
 
@@ -41,6 +41,20 @@ Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Represent
 ```
 
 Cada documento desta pasta declara explicitamente, em sua própria seção de rastreabilidade, a quais conceitos da [Biblioteca Teórica](../Biblioteca-Teorica/README.md), fenômenos do [Modelo Observacional](../Modelo-Observacional/README.md) e relações do [Modelo Relacional](../Modelo-Relacional/README.md) corresponde — nunca uma representação sem essa cadeia completa até a fundamentação bibliográfica original.
+
+## Origem dos Dados
+
+Adicionado por decisão de arquitetura permanente pós-Sprint 30 ("Modos de Operação da Plataforma", [Arquitetura-Cientifica.md §8](../Arquitetura-Cientifica.md#8-modos-de-operação-da-plataforma)): o PsycheAI não é mais definido como plataforma exclusivamente conversacional — o discurso que alimenta os Motores pode ter múltiplas origens, sempre convergindo para a mesma Representação Computacional. Nenhuma das oito representações desta pasta muda de estrutura, campo ou significado conforme a origem do dado: todas operam sobre `EventoDiscursivo` já registrado, independentemente de como ele chegou até ali. A diferença entre origens está inteiramente antes da cadeia científica (na captação/transcrição), nunca depois — este é o princípio de **equivalência computacional**.
+
+| Origem | Estado | Caminho até o `EventoDiscursivo` |
+|---|---|---|
+| **Conversa** (Modo 1 — ECO Conversacional) | Implementado | `ConversaController` → `MensagemApplicationService` → `EventoDiscursivo`, já em produção desde a Sprint 12 |
+| **Texto** | Implementado (mesmo caminho de Conversa) | Todo `EventoDiscursivo` é, por definição, texto — não há caminho de texto avulso fora da conversa nesta versão |
+| **Áudio** | Parcialmente implementado | Captura de áudio de sessão existe desde a Sprint 22 (`StorageInterface`); sua aplicação ao Modo 2 — ECO Clínica (sessão conduzida por profissional, sem a ECO) é especificação nova, sem componente de Aplicação/Apresentação implementado |
+| **Transcrição** | Parcialmente implementado | `TranscriptionInterface`/`StatusTranscricao` existem como porta desde a Sprint 7/22; sem implementação concreta ligada aos Modos 2/3 |
+| **Vídeo** | Não implementado — especificação | Nenhum componente de captura ou processamento de vídeo existe nesta data |
+
+Cada uma das oito representações ([Timeline.md](Timeline.md), [Memoria-Longitudinal.md](Memoria-Longitudinal.md), [Recorrencias.md](Recorrencias.md), [Formacoes-Freudianas.md](Formacoes-Freudianas.md), [Representacoes-Lacanianas.md](Representacoes-Lacanianas.md), [Circuitos.md](Circuitos.md), [Grafos.md](Grafos.md), [Indicadores.md](Indicadores.md)) herda esta tabela por inteiro — nenhuma delas documenta uma origem de dado diferente das cinco acima, e nenhuma exige alteração de sua própria especificação para operar sobre discurso vindo de qualquer uma delas.
 
 ## Estado de implementação — nota de leitura obrigatória
 

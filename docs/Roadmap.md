@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 1.0 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada)
+> Versão 1.1 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada); Decisão de Arquitetura Permanente pós-Sprint 30: Modos de Operação da Plataforma (ECO Conversacional/Clínica/Pesquisa)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -1379,6 +1379,28 @@ código de Domínio/Aplicação/Infraestrutura/Apresentação, sem API nova, sem
 migration, sem banco de dados, sem teste alterado. Com a conclusão desta
 Sprint, a **Fase 1 — Fundação Científica do PsycheAI** está oficialmente
 encerrada; inicia-se a **Fase 2 — Desenvolvimento Experimental**.
+
+## Decisão de Arquitetura Permanente — Modos de Operação da Plataforma
+
+**Não é uma sprint numerada** — registrada aqui como evolução permanente da arquitetura da plataforma, imediatamente após a certificação da Base Científica v1.0 (Sprint 30), a pedido explícito do usuário.
+
+**Origem**: decisão de que o PsycheAI deixa de ser definido como plataforma conversacional e passa a ser definido como **Plataforma de Observação Computacional do Discurso**. O objeto científico é o discurso, não a conversa — a plataforma deve produzir a mesma Representação Computacional independentemente de como o discurso chega até ela. Os Motores do PsycheAI (Discourse Engine, Freud Engine, Lacan Engine) passam a ser formalmente independentes da origem do material analisado.
+
+- [x] **Três modos de operação oficiais registrados**: **Modo 1 — ECO Conversacional** (Público: Sujeito; Fluxo: Sujeito → ECO → Motores → Representação Computacional → Interface do Analista; já em produção, nenhuma mudança de comportamento); **Modo 2 — ECO Clínica** (Público: profissionais autorizados; Fluxo: Sessão Clínica → Áudio → Transcrição → Motores → Representação Computacional → Interface do Analista; a ECO não participa, o profissional conduz integralmente, o PsycheAI só observa posteriormente, nenhuma intervenção durante a sessão; especificado, sem implementação); **Modo 3 — ECO Pesquisa** (Público: pesquisadores; Fluxo: Sessões anonimizadas → Motores → Representação Computacional → Produção Científica; deve respeitar anonimização, consentimento, ética em pesquisa, proteção de dados; especificado, sem implementação).
+- [x] **Princípio arquitetônico permanente**: os Motores não dependem da origem do discurso — podem receber conversa da ECO, áudio, vídeo, transcrição, texto ou documentos clínicos autorizados; todos convergem para a mesma Representação Computacional (princípio de equivalência computacional).
+- [x] `docs/Arquitetura-Cientifica.md` (versão 1.1, novo §8 "Modos de Operação da Plataforma", seis subseções: redefinição do PsycheAI, os três modos, o princípio de independência de origem, o diagrama de convergência até a camada de Motores — que não substitui nem contradiz a cadeia completa de §1 — e a nota de que a ECO não é toda a arquitetura).
+- [x] `docs/Documento-Mestre.md` (versão 1.1, novo §8): registra oficialmente que o PsycheAI não é um chatbot, que a ECO Conversacional é apenas uma das interfaces possíveis, e que a plataforma é independente da interface de coleta do discurso.
+- [x] `docs/ECO/README.md` (versão 1.1, nova seção "A ECO não é toda a arquitetura do PsycheAI"): a ECO é a interface do Modo 1; nos Modos 2 e 3 ela não participa. Nenhum conteúdo já existente sobre a ECO foi alterado — permanece válido como descrição completa do Modo 1.
+- [x] `docs/Representacao-Computacional/README.md` (nova seção "Origem dos Dados"): tabela de cinco origens (Conversa, Texto, Áudio, Transcrição, Vídeo) com estado de implementação auditado contra `app/` (Conversa/Texto implementados desde a Sprint 12; Áudio/Transcrição parcialmente implementados desde a Sprint 22/7, sem ligação aos Modos 2/3; Vídeo não implementado) — nenhuma das oito representações já catalogadas muda de estrutura conforme a origem.
+- [x] Validação: todos os links internos das cinco edições resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta decisão é exclusivamente documental e arquitetônico — sem
+alteração de código de Domínio/Aplicação/Infraestrutura/Apresentação, sem
+API nova, sem migration, sem banco de dados, sem teste alterado. Os Modos
+2 e 3 são especificação de arquitetura, não implementação: nenhum
+componente de captura de vídeo, condução de sessão clínica fora da ECO,
+anonimização de pesquisa ou exportação científica foi criado.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
