@@ -10,8 +10,13 @@ Vazia nesta Sprint, por decisão explícita do item 5 do briefing: "Criar estrut
 
 Padrões arquiteturais (Clean/Hexagonal, Domain-Driven Design) já em uso no PsycheAI, documentados como referência técnica auxiliar — nunca como fundamentação científica de um conceito psicanalítico, que permanece exclusiva de [Freud/](../Freud/), [Lacan/](../Lacan/), [Referencias/](../Referencias/), [Psicanalise/](../Psicanalise/) e [Conceitos/](../Conceitos/).
 
+## Nota da Sprint 33
+
+A Sprint 33 criou [../Fundamentos-Computacionais/](../Fundamentos-Computacionais/README.md), com a categoria [../Fundamentos-Computacionais/Engenharia-Cientifica/](../Fundamentos-Computacionais/Engenharia-Cientifica/README.md) catalogando rastreabilidade, reprodutibilidade e auditoria *da pesquisa/documentação científica* — distinto dos padrões arquiteturais de código reservados nesta pasta. Esta pasta continua reservada, sem alteração de escopo.
+
 ## Referências cruzadas do projeto
 
 - [../README.md](../README.md)
 - [../Modelo-de-Documento.md](../Modelo-de-Documento.md)
 - [../../Arquitetura.md](../../Arquitetura.md)
+- [../Fundamentos-Computacionais/README.md](../Fundamentos-Computacionais/README.md)

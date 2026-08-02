@@ -1,6 +1,6 @@
 # Arquitetura Científica — Psyche AI
 
-> Versão 1.2 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 28 (ECO — Estrutura Computacional de Observação, §5), na Sprint 29 (Representação Computacional, §6), na Sprint 30 (§7, certificação da Base Científica v1.0), por decisão de arquitetura permanente pós-Sprint 30 (§8, Modos de Operação da Plataforma) e por nova decisão de arquitetura permanente (§5.1, Ética da Psicanálise). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
+> Versão 1.3 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 28 (ECO — Estrutura Computacional de Observação, §5), na Sprint 29 (Representação Computacional, §6), na Sprint 30 (§7, certificação da Base Científica v1.0), por decisão de arquitetura permanente pós-Sprint 30 (§8, Modos de Operação da Plataforma), por nova decisão de arquitetura permanente (§5.1, Ética da Psicanálise) e na Sprint 33 (§9, Fundamentos Computacionais — segundo eixo da Base Científica). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
 
 ## 1. Cadeia de rastreabilidade obrigatória
 
@@ -179,6 +179,14 @@ Registrado que, futuramente, o Laboratório poderá disponibilizar acesso contro
 
 O Laboratório não é uma funcionalidade do Sujeito. O Laboratório é um ambiente científico da plataforma. A ECO e o Laboratório são interfaces distintas que compartilham exatamente a mesma arquitetura científica — mesma cadeia de rastreabilidade (§1), mesmos princípios permanentes (§2-4), mesma Representação Computacional (§6, §8.3-8.4). Nenhuma leitura desta decisão autoriza duplicar, bifurcar ou criar uma fundamentação científica paralela para o Laboratório.
 
+## 9. Fundamentos Computacionais — segundo eixo da Base Científica
+
+Adicionado na Sprint 33 — princípio permanente. A Base Científica do PsycheAI passa a ser oficialmente interdisciplinar, composta por dois eixos de igual importância: a **Fundamentação Psicanalítica** (Freud, Lacan, psicanálise pós-freudiana/pós-lacaniana, filosofia, linguística/semiótica, antropologia, psiquiatria/neurologia — já descrita em §1 acima) e a **Fundamentação Computacional** ([Biblioteca-Teorica/Fundamentos-Computacionais/](Biblioteca-Teorica/Fundamentos-Computacionais/README.md) — processamento computacional da linguagem, processamento de áudio, inteligência artificial, arquiteturas cognitivas, engenharia científica, ética computacional).
+
+A divisão de trabalho entre os dois eixos é precisa e permanente: a Biblioteca Computacional ajuda a extrair e qualificar os dados do discurso (transcrição, tokenização, classificação, geração de linguagem); a Biblioteca Psicanalítica orienta como esses dados podem ser organizados na representação (o que, do dado já extraído, é fenômeno observável relevante). Nenhum dos dois eixos subordina ou substitui o outro — sem extração/qualificação rigorosa não há dado confiável para organizar; sem a orientação psicanalítica não há critério científico para decidir o que, no dado extraído, é observação relevante.
+
+Este §9 não altera nem relativiza nenhum dos oito princípios permanentes anteriores (§1-8): a cadeia de rastreabilidade obrigatória (§1) continua a única via de implementação; a separação Sujeito/Analista (§2) e a exclusividade lacaniana ao Analista (§3) aplicam-se integralmente a qualquer componente técnico fundamentado pela Fundamentação Computacional. As cinco Arquiteturas Cognitivas catalogadas (ACT-R, SOAR, LIDA, CLARION, Sigma) são fundamentação de posicionamento científico, nunca arquitetura de implementação do PsycheAI. A Ética Computacional (LGPD, GDPR, ética em pesquisa etc.) complementa, sem substituir, a Ética da Psicanálise já registrada em §5.1.
+
 ## Referências cruzadas do projeto
 
 - [Documento-Mestre.md](Documento-Mestre.md)
@@ -190,6 +198,7 @@ O Laboratório não é uma funcionalidade do Sujeito. O Laboratório é um ambie
 - [ECO/README.md](ECO/README.md)
 - [ECO/Etica-da-Psicanalise.md](ECO/Etica-da-Psicanalise.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
+- [Biblioteca-Teorica/Fundamentos-Computacionais/README.md](Biblioteca-Teorica/Fundamentos-Computacionais/README.md)
 - [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md)
 - [Base-Cientifica-v1.0.md](Base-Cientifica-v1.0.md)
 - [Regras-Dominio.md](Regras-Dominio.md)

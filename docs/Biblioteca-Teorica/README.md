@@ -2,6 +2,10 @@
 
 > Base de Conhecimento Científico do PsycheAI, parte permanente da arquitetura do sistema (ver [Documento-Mestre.md §6.0](../Documento-Mestre.md#60-objetivo-científico-do-psycheai) e [Arquitetura.md §9](../Arquitetura.md#9-base-científica-e-princípios-de-representação-biblioteca-teórica)). Toda regra computacional presente ou futura deve possuir rastreabilidade até a literatura científica que a fundamenta.
 
+## Dois eixos da Base Científica (a partir da Sprint 33)
+
+A Base Científica do PsycheAI é interdisciplinar, composta por dois eixos de igual importância: **Fundamentação Psicanalítica** (Freud, Lacan, psicanálise pós-freudiana/pós-lacaniana, filosofia, linguística/semiótica, antropologia, psiquiatria/neurologia — todo o restante deste documento) e **Fundamentação Computacional** ([Fundamentos-Computacionais/](Fundamentos-Computacionais/README.md), Sprint 33 — processamento computacional da linguagem, processamento de áudio, inteligência artificial, arquiteturas cognitivas, engenharia científica, ética computacional). A divisão de trabalho entre os dois eixos: a Biblioteca Computacional ajuda a extrair e qualificar os dados; a Biblioteca Psicanalítica orienta como esses dados podem ser organizados na representação. Nenhum dos dois eixos subordina o outro — ver [Fundamentos-Computacionais/README.md](Fundamentos-Computacionais/README.md#por-que-este-eixo-existe) para o detalhamento completo.
+
 ## O que esta Biblioteca é
 
 Uma estrutura documental que organiza autores, obras e conceitos — e as relações entre eles — servindo de base científica auditável para o PsycheAI. **Não é** um resumo interpretativo da obra de Freud, Lacan ou de qualquer outro autor: é catalogação de metadados, seguindo rigorosamente o modelo único definido em [Modelo-de-Documento.md](Modelo-de-Documento.md).
@@ -28,9 +32,10 @@ Nenhum conceito é implementado no código sem essa cadeia completa. Ver [Como-o
 | [Psicanalise/](Psicanalise/) | Autores da tradição psicanalítica pós-freudiana/pós-lacaniana | 13 |
 | [Conceitos/](Conceitos/) | Os 21 conceitos canônicos de Ontologia-Freud.md/Ontologia-Lacan.md, únicos com Aplicação Computacional e Representação Computacional | 21 |
 | [Filosofia/](Filosofia/), [Linguistica/](Linguistica/), [Antropologia/](Antropologia/), [Psiquiatria/](Psiquiatria/), [Inteligencia-Artificial/](Inteligencia-Artificial/), [Engenharia-de-Software/](Engenharia-de-Software/) | Ciências auxiliares — estrutura reservada para documentação futura | 0 (deliberado) |
+| [Fundamentos-Computacionais/](Fundamentos-Computacionais/README.md) | Segundo eixo da Base Científica (Sprint 33): processamento computacional da linguagem, processamento de áudio, inteligência artificial, arquiteturas cognitivas, engenharia científica, ética computacional | 44 |
 | [Indices/](Indices/) | Seis índices navegáveis (Autor, Obra, Ano, Área, Conceito, Motor) | — |
 
-**Total: 229 documentos catalogados** nesta Sprint, mais [Valor-Cientifico-dos-Casos.md](Valor-Cientifico-dos-Casos.md) — fundamentação histórica do Princípio da Neutralidade Observacional (ver [../Arquitetura-Cientifica.md](../Arquitetura-Cientifica.md)).
+**Total: 229 documentos catalogados** na Sprint 25 (Fundamentação Psicanalítica), mais [Valor-Cientifico-dos-Casos.md](Valor-Cientifico-dos-Casos.md) — fundamentação histórica do Princípio da Neutralidade Observacional (ver [../Arquitetura-Cientifica.md](../Arquitetura-Cientifica.md)) —, mais **44 documentos de tópico da Fundamentação Computacional** ([Fundamentos-Computacionais/](Fundamentos-Computacionais/README.md), Sprint 33).
 
 ## Modelo único de documento
 
@@ -54,6 +59,7 @@ Nenhuma interpretação foi escrita. Nenhuma obra foi resumida de forma opinativ
 - [Modelo-de-Documento.md](Modelo-de-Documento.md)
 - [Como-os-Motores-Usam-a-Biblioteca.md](Como-os-Motores-Usam-a-Biblioteca.md)
 - [Valor-Cientifico-dos-Casos.md](Valor-Cientifico-dos-Casos.md)
+- [Fundamentos-Computacionais/README.md](Fundamentos-Computacionais/README.md)
 - [../Documento-Mestre.md](../Documento-Mestre.md)
 - [../Arquitetura.md](../Arquitetura.md)
 - [../Arquitetura-Cientifica.md](../Arquitetura-Cientifica.md)

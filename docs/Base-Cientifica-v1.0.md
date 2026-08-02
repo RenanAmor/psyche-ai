@@ -1,6 +1,8 @@
 # Base Científica v1.0 — Psyche AI
 
 > Sprint 30 — Consolidação Científica v1.0. Documento de certificação oficial: encerra a Fase 1 (Fundação Científica) do PsycheAI, consolidando toda a documentação científica produzida entre a Sprint 25 (Biblioteca Teórica) e a Sprint 29 (Representação Computacional), auditada, corrigida e padronizada nesta Sprint. A partir deste documento, a Base Científica do PsycheAI está oficialmente congelada na versão 1.0 — qualquer alteração de princípio permanente exige o processo descrito em ["Critérios para futuras alterações"](#critérios-para-futuras-alterações) abaixo.
+>
+> **Nota da Sprint 33**: a expansão da Biblioteca Teórica com o segundo eixo [Biblioteca-Teorica/Fundamentos-Computacionais/](Biblioteca-Teorica/Fundamentos-Computacionais/README.md) (44 documentos) é uma adição estritamente aditiva à Fundamentação Psicanalítica já certificada nesta versão — não altera, revisa ou substitui nenhum dos oito princípios permanentes abaixo, apenas os estende com fundamentação computacional (§9 de [Arquitetura-Cientifica.md](Arquitetura-Cientifica.md#9-fundamentos-computacionais--segundo-eixo-da-base-científica)). Não configura, portanto, abertura da Base Científica v2.0 — as condições completas para essa abertura permanecem as registradas em ["Condições para abertura da Base Científica v2.0"](#condições-para-abertura-da-base-científica-v20).
 
 ## Objetivo científico do PsycheAI
 
@@ -18,7 +20,7 @@ Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Represent
 
 | Camada | O que resolve | Onde vive |
 |---|---|---|
-| **Biblioteca Teórica** | De onde vem o conceito — autores, obras, fundamentação bibliográfica | [Biblioteca-Teorica/](Biblioteca-Teorica/README.md) — 245 documentos |
+| **Biblioteca Teórica** | De onde vem o conceito — autores, obras, fundamentação bibliográfica (Fundamentação Psicanalítica); infraestrutura técnica de extração/qualificação do dado (Fundamentação Computacional, Sprint 33) | [Biblioteca-Teorica/](Biblioteca-Teorica/README.md) — 245 documentos + 44 ([Fundamentos-Computacionais/](Biblioteca-Teorica/Fundamentos-Computacionais/README.md)) |
 | **Modelo Observacional** | O que, do discurso registrado, é fenômeno observável | [Modelo-Observacional/](Modelo-Observacional/README.md) + [Modelo-Observacional.md](Modelo-Observacional.md) — 24 documentos |
 | **Modelo Relacional** | Como os 21 conceitos canônicos se relacionam entre si | [Modelo-Relacional/](Modelo-Relacional/README.md) — 37 documentos |
 | **Representação Computacional** | Como uma observação chega a ser vista pelo Analista/Sujeito | [Representacao-Computacional/](Representacao-Computacional/README.md) — 14 documentos |
@@ -76,13 +78,14 @@ docs/
 ├── Base-Cientifica-v1.0.md          — este documento
 │
 ├── Biblioteca-Teorica/   (245 docs) — autores, obras, 21 Conceitos canônicos
+│   └── Fundamentos-Computacionais/ (44 docs, Sprint 33) — segundo eixo da Base Científica
 ├── Modelo-Observacional/ (24 docs)  — fenômeno observável, 1:1 por conceito
 ├── Modelo-Relacional/    (37 docs)  — relações, matrizes, grafos científicos
 ├── Representacao-Computacional/ (14 docs) — 8 representações + princípios + interfaces
 └── ECO/                  (10 docs) — identidade, método, ética, limites, interfaces
 ```
 
-**351 documentos markdown** no total em `docs/` (350 na cadeia científica + arquitetura técnica; 1 documento operacional de infraestrutura em `docs/architecture/`, fora do escopo desta certificação).
+**351 documentos markdown** no total em `docs/` nesta certificação (Sprint 30; 350 na cadeia científica + arquitetura técnica; 1 documento operacional de infraestrutura em `docs/architecture/`, fora do escopo desta certificação). **A partir da Sprint 33**, mais 53 documentos markdown (README + Modelo-de-Documento + Índice de Tópicos + 6 READMEs de categoria + 44 documentos de tópico) foram adicionados em [Biblioteca-Teorica/Fundamentos-Computacionais/](Biblioteca-Teorica/Fundamentos-Computacionais/README.md) — adição estritamente aditiva, fora do escopo desta certificação de v1.0 (ver nota no topo deste documento).
 
 ## Cobertura da documentação
 
@@ -187,6 +190,7 @@ Inicia-se a **Fase 2 — Desenvolvimento Experimental do PsycheAI**: sprints fut
 - [Documento-Mestre.md](Documento-Mestre.md)
 - [Arquitetura-Cientifica.md](Arquitetura-Cientifica.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
+- [Biblioteca-Teorica/Fundamentos-Computacionais/README.md](Biblioteca-Teorica/Fundamentos-Computacionais/README.md)
 - [Modelo-Observacional/README.md](Modelo-Observacional/README.md)
 - [Modelo-Relacional/README.md](Modelo-Relacional/README.md)
 - [Representacao-Computacional/README.md](Representacao-Computacional/README.md)
