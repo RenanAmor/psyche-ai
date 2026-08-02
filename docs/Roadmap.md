@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 1.4 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada); Decisões de Arquitetura Permanente pós-Sprint 30: Modos de Operação da Plataforma (ajustada para dois modos) e Ética da Psicanálise (fundamentação da ECO); Sprint 32: Interface Definitiva da ECO (Modo Conversacional por Voz)
+> Versão 1.5 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada); Decisões de Arquitetura Permanente pós-Sprint 30: Modos de Operação da Plataforma (ajustada para dois modos, Modo 2 nomeado Laboratório com política de acesso registrada) e Ética da Psicanálise (fundamentação da ECO); Sprint 32: Interface Definitiva da ECO (Modo Conversacional por Voz)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -1458,6 +1458,25 @@ operação foi simplificada.
 - [x] **Documentação**: [ECO/Interface-Sujeito.md](ECO/Interface-Sujeito.md) (v1.1) e [ECO/Fluxo-Conversacional.md](ECO/Fluxo-Conversacional.md) (v1.1, passos 1 e 8) atualizados para descrever a interface de voz e o encerramento client-side.
 - [x] **Testes**: 9 testes aditivos, comportamento existente preservado sem alteração (`processarEnvio()`/`mensagens()`/`audio()` inalterados) — `GravacaoAudioApplicationServiceTest` (`transcreverTexto()`, 3 novos), `GravacaoAudioEndpointsTest` (`POST /audio/transcricao`, 2 novos), `ConversaControllerTest` (`mensagensAudio()`, 4 novos), `MensagemHttpClientFake` ganha suporte opcional a simular `POST /audio/transcricao`. **605 testes / 1471 asserções, zero regressão** (eram 596/1450 antes desta Sprint).
 - [x] **Limite explícito desta Sprint**: verificado por suíte automatizada (PHPUnit) e leitura do HTML/CSS/JS gerado — não por uso real em navegador. O laço de voz de ponta a ponta (permissão de microfone, sensibilidade dos limiares de silêncio ao ruído de fundo, política de autoplay do navegador) precisa de validação humana com microfone real antes de ser considerado testado na prática; os limiares de detecção de silêncio (`LIMIAR_VOLUME`/`SILENCIO_MS`/`FALA_MINIMA_MS` em `conversa/index.php`) são um primeiro palpite, não calibrado contra gravação real.
+
+## Ajuste de Arquitetura Permanente — Acesso aos Modos de Operação (Modo 2 nomeado Laboratório)
+
+**Não é uma sprint numerada** — registrada aqui como evolução permanente da arquitetura, a pedido explícito do usuário, imediatamente após a Sprint 32. **Não substitui** nenhuma das duas decisões anteriores sobre Modos de Operação (acima) — não altera os dois modos, seu fluxo ou sua fundamentação científica; define exclusivamente **quem** pode utilizar cada um. Tarefa exclusivamente documental: sem alteração de código, API, banco de dados ou teste.
+
+**Origem**: consolidar oficialmente a política de acesso aos dois Modos de Operação da plataforma.
+
+- [x] **Modo 1 — ECO registrado oficialmente** como a interface pública da plataforma, destinada ao Sujeito, cujo objetivo é permitir a associação livre por meio da ECO. Registrado explicitamente que o Sujeito nunca terá acesso às representações computacionais produzidas pela plataforma: Biblioteca Teórica, Modelo Observacional, Modelo Relacional, Representação Computacional, Motores, Memória Discursiva, Grafos, Indicadores, Recorrências, Ferramentas de pesquisa — enumeração no nível arquitetônico, complementar (não substitutiva) à enumeração já existente no nível de interface em [ECO/Interface-Sujeito.md](ECO/Interface-Sujeito.md#o-que-o-sujeito-nunca-visualiza).
+- [x] **Modo 2 nomeado oficialmente Laboratório**: o ambiente interno do PsycheAI, cujo objetivo é apoiar desenvolvimento, validação científica, pesquisa, observação computacional do discurso e análise profissional. Todo material discursivo produzido fora da plataforma é processado exclusivamente neste ambiente.
+- [x] **Política de acesso registrada**: nesta primeira fase do projeto, o Laboratório é de acesso exclusivo do Administrador do PsycheAI — nenhum outro usuário tem acesso, visando permitir a evolução científica da plataforma antes da abertura para uso profissional.
+- [x] **Evolução futura registrada** (sem compromisso de prazo, fora do escopo da versão atual): acesso controlado ao Laboratório para psicólogos, psicanalistas, pesquisadores, universidades, hospitais, centros de pesquisa e instituições autorizadas, exclusivamente por meio de um sistema de permissões ainda inexistente.
+- [x] **Princípio permanente registrado**: o Laboratório não é uma funcionalidade do Sujeito — é um ambiente científico da plataforma. A ECO e o Laboratório são interfaces distintas que compartilham exatamente a mesma arquitetura científica.
+- [x] `docs/Documento-Mestre.md` (§8, novo parágrafo "Política de acesso").
+- [x] `docs/Arquitetura-Cientifica.md` (§8.1 ganha a lista explícita de acesso do Modo 1; §8.2 renomeado "Modo 2 — Laboratório"; três novas subseções: §8.6 Política de Acesso, §8.7 Evolução Futura, §8.8 Princípio Permanente).
+- [x] `docs/ECO/README.md` (seção "A ECO não é toda a arquitetura do PsycheAI" ganha o nome "Laboratório" para o Modo 2 e um novo parágrafo de política de acesso).
+- [x] Validação: todos os links internos das quatro edições resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Publicação e sincronização do repositório remoto.
+
+Nenhum princípio científico permanente foi revisto. Nenhuma rota, Controller, migration ou teste foi tocado — o Laboratório, como Modo 2 com público externo autorizado, continua especificado sem implementação, exatamente como antes desta decisão; apenas a política de quem poderá utilizá-lo quando implementado foi formalizada.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 
