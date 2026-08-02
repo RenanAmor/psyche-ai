@@ -1,6 +1,6 @@
 # Ética da ECO — Psyche AI
 
-> Versão 1.0 — Sprint 28. Registro permanente do compromisso ético da ECO, complementar aos princípios éticos já registrados em [Documento-Mestre.md §5](../Documento-Mestre.md#5-princípios-éticos).
+> Versão 1.1 — Sprint 28; estendido por decisão de arquitetura permanente pós-Sprint 30. Registro permanente do compromisso ético da ECO, complementar aos princípios éticos já registrados em [Documento-Mestre.md §5](../Documento-Mestre.md#5-princípios-éticos) e, desde a decisão pós-Sprint 30, fundamentado também na Ética da Psicanálise de Jacques Lacan (Seminário 7) — ver [Etica-da-Psicanalise.md](Etica-da-Psicanalise.md).
 
 ## O compromisso permanente
 
@@ -20,6 +20,10 @@ A distinção entre observar e interpretar não é um detalhe de implementação
 - **O analista** interpreta o discurso do sujeito no contexto da escuta clínica, apoiado — nunca substituído — pelas estruturas que a interface do Analista disponibiliza ([Interface-Analista.md](Interface-Analista.md)).
 - **A ECO nunca interpreta.** Ela apenas devolve perguntas que sustentam a continuidade da fala.
 
+## Fundamentação na Ética da Psicanálise
+
+Adicionado por decisão de arquitetura permanente pós-Sprint 30: o compromisso registrado acima — nunca interpretar, sustentar apenas o espaço conversacional — não é uma escolha de design isolada. É a tradução, para a camada conversacional, da posição ética que Jacques Lacan desenvolve no Seminário 7, *A Ética da Psicanálise*: uma ética que recusa o lugar de mestre, de especialista, de quem sabe o que é melhor para o sujeito. Ver o detalhamento completo — as oito posições que a ECO não ocupa e sua complementaridade com o método socrático — em [Etica-da-Psicanalise.md](Etica-da-Psicanalise.md).
+
 ## Relação com os princípios éticos já registrados
 
 Este documento não substitui [Documento-Mestre.md §5](../Documento-Mestre.md#5-princípios-éticos) — ele aplica, especificamente à ECO, os princípios já registrados ali como permanentes:
@@ -36,6 +40,7 @@ Este documento não substitui [Documento-Mestre.md §5](../Documento-Mestre.md#5
 
 - [README.md](README.md)
 - [Manifesto.md](Manifesto.md)
+- [Etica-da-Psicanalise.md](Etica-da-Psicanalise.md)
 - [Posicao-Clinica.md](Posicao-Clinica.md)
 - [Limites-da-ECO.md](Limites-da-ECO.md)
 - [Interface-Analista.md](Interface-Analista.md)

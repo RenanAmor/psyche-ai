@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 1.1 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada); Decisão de Arquitetura Permanente pós-Sprint 30: Modos de Operação da Plataforma (ECO Conversacional/Clínica/Pesquisa)
+> Versão 1.2 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada); Decisões de Arquitetura Permanente pós-Sprint 30: Modos de Operação da Plataforma (ECO Conversacional/Clínica/Pesquisa) e Ética da Psicanálise (fundamentação da ECO)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -1401,6 +1401,27 @@ API nova, sem migration, sem banco de dados, sem teste alterado. Os Modos
 2 e 3 são especificação de arquitetura, não implementação: nenhum
 componente de captura de vídeo, condução de sessão clínica fora da ECO,
 anonimização de pesquisa ou exportação científica foi criado.
+
+## Decisão de Arquitetura Permanente — Ética da Psicanálise (fundamentação da ECO)
+
+**Não é uma sprint numerada** — registrada aqui como evolução permanente da arquitetura, imediatamente após a decisão sobre os Modos de Operação da Plataforma, a pedido explícito do usuário.
+
+**Origem**: decisão de que a posição da ECO diante do sujeito seja fundamentada, explicitamente, na Ética da Psicanálise desenvolvida por Jacques Lacan no Seminário 7 (*A Ética da Psicanálise*, 1959-60), já catalogado em [Biblioteca-Teorica/Lacan/Seminarios/a-etica-da-psicanalise-seminario-vii.md](Biblioteca-Teorica/Lacan/Seminarios/a-etica-da-psicanalise-seminario-vii.md) desde a Sprint 25 — nunca antes vinculado a um motor do PsycheAI ("Motores do PsycheAI relacionados: Nenhum (catalogação apenas)").
+
+- [x] `docs/ECO/Etica-da-Psicanalise.md` (novo): fundamentação teórica no Seminário 7; registro de que o método conversacional da ECO (maiêutica socrática) e sua posição ética (Ética da Psicanálise) são elementos complementares, nunca substitutos um do outro; as oito posições que a ECO não ocupa (mestre, especialista, quem sabe, condução a um ideal, adaptação social, conselho, interpretação) e a contrapartida positiva (sustentar a possibilidade de emergência do discurso do sujeito) — nenhuma delas contradiz os cinco princípios de [ECO/Principios.md](ECO/Principios.md) nem os dez limites de [ECO/Limites-da-ECO.md](ECO/Limites-da-ECO.md); aprofunda-os pela via da ética lacaniana.
+- [x] `docs/Biblioteca-Teorica/Lacan/Seminarios/a-etica-da-psicanalise-seminario-vii.md`: campo "Motores do PsycheAI relacionados" atualizado de "Nenhum (catalogação apenas)" para ECO, com referência à nova fundamentação.
+- [x] `docs/Documento-Mestre.md` (versão 1.2, novo §6.8 "Fundamentação ética: a Ética da Psicanálise", complementar a §6.7 já existente).
+- [x] `docs/Arquitetura-Cientifica.md` (versão 1.2, novo §5.1, dentro do §5 já existente sobre a identidade da ECO).
+- [x] `docs/ECO/README.md` (versão 1.2, novo item na tabela de Estrutura, contagem de documentos atualizada de nove para dez).
+- [x] `docs/ECO/Etica.md` (versão 1.1, nova seção "Fundamentação na Ética da Psicanálise", sem alterar o compromisso já registrado — apenas explicitando sua origem teórica).
+- [x] Nenhum novo conceito canônico foi criado — a Ética da Psicanálise é registrada como pilar permanente da arquitetura, mesmo estatuto do método socrático, não como 22º conceito da Biblioteca Teórica (que permanece em 21, íntegra desde a Sprint 25).
+- [x] Validação: todos os links internos das seis edições/criações resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta decisão é exclusivamente documental — sem alteração de
+código de Domínio/Aplicação/Infraestrutura/Apresentação, sem API nova,
+sem migration, sem banco de dados, sem teste alterado, sem novo
+comportamento conversacional da ECO.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

@@ -1,6 +1,6 @@
 # Arquitetura Científica — Psyche AI
 
-> Versão 1.1 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 28 (ECO — Estrutura Computacional de Observação, §5), na Sprint 29 (Representação Computacional, §6), na Sprint 30 (§7, certificação da Base Científica v1.0) e por decisão de arquitetura permanente pós-Sprint 30 (§8, Modos de Operação da Plataforma). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
+> Versão 1.2 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 28 (ECO — Estrutura Computacional de Observação, §5), na Sprint 29 (Representação Computacional, §6), na Sprint 30 (§7, certificação da Base Científica v1.0), por decisão de arquitetura permanente pós-Sprint 30 (§8, Modos de Operação da Plataforma) e por nova decisão de arquitetura permanente (§5.1, Ética da Psicanálise). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
 
 ## 1. Cadeia de rastreabilidade obrigatória
 
@@ -61,6 +61,10 @@ Nenhum dado é descartado por representar um caso interrompido. Ver [Modelo-Obse
 Adicionado na Sprint 28 — princípio permanente. A ECO (Estrutura Computacional de Observação) é a interface conversacional exclusiva do PsycheAI diante do sujeito — a materialização do "modo de enunciação" já registrado em [Documento-Mestre.md §6.7/§7](Documento-Mestre.md#67-modo-de-enunciação-o-método-socrático). O sujeito nunca conversa diretamente com o Discourse Engine, o Motor Freud ou o Motor Lacan — apenas com a ECO, que aplica o método socrático (maiêutica) para sustentar a associação livre, sem jamais interpretar, aconselhar, diagnosticar ou substituir o analista.
 
 Identidade completa — manifesto, princípios permanentes, método socrático, posição clínica, fluxo conversacional, separação Sujeito/Analista aplicada à conversa e ética — documentada em [ECO/README.md](ECO/README.md). Os princípios de separação de interface (§2 acima) e a proibição de escrita lacaniana na conversa com o sujeito (§3 acima) valem integralmente para a ECO — este §5 não os substitui, apenas consolida sua aplicação específica à camada conversacional.
+
+### 5.1 Fundamentação ética: a Ética da Psicanálise
+
+Adicionado por decisão de arquitetura permanente, fora de sprint numerada — pilar permanente, complementar ao método socrático já registrado acima. A posição da ECO diante do sujeito é fundamentada, além do método (maiêutica socrática), na **Ética da Psicanálise** desenvolvida por Jacques Lacan no Seminário 7 (*A Ética da Psicanálise*, catalogado em [Biblioteca-Teorica/Lacan/Seminarios/a-etica-da-psicanalise-seminario-vii.md](Biblioteca-Teorica/Lacan/Seminarios/a-etica-da-psicanalise-seminario-vii.md)): a ECO não ocupa o lugar do mestre, do especialista ou de quem sabe; não conduz o sujeito a um ideal; não busca adaptação social; não oferece conselho nem produz interpretação — sustentando, em vez disso, a possibilidade de emergência do próprio discurso do sujeito. Método e ética são complementares, nunca substitutos um do outro. Detalhamento completo em [ECO/Etica-da-Psicanalise.md](ECO/Etica-da-Psicanalise.md).
 
 ## 6. Representação Computacional — modelo oficial
 
@@ -161,6 +165,7 @@ A ECO Conversacional é apenas uma interface da plataforma — a interface do Mo
 - [Modelo-Relacional/README.md](Modelo-Relacional/README.md)
 - [Representacao-Computacional/README.md](Representacao-Computacional/README.md)
 - [ECO/README.md](ECO/README.md)
+- [ECO/Etica-da-Psicanalise.md](ECO/Etica-da-Psicanalise.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
 - [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md)
 - [Base-Cientifica-v1.0.md](Base-Cientifica-v1.0.md)

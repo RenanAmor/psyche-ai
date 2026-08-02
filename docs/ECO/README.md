@@ -1,6 +1,6 @@
 # ECO — Estrutura Computacional de Observação
 
-> Versão 1.1 — Sprint 28; atualizado por decisão de arquitetura permanente pós-Sprint 30 ("Modos de Operação da Plataforma") para registrar que a ECO é a interface de apenas um dos três modos oficiais de operação da plataforma. Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) que documenta a identidade da interface conversacional do PsycheAI. Sprint exclusivamente científica e arquitetônica: nenhum código, API, banco de dados ou teste foi alterado para produzir esta documentação.
+> Versão 1.2 — Sprint 28; atualizado por decisão de arquitetura permanente pós-Sprint 30 ("Modos de Operação da Plataforma") para registrar que a ECO é a interface de apenas um dos três modos oficiais de operação da plataforma; estendido por nova decisão de arquitetura permanente para registrar a Ética da Psicanálise (Seminário 7 de Lacan) como fundamentação da posição ética da ECO — ver [Etica-da-Psicanalise.md](Etica-da-Psicanalise.md). Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) que documenta a identidade da interface conversacional do PsycheAI. Sprint exclusivamente científica e arquitetônica: nenhum código, API, banco de dados ou teste foi alterado para produzir esta documentação.
 
 ## O que é a ECO
 
@@ -25,6 +25,7 @@ Adicionado por decisão de arquitetura permanente pós-Sprint 30 ("Modos de Oper
 | [Interface-Analista.md](Interface-Analista.md) | O que o analista pode visualizar, fora da ECO |
 | [Limites-da-ECO.md](Limites-da-ECO.md) | Os dez limites permanentes, consolidados em um único documento de referência |
 | [Etica.md](Etica.md) | O compromisso ético permanente: a ECO nunca interpreta |
+| [Etica-da-Psicanalise.md](Etica-da-Psicanalise.md) | Fundamentação da posição ética da ECO na Ética da Psicanálise de Lacan (Seminário 7); as oito posições que a ECO não ocupa; complementaridade com a maiêutica socrática |
 
 ## Missão
 
@@ -43,7 +44,7 @@ Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Represent
 
 ## Restrições desta Sprint
 
-Nenhum código foi alterado. Nenhuma API foi modificada. Nenhum comportamento conversacional novo foi implementado. Todo componente citado nos nove documentos desta pasta já existia em produção antes desta Sprint — auditado contra o código real, na mesma disciplina já aplicada pela Biblioteca Teórica (Sprint 25), pelo Modelo Observacional (Sprint 26) e pelo Modelo Relacional (Sprint 27). Nenhum componente foi inventado.
+Nenhum código foi alterado. Nenhuma API foi modificada. Nenhum comportamento conversacional novo foi implementado. Todo componente citado nos dez documentos desta pasta (nove da Sprint 28 + [Etica-da-Psicanalise.md](Etica-da-Psicanalise.md), acrescentado por decisão de arquitetura permanente posterior) já existia em produção antes de sua respectiva adição — auditado contra o código real, na mesma disciplina já aplicada pela Biblioteca Teórica (Sprint 25), pelo Modelo Observacional (Sprint 26) e pelo Modelo Relacional (Sprint 27). Nenhum componente foi inventado.
 
 ## Referências cruzadas do projeto
 
@@ -52,6 +53,7 @@ Nenhum código foi alterado. Nenhuma API foi modificada. Nenhum comportamento co
 - [../Arquitetura.md](../Arquitetura.md)
 - [../Regras-Dominio.md](../Regras-Dominio.md)
 - [../Biblioteca-Teorica/README.md](../Biblioteca-Teorica/README.md)
+- [../Biblioteca-Teorica/Lacan/Seminarios/a-etica-da-psicanalise-seminario-vii.md](../Biblioteca-Teorica/Lacan/Seminarios/a-etica-da-psicanalise-seminario-vii.md)
 - [../Modelo-Observacional/README.md](../Modelo-Observacional/README.md)
 - [../Modelo-Relacional/README.md](../Modelo-Relacional/README.md)
 - [../Roadmap.md](../Roadmap.md)
