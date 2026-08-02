@@ -1,6 +1,6 @@
 # Modelo Relacional — Psyche AI
 
-> Base científica que documenta como todos os conceitos da [Biblioteca Teórica](../Biblioteca-Teorica/README.md) se relacionam entre si, sustentando o futuro Motor de Representação. Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) entre o [Modelo Observacional](../Modelo-Observacional/README.md) (o que pode ser observado, conceito a conceito) e a futura Ontologia computacional (como as observações se conectam entre si). Nenhuma relação neste Modelo foi criada sem fundamentação explícita na literatura já catalogada pela Biblioteca Teórica.
+> Base científica que documenta como todos os conceitos da [Biblioteca Teórica](../Biblioteca-Teorica/README.md) se relacionam entre si, sustentando o Motor de Representação. Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) entre o [Modelo Observacional](../Modelo-Observacional/README.md) (o que pode ser observado, conceito a conceito) e a [Representação Computacional](../Representacao-Computacional/README.md) (Sprint 29 — como as observações e relações chegam a ser apresentadas ao Analista e ao Sujeito). Nenhuma relação neste Modelo foi criada sem fundamentação explícita na literatura já catalogada pela Biblioteca Teórica.
 
 ## O que este Modelo é
 
@@ -51,6 +51,10 @@ Nenhuma obra nova foi consultada ou citada nesta Sprint além das já catalogada
 
 Nenhuma interpretação foi escrita. Nenhuma obra foi resumida de forma opinativa. Nenhum motor foi implementado. Nenhum código, API, banco de dados ou teste foi alterado. Esta Sprint é exclusivamente documental — Sprint científica de organização relacional, não uma sprint de engenharia.
 
+## Representação Computacional (camada seguinte)
+
+Adicionado na Sprint 29 — [Representacao-Computacional/](../Representacao-Computacional/README.md) documenta como as relações aqui classificadas (matrizes e grafos científicos) chegam a ser efetivamente apresentadas ao Analista, através de oito representações (Timeline, Memória Longitudinal, Recorrências, Formações Freudianas, Representações Lacanianas, Circuitos, Grafos, Indicadores), e por que nenhuma delas alcança o Sujeito. Nenhum Motor de Representação pode ser desenvolvido sem que essa camada esteja documentada primeiro, mesma obrigatoriedade já registrada em [Arquitetura-Cientifica.md §1](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória).
+
 ## Referências cruzadas do projeto
 
 - [Conceitos/](Conceitos/)
@@ -60,6 +64,7 @@ Nenhuma interpretação foi escrita. Nenhuma obra foi resumida de forma opinativ
 - [Grafos/README.md](Grafos/README.md)
 - [../Biblioteca-Teorica/README.md](../Biblioteca-Teorica/README.md)
 - [../Modelo-Observacional/README.md](../Modelo-Observacional/README.md)
+- [../Representacao-Computacional/README.md](../Representacao-Computacional/README.md)
 - [../Documento-Mestre.md](../Documento-Mestre.md)
 - [../Arquitetura-Cientifica.md](../Arquitetura-Cientifica.md)
 - [../Ontologia-Freud.md](../Ontologia-Freud.md)

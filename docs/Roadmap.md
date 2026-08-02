@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.20 — Sprint 28: ECO (Estrutura Computacional de Observação)
+> Versão 0.21 — Sprint 29: Representação Computacional
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -1334,6 +1334,28 @@ API nova, sem migration, sem banco de dados, sem teste alterado, sem novo
 comportamento conversacional. Nenhuma interpretação foi escrita; nenhum
 componente foi inventado; cada afirmação sobre o que a ECO já faz decorre
 diretamente do código já auditado nas Sprints 12, 17, 20, 22-24.
+
+## Sprint 29 — Representação Computacional
+
+**Origem**: pedido do usuário para construir o modelo oficial de Representação Computacional do PsycheAI — a camada que documenta como toda observação produzida pelos motores (Discourse Engine, Motor Freud, Motor Lacan) é apresentada ao Analista e, de forma estritamente distinta, ao Sujeito. Objetivo científico da Sprint: transformar as observações computacionais em representações estruturadas, auditáveis e fundamentadas cientificamente — nenhuma representação pode produzir interpretação, todas devem representar apenas evidências observacionais.
+
+- [x] `docs/Representacao-Computacional/` (novo): `README.md` (o que é a camada, por que existe separada do Modelo Relacional, estrutura, rastreabilidade), `Principios.md` (os cinco atributos obrigatórios — observacional, rastreável, auditável, reproduzível, fundamentada na Biblioteca Teórica — e as quatro proibições permanentes — interpretar, diagnosticar, concluir, produzir hipótese clínica), `Interface-Sujeito.md` (consolida, do ponto de vista desta camada, que nenhuma das oito representações alcança o Sujeito, complementando sem duplicar [ECO/Interface-Sujeito.md](ECO/Interface-Sujeito.md)), `Interface-Analista.md` (especifica as oito representações disponíveis, com estado de implementação, complementando [ECO/Interface-Analista.md](ECO/Interface-Analista.md)), `Timeline.md`, `Memoria-Longitudinal.md`, `Recorrencias.md`, `Formacoes-Freudianas.md`, `Representacoes-Lacanianas.md`, `Circuitos.md`, `Grafos.md` e `Indicadores.md` (uma representação por documento, cada uma com objetivo, rastreabilidade até a Biblioteca Teórica, dimensões próprias auditadas item a item contra o código real, dados necessários/opcionais, componentes envolvidos e visão do Analista/Sujeito), `Evidencias.md` (tabela de rastreabilidade das oito representações até a Biblioteca Teórica) e `Visualizacoes.md` (catálogo das oito visualizações, cada uma respondendo às nove perguntas obrigatórias: objetivo, evidências, componentes, motores, dados necessários/opcionais, automação, dependência do analista, visibilidade ao sujeito).
+- [x] **Auditoria contra o código real**, mesma disciplina já estabelecida pela Biblioteca Teórica/Modelo Observacional/Modelo Relacional/ECO: cada afirmação de "implementado" verificada contra `app/` nesta data (`LinhaDoTempoApplicationService`, `MemoriaLongitudinal`, `DetectorRecorrencias`, `Recorrencia`, `TipoFormacaoFreudiana`/`ClassificadorFreudianoLLM`, `ReclassificadorLacaniano`, `DetectorRecorrencias::detectarCircuito()`, `GrafoCircuitoViewModel`, `ConsolidacaoApplicationService`). Toda dimensão não implementada (ex.: "Intensidade" de uma Recorrência, "Mudanças" e "Encerramentos" na Timeline/Circuitos, seis das oito estruturas lacanianas do briefing, quatro dos cinco tipos de grafo) é marcada explicitamente como "Não implementado — especificação para sprint futura", nunca apresentada por antecipação.
+- [x] **Nota terminológica de precisão**, registrada em `Circuitos.md`: o componente "Circuito Pulsional", já nomeado desde o Modelo Relacional (Sprint 27) nas matrizes Motor×Conceito e no Grafo dos Motores, tem o nome inspirado no conceito de Pulsão mas não o operacionaliza — o que de fato implementa é o circuito/trajeto de uma Recorrência através de Sessões distintas, mesma ressalva já registrada em `Modelo-Relacional/Conceitos/pulsao.md` e `objeto-a.md`, preservada aqui sem contradição.
+- [x] `docs/Documento-Mestre.md` (§6.0): "Representação Computacional" passa a apontar também para o novo modelo consolidado, além da seção obrigatória por Conceito já existente; versão avançada para 0.9.
+- [x] `docs/Arquitetura-Cientifica.md`: novo §6 "Representação Computacional — modelo oficial", consolidando que a separação Sujeito/Analista (§2) e a exclusividade lacaniana ao Analista (§3) valem integralmente para as oito representações; versão avançada para 0.4.
+- [x] `docs/Modelo-Observacional.md` (§7) e `docs/Modelo-Relacional/README.md`: ambos estendidos com referência à Representação Computacional como camada seguinte na cadeia de rastreabilidade.
+- [x] Validação: todos os links internos dos treze novos documentos de `docs/Representacao-Computacional/` e das quatro edições em documentos existentes resolvidos contra o sistema de arquivos — zero link quebrado.
+- [x] Atualização do Roadmap.
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente científico: sem novo motor, sem
+alteração de código de Domínio/Aplicação/Infraestrutura/Apresentação, sem
+API nova, sem migration, sem banco de dados, sem teste alterado. Nenhuma
+interpretação foi escrita; nenhum componente foi inventado; toda afirmação
+de "implementado" decorre diretamente do código já auditado pelas Sprints
+anteriores, e toda dimensão sem correspondência no código é marcada como
+especificação para sprint futura, nunca como fato consumado.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

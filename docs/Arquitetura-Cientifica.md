@@ -1,6 +1,6 @@
 # Arquitetura Científica — Psyche AI
 
-> Versão 0.3 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional) e na Sprint 28 (ECO — Estrutura Computacional de Observação, §5). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
+> Versão 0.4 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 28 (ECO — Estrutura Computacional de Observação, §5) e na Sprint 29 (Representação Computacional, §6). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
 
 ## 1. Cadeia de rastreabilidade obrigatória
 
@@ -13,7 +13,7 @@ Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Represent
 - **Biblioteca Teórica**: [Biblioteca-Teorica/](Biblioteca-Teorica/README.md).
 - **Modelo Observacional**: [Modelo-Observacional.md](Modelo-Observacional.md) — princípios gerais: o que, do discurso registrado, pode em princípio ser observado, e o que conta como sucesso científico da observação (distinto de sucesso clínico). Complementa, sem substituir, [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado. Detalhamento conceito a conceito — fenômeno observado, evidências observáveis, dados necessários/opcionais, limites explícitos — em [Modelo-Observacional/](Modelo-Observacional/README.md) (Sprint 26), um documento por cada um dos 21 conceitos canônicos da Biblioteca Teórica. Nenhum motor novo pode ser desenvolvido sem que essa camada esteja documentada primeiro.
 - **Modelo Relacional**: [Modelo-Relacional/](Modelo-Relacional/README.md) (Sprint 27) — como os 21 conceitos canônicos se relacionam entre si: conceitos antecedentes, consequentes, relacionados, relações estruturais/temporais/observacionais/de dependência/bidirecionais/não observáveis computacionalmente, cada uma com fundamentação bibliográfica, intensidade e natureza. Inclui seis matrizes (Conceito×Conceito, Motor×Conceito, Conceito×Obra, Conceito×Autor, Conceito×Evidência, Conceito×Observabilidade) e a especificação — sem implementação — de cinco grafos científicos. Nenhum Motor de Representação pode ser desenvolvido sem que essa camada esteja documentada primeiro.
-- **Representação Computacional**: seção obrigatória de todo documento de Conceito em [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/).
+- **Representação Computacional**: seção obrigatória de todo documento de Conceito em [Biblioteca-Teorica/Conceitos/](Biblioteca-Teorica/Conceitos/), consolidada no modelo oficial de [Representacao-Computacional/](Representacao-Computacional/README.md) (Sprint 29) — ver §6 abaixo.
 - **Ontologia**: [Ontologia-Freud.md](Ontologia-Freud.md) / [Ontologia-Lacan.md](Ontologia-Lacan.md).
 - **Modelo Computacional**: seção "Aplicação Computacional" de cada documento de Conceito.
 - **Implementação**: código real em `app/`.
@@ -62,6 +62,12 @@ Adicionado na Sprint 28 — princípio permanente. A ECO (Estrutura Computaciona
 
 Identidade completa — manifesto, princípios permanentes, método socrático, posição clínica, fluxo conversacional, separação Sujeito/Analista aplicada à conversa e ética — documentada em [ECO/README.md](ECO/README.md). Os princípios de separação de interface (§2 acima) e a proibição de escrita lacaniana na conversa com o sujeito (§3 acima) valem integralmente para a ECO — este §5 não os substitui, apenas consolida sua aplicação específica à camada conversacional.
 
+## 6. Representação Computacional — modelo oficial
+
+Adicionado na Sprint 29 — princípio permanente. O modelo oficial de Representação Computacional, documentado em [Representacao-Computacional/](Representacao-Computacional/README.md), define como toda observação produzida pelos motores é apresentada ao Analista e, de forma estritamente distinta, ao Sujeito. Cinco atributos obrigatórios (observacional, rastreável, auditável, reproduzível, fundamentada na Biblioteca Teórica) e quatro proibições permanentes (interpretar, diagnosticar, concluir, produzir hipótese clínica) regem as oito representações catalogadas: Timeline, Memória Longitudinal, Recorrências, Formações Freudianas, Representações Lacanianas, Circuitos, Grafos e Indicadores — ver [Representacao-Computacional/Principios.md](Representacao-Computacional/Principios.md).
+
+Nenhum Motor de Representação (visualização, indicador, grafo renderizado) pode ser desenvolvido sem que esta camada esteja documentada primeiro — mesma obrigatoriedade já estabelecida para o Modelo Observacional e o Modelo Relacional em §1 acima. A separação de interface entre Sujeito e Analista (§2) e a exclusividade da escrita lacaniana ao Analista (§3) valem integralmente para esta camada — §6 não os substitui, apenas consolida sua aplicação a cada uma das oito representações, em [Representacao-Computacional/Interface-Sujeito.md](Representacao-Computacional/Interface-Sujeito.md) e [Representacao-Computacional/Interface-Analista.md](Representacao-Computacional/Interface-Analista.md).
+
 ## Referências cruzadas do projeto
 
 - [Documento-Mestre.md](Documento-Mestre.md)
@@ -69,6 +75,7 @@ Identidade completa — manifesto, princípios permanentes, método socrático, 
 - [Modelo-Observacional.md](Modelo-Observacional.md)
 - [Modelo-Observacional/README.md](Modelo-Observacional/README.md)
 - [Modelo-Relacional/README.md](Modelo-Relacional/README.md)
+- [Representacao-Computacional/README.md](Representacao-Computacional/README.md)
 - [ECO/README.md](ECO/README.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
 - [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md)

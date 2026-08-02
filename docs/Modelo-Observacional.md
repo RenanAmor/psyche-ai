@@ -1,6 +1,6 @@
 # Modelo Observacional — Psyche AI
 
-> Versão 0.3 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional) e na Sprint 27 (§6, apontando para o Modelo Relacional). Define o que, do discurso registrado, pode em princípio ser observado pelo PsycheAI, e o que conta como sucesso científico dessa observação — distinto de, e independente de, sucesso terapêutico. Complementa [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado (Evento Discursivo, Sessão, temporalidade); este documento trata do objetivo e do critério de qualidade da observação, não da sua estrutura de dados.
+> Versão 0.4 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 27 (§6, apontando para o Modelo Relacional) e na Sprint 29 (§7, apontando para a Representação Computacional). Define o que, do discurso registrado, pode em princípio ser observado pelo PsycheAI, e o que conta como sucesso científico dessa observação — distinto de, e independente de, sucesso terapêutico. Complementa [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md), que define a estrutura de dados do discurso registrado (Evento Discursivo, Sessão, temporalidade); este documento trata do objetivo e do critério de qualidade da observação, não da sua estrutura de dados.
 >
 > Este documento registra os **princípios gerais** da observação. Para o detalhamento conceito a conceito — fenômeno observado, evidências observáveis, dados necessários/opcionais, limites e automação, um documento por cada um dos 21 conceitos canônicos da Biblioteca Teórica — ver o catálogo em [Modelo-Observacional/](Modelo-Observacional/README.md), novo nesta Sprint 26.
 
@@ -48,10 +48,15 @@ Adicionado na Sprint 26 — [Modelo-Observacional/](Modelo-Observacional/README.
 
 Adicionado na Sprint 27 — [Modelo-Relacional/](Modelo-Relacional/README.md) documenta como os mesmos 21 conceitos, já traduzidos em fenômeno observável por este catálogo, se relacionam entre si: conceitos antecedentes, consequentes, relacionados, relações estruturais/temporais/observacionais/de dependência/bidirecionais/não observáveis computacionalmente — cada uma com fundamentação bibliográfica, intensidade e natureza explícitas — além de seis matrizes e a especificação (sem implementação) de cinco grafos científicos. Nenhum Motor de Representação pode ser desenvolvido sem que essa camada relacional esteja documentada primeiro, mesma obrigatoriedade já registrada em [Arquitetura-Cientifica.md §1](Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória).
 
+## 7. Representação Computacional (camada seguinte)
+
+Adicionado na Sprint 29 — [Representacao-Computacional/](Representacao-Computacional/README.md) documenta como cada fenômeno observável catalogado por este documento e por [Modelo-Observacional/](Modelo-Observacional/README.md) chega a ser efetivamente apresentado ao Analista (oito representações: Timeline, Memória Longitudinal, Recorrências, Formações Freudianas, Representações Lacanianas, Circuitos, Grafos, Indicadores) e, de forma estritamente distinta, ao Sujeito. Nenhum Motor de Representação pode ser desenvolvido sem que essa camada esteja documentada primeiro, mesma obrigatoriedade já registrada em [Arquitetura-Cientifica.md §1](Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória).
+
 ## Referências cruzadas do projeto
 
 - [Modelo-Observacional/README.md](Modelo-Observacional/README.md)
 - [Modelo-Relacional/README.md](Modelo-Relacional/README.md)
+- [Representacao-Computacional/README.md](Representacao-Computacional/README.md)
 - [Documento-Mestre.md](Documento-Mestre.md)
 - [Arquitetura-Cientifica.md](Arquitetura-Cientifica.md)
 - [Modelo-Computacional-Discurso.md](Modelo-Computacional-Discurso.md)
