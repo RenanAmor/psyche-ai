@@ -8,7 +8,7 @@
 - **Ano**: 1915
 - **Idioma**: Alemão
 - **Área**: Freud
-- **Conceitos relacionados**: Desejo; Repetição; Formação de compromisso
+- **Conceitos relacionados**: Desejo (Freud); Repetição; Formação de compromisso
 - **Autores relacionados**: Nenhum registrado nesta versão.
 - **Obras relacionadas**: Pulsões e seus Destinos; Três Ensaios sobre a Teoria da Sexualidade
 - **Status**: Catalogado
@@ -21,7 +21,7 @@
 - **Dados necessários**: EventoDiscursivo.conteudo normalizado através de múltiplas Sessões, para observar insistência ao longo do tempo
 - **Dados opcionais**: OcorrenciaRecorrencia (circuito) — mostra o trajeto, não a pulsão em si
 - **Eventos que podem originá-lo**: Registro de múltiplos EventoDiscursivo com conteúdo normalizado equivalente ao longo de Sessões distintas
-- **Relações com outros conceitos**: Força motriz junto com Desejo (Ontologia-Freud.md §4); base teórica da Repetição.
+- **Relações com outros conceitos**: Força motriz junto com Desejo (Freud) (Ontologia-Freud.md §4); base teórica da Repetição.
 - **Componentes do PsycheAI que utilizam este conceito**: Domain/Services/DetectorRecorrencias — observa insistência de conteúdo, mas nomeia isso "recorrência", nunca "pulsão"
 - **Pode ser observado automaticamente?**: Não — o que é observado é recorrência de conteúdo (um efeito possível), nunca a pulsão como tal.
 - **Pode ser organizado automaticamente?**: Não.

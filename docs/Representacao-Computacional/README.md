@@ -1,6 +1,6 @@
 # Representação Computacional — Psyche AI
 
-> Sprint 29. Modelo oficial de Representação Computacional do PsycheAI: como toda observação produzida pelos motores (Discourse Engine, Motor Freud, Motor Lacan) é apresentada ao Analista e, de forma estritamente distinta, ao Sujeito. Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) entre o [Modelo Relacional](../Modelo-Relacional/README.md) (como os 21 conceitos canônicos se relacionam entre si) e a Ontologia computacional (como as observações se conectam entre si na implementação). Sprint exclusivamente científica: nenhum código, API, banco de dados ou teste foi alterado para produzir esta documentação.
+> Sprint 29. Modelo oficial de Representação Computacional do PsycheAI: como toda observação produzida pelos motores (Discourse Engine, Motor Freud, Motor Lacan) é apresentada ao Analista e, de forma estritamente distinta, ao Sujeito. Camada da [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) entre o [Modelo Relacional](../Modelo-Relacional/README.md) (como os 21 conceitos canônicos se relacionam entre si) e a Ontologia (vocabulário conceitual fixado em [Ontologia-Freud.md](../Ontologia-Freud.md)/[Ontologia-Lacan.md](../Ontologia-Lacan.md)). Sprint exclusivamente científica: nenhum código, API, banco de dados ou teste foi alterado para produzir esta documentação.
 
 ## O que esta camada é
 

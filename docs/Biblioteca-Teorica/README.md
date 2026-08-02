@@ -14,6 +14,8 @@ Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Represent
 
 Nenhum conceito é implementado no código sem essa cadeia completa. Ver [Como-os-Motores-Usam-a-Biblioteca.md](Como-os-Motores-Usam-a-Biblioteca.md) para a explicação completa de como cada motor do PsycheAI se apoia nela. Como os 21 conceitos canônicos catalogados aqui se relacionam entre si — conceito a conceito, com fundamentação bibliográfica, intensidade, natureza e observabilidade de cada relação, mais matrizes e especificação de grafos — está em [../Modelo-Relacional/](../Modelo-Relacional/README.md) (Sprint 27), camada que sucede o [Modelo Observacional](../Modelo-Observacional/README.md) nesta cadeia.
 
+> **Nota de nomenclatura (Sprint 30)**: os 229 documentos desta Biblioteca (catalogados na Sprint 25, antes da Sprint 28) usam "Modo Socrático" como valor do campo "Motores do PsycheAI relacionados" nos quatro motores conceituais. A partir da Sprint 28, esse mesmo componente tem identidade oficial: **ECO — Estrutura Computacional de Observação** (ver [ECO/README.md](../ECO/README.md)). Os dois nomes designam exatamente o mesmo componente — nenhuma reescrita retroativa dos 229 documentos foi feita nesta Sprint 30 (risco de regenerar `_gerador/*.php` de forma não coordenada seria desproporcional a uma nota de nomenclatura), mas toda leitura destes documentos deve entender "Modo Socrático" como sinônimo histórico de "ECO".
+
 ## Estrutura
 
 | Pasta | Conteúdo | Itens catalogados |

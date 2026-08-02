@@ -1,6 +1,6 @@
 # Formação de compromisso — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/formacao-de-compromisso.md](../../Biblioteca-Teorica/Conceitos/formacao-de-compromisso.md); fenômeno observável em [Modelo-Observacional/Conceitos/formacao-de-compromisso.md](../../Modelo-Observacional/Conceitos/formacao-de-compromisso.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/formacao-de-compromisso.md](../../Biblioteca-Teorica/Conceitos/formacao-de-compromisso.md); fenômeno observável em [Modelo-Observacional/Conceitos/formacao-de-compromisso.md](../../Modelo-Observacional/Conceitos/formacao-de-compromisso.md).
 
 ## Relações Científicas
 

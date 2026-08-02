@@ -1,6 +1,6 @@
 # Falta — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/falta.md](../../Biblioteca-Teorica/Conceitos/falta.md); fenômeno observável em [Modelo-Observacional/Conceitos/falta.md](../../Modelo-Observacional/Conceitos/falta.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/falta.md](../../Biblioteca-Teorica/Conceitos/falta.md); fenômeno observável em [Modelo-Observacional/Conceitos/falta.md](../../Modelo-Observacional/Conceitos/falta.md).
 
 ## Relações Científicas
 

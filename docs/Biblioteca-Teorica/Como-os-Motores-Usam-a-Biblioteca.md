@@ -9,12 +9,15 @@ Desde esta Sprint, **nenhum conceito é implementado no código sem fundamentaç
 A cadeia de rastreabilidade exigida (ver [Documento-Mestre.md §6.0](../Documento-Mestre.md#60-objetivo-científico-do-psycheai) e [Arquitetura.md §9](../Arquitetura.md#9-base-científica-e-princípios-de-representação-biblioteca-teórica)) é:
 
 ```
-Biblioteca Teórica → Modelo Observacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
+Biblioteca Teórica → Modelo Observacional → Modelo Relacional → Representação Computacional → Ontologia → Modelo Computacional → Implementação → Testes
 ```
 
+> Nota de consolidação (Sprint 30): esta cadeia tinha ficado desatualizada nesta página desde a Sprint 25 (não incluía "Modelo Relacional", introduzido na Sprint 27) — corrigida para o texto canônico, idêntico ao reproduzido em [Documento-Mestre.md §6.0](../Documento-Mestre.md#60-objetivo-científico-do-psycheai) e [Arquitetura-Cientifica.md §1](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória).
+
 - **Biblioteca Teórica**: autores, obras, conceitos — `Freud/`, `Lacan/`, `Referencias/`, `Psicanalise/`.
-- **Modelo Observacional**: o que, do discurso registrado, pode em princípio ser observado — [Modelo-Computacional-Discurso.md](../Modelo-Computacional-Discurso.md).
-- **Representação Computacional**: como o conceito pode aparecer para o Sujeito e para o Analista — seção obrigatória de todo documento de Conceito.
+- **Modelo Observacional**: o que, do discurso registrado, pode em princípio ser observado — princípios gerais em [Modelo-Observacional.md](../Modelo-Observacional.md), catálogo por conceito em [Modelo-Observacional/](../Modelo-Observacional/README.md).
+- **Modelo Relacional**: como os 21 conceitos canônicos se relacionam entre si — [Modelo-Relacional/](../Modelo-Relacional/README.md).
+- **Representação Computacional**: como o conceito pode aparecer para o Sujeito e para o Analista — seção obrigatória de todo documento de Conceito, consolidada por tipo de representação em [Representacao-Computacional/](../Representacao-Computacional/README.md).
 - **Ontologia**: vocabulário fixado em [Ontologia-Freud.md](../Ontologia-Freud.md) / [Ontologia-Lacan.md](../Ontologia-Lacan.md).
 - **Modelo Computacional**: seção "Aplicação Computacional" de cada documento de Conceito.
 - **Implementação**: código real em `app/`.
@@ -52,9 +55,9 @@ Reclassifica as mesmas recorrências trazidas pelo Freud Engine com vocabulário
 - Conceito mapeado na tabela de reclassificação, mas não efetivamente disparado pelo detector atual: [Metáfora](Conceitos/metafora.md) — ver a limitação registrada no próprio documento do conceito.
 - Conceitos sem nenhuma representação computacional nesta versão, incluídos aqui porque compõem o vocabulário estrutural de Ontologia-Lacan.md §3: [Significante](Conceitos/significante.md), [Cadeia significante](Conceitos/cadeia-significante.md), [Registro Simbólico](Conceitos/registro-simbolico.md), [Registro Imaginário](Conceitos/registro-imaginario.md), [Registro Real](Conceitos/registro-real.md), [Outro](Conceitos/outro.md), [Objeto a](Conceitos/objeto-a.md), [Falta](Conceitos/falta.md), [Desejo lacaniano](Conceitos/desejo-lacaniano.md).
 
-### Modo Socrático
+### ECO — Estrutura Computacional de Observação
 
-Camada de enunciação que transforma o que os motores acima trazem em pergunta dirigida ao sujeito, nunca em afirmação (`RespostaSocraticaService`/`GeradorDePerguntaSocraticaLLM`, desde a Sprint 23).
+Camada de enunciação que transforma o que os motores acima trazem em pergunta dirigida ao sujeito, nunca em afirmação (`RespostaSocraticaService`/`GeradorDePerguntaSocraticaLLM`, desde a Sprint 23). Chamada de "Modo Socrático" até a Sprint 28, quando recebeu identidade oficial como ECO — ver [ECO/README.md](../ECO/README.md).
 
 - Fundamentação nomeada explicitamente em Documento-Mestre.md §6.7 e catalogada nesta Sprint em [Referencias/socrates.md](Referencias/socrates.md) — único autor de Referências Primárias com motor do PsycheAI vinculado por nome.
 - Usa as evidências já produzidas pelo Freud Engine/Lacan Engine (recorrência, rótulo estrutural) apenas para saber *onde* dirigir a pergunta — nunca para compor conteúdo interpretativo (Regra 7, [Regras-Dominio.md](../Regras-Dominio.md)).
@@ -76,6 +79,11 @@ Dos 229 documentos desta Sprint (94 obras de Freud, 74 de Lacan, 27 Referências
 - [README.md](README.md)
 - [Modelo-de-Documento.md](Modelo-de-Documento.md)
 - [../Documento-Mestre.md](../Documento-Mestre.md)
+- [../Arquitetura-Cientifica.md](../Arquitetura-Cientifica.md)
+- [../Modelo-Observacional/README.md](../Modelo-Observacional/README.md)
+- [../Modelo-Relacional/README.md](../Modelo-Relacional/README.md)
+- [../Representacao-Computacional/README.md](../Representacao-Computacional/README.md)
+- [../ECO/README.md](../ECO/README.md)
 - [../Ontologia-Freud.md](../Ontologia-Freud.md)
 - [../Ontologia-Lacan.md](../Ontologia-Lacan.md)
 - [../Regras-Dominio.md](../Regras-Dominio.md)

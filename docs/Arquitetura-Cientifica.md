@@ -1,6 +1,6 @@
 # Arquitetura Científica — Psyche AI
 
-> Versão 0.4 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 28 (ECO — Estrutura Computacional de Observação, §5) e na Sprint 29 (Representação Computacional, §6). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
+> Versão 1.0 — criado na Sprint 25 (Biblioteca Teórica), estendido na Sprint 26 (Modelo Observacional), na Sprint 28 (ECO — Estrutura Computacional de Observação, §5), na Sprint 29 (Representação Computacional, §6) e na Sprint 30 (§7, certificação da Base Científica v1.0). Documento consolidado dos princípios científicos permanentes da arquitetura do PsycheAI — distinto de [Arquitetura.md](Arquitetura.md), que trata da arquitetura técnica (camadas, componentes, stack). Este documento trata da arquitetura da fundamentação científica: como a Biblioteca Teórica se conecta à implementação, e quais princípios éticos/epistemológicos nenhuma sprint futura pode contradizer.
 
 ## 1. Cadeia de rastreabilidade obrigatória
 
@@ -68,6 +68,12 @@ Adicionado na Sprint 29 — princípio permanente. O modelo oficial de Represent
 
 Nenhum Motor de Representação (visualização, indicador, grafo renderizado) pode ser desenvolvido sem que esta camada esteja documentada primeiro — mesma obrigatoriedade já estabelecida para o Modelo Observacional e o Modelo Relacional em §1 acima. A separação de interface entre Sujeito e Analista (§2) e a exclusividade da escrita lacaniana ao Analista (§3) valem integralmente para esta camada — §6 não os substitui, apenas consolida sua aplicação a cada uma das oito representações, em [Representacao-Computacional/Interface-Sujeito.md](Representacao-Computacional/Interface-Sujeito.md) e [Representacao-Computacional/Interface-Analista.md](Representacao-Computacional/Interface-Analista.md).
 
+## 7. Base Científica v1.0 — certificação
+
+Adicionado na Sprint 30 — princípio permanente. A Base Científica do PsycheAI, consolidando tudo produzido entre a Sprint 25 e a Sprint 29, foi auditada, corrigida e certificada como versão 1.0 em [Base-Cientifica-v1.0.md](Base-Cientifica-v1.0.md). A partir desta certificação, a **Fase 1 — Fundação Científica** está oficialmente encerrada e a **Fase 2 — Desenvolvimento Experimental** tem início.
+
+Qualquer alteração aos princípios permanentes registrados neste documento (§1-6) exige o processo descrito em [Base-Cientifica-v1.0.md, "Critérios para futuras alterações"](Base-Cientifica-v1.0.md#critérios-para-futuras-alterações) — decisão explícita do usuário, atualização coordenada de todos os documentos afetados, revalidação de links e da cadeia de rastreabilidade, e registro no Roadmap.
+
 ## Referências cruzadas do projeto
 
 - [Documento-Mestre.md](Documento-Mestre.md)
@@ -79,5 +85,6 @@ Nenhum Motor de Representação (visualização, indicador, grafo renderizado) p
 - [ECO/README.md](ECO/README.md)
 - [Biblioteca-Teorica/README.md](Biblioteca-Teorica/README.md)
 - [Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md](Biblioteca-Teorica/Valor-Cientifico-dos-Casos.md)
+- [Base-Cientifica-v1.0.md](Base-Cientifica-v1.0.md)
 - [Regras-Dominio.md](Regras-Dominio.md)
 - [Roadmap.md](Roadmap.md)

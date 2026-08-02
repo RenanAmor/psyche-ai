@@ -21,7 +21,7 @@
 - **Dados necessários**: EventoDiscursivo.conteudo (relato do sonho, tratado como qualquer outro material discursivo)
 - **Dados opcionais**: Nenhum registrado nesta versão.
 - **Eventos que podem originá-lo**: Mensagem do Sujeito classificada pelo Motor Freud
-- **Relações com outros conceitos**: Modelo para o Chiste e para toda Formação de compromisso; ligado ao Desejo (realização de desejo) e ao Recalque (razão da distorção).
+- **Relações com outros conceitos**: Modelo para o Chiste e para toda Formação de compromisso; ligado ao Desejo (Freud) (realização de desejo) e ao Recalque (razão da distorção).
 - **Componentes do PsycheAI que utilizam este conceito**: TipoFormacaoFreudiana::Sonho; Infrastructure/AI/ClassificadorFreudianoLLM
 - **Pode ser observado automaticamente?**: Sim (reconhecimento de forma, não interpretação de conteúdo onírico).
 - **Pode ser organizado automaticamente?**: Não.

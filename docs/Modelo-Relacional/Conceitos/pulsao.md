@@ -1,6 +1,6 @@
 # Pulsão — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/pulsao.md](../../Biblioteca-Teorica/Conceitos/pulsao.md); fenômeno observável em [Modelo-Observacional/Conceitos/pulsao.md](../../Modelo-Observacional/Conceitos/pulsao.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/pulsao.md](../../Biblioteca-Teorica/Conceitos/pulsao.md); fenômeno observável em [Modelo-Observacional/Conceitos/pulsao.md](../../Modelo-Observacional/Conceitos/pulsao.md).
 
 ## Relações Científicas
 

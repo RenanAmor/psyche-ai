@@ -1,6 +1,6 @@
 # Roadmap — Psyche AI
 
-> Versão 0.21 — Sprint 29: Representação Computacional
+> Versão 1.0 — Sprint 30: Consolidação Científica v1.0 (Base Científica certificada; Fase 1 encerrada, Fase 2 iniciada)
 
 ## Sprint 0 — Fundação oficial do projeto (concluída)
 
@@ -1356,6 +1356,29 @@ interpretação foi escrita; nenhum componente foi inventado; toda afirmação
 de "implementado" decorre diretamente do código já auditado pelas Sprints
 anteriores, e toda dimensão sem correspondência no código é marcada como
 especificação para sprint futura, nunca como fato consumado.
+
+## Sprint 30 — Consolidação Científica v1.0
+
+**Origem**: pedido do usuário para consolidar oficialmente a Base Científica v1.0 do PsycheAI — Sprint exclusivamente de auditoria, sem novo conceito, sem novo componente arquitetônico, sem código. Objetivo científico: auditar, consolidar, padronizar e certificar toda a documentação científica produzida entre a Sprint 23 e a Sprint 29, congelando a Base Científica na versão 1.0 e encerrando formalmente a Fase 1 — Fundação Científica do PsycheAI.
+
+- [x] **Auditoria completa em três frentes paralelas**, cobrindo a totalidade dos 351 documentos de `docs/`: (1) Biblioteca Teórica — todos os 21 Conceitos, todos os documentos de topo, amostragem de 15 documentos de Obra/Autor, cross-check com as duas Ontologias; (2) Modelo Observacional + Modelo Relacional — ambos os READMEs, ambas as sínteses Freud/Lacan, as 6 Matrizes, os 5 Grafos, 12 dos 21 pares de Conceitos em ambas as camadas, verificação estrutural programática dos 42 documentos de Conceito; (3) ECO + Ontologias + núcleo institucional — os 10 documentos da ECO, ambas as Ontologias, Regras-Dominio.md, Documento-Mestre.md, Arquitetura-Cientifica.md, Arquitetura.md, e os dois documentos de Interface de `Representacao-Computacional/`.
+- [x] **Verificação mecânica de cobertura e links**: 21/21/21/21 de cobertura por conceito (Biblioteca Teórica, Modelo Observacional, Modelo Relacional, e Bloco 3 "Representação Computacional" dentro de cada documento de Conceito), confirmada byte-a-byte; 3.895 links internos verificados em 351 arquivos, zero quebrado, zero âncora sem correspondência (script Python dedicado, reexecutado após as correções).
+- [x] **2 achados bloqueantes corrigidos**: status da reclassificação lacaniana de Metáfora, incorretamente descrito como "nunca produzido na prática" em 5 documentos (`Biblioteca-Teorica/Conceitos/metafora.md`, `Modelo-Observacional/Conceitos/metafora.md`, `Modelo-Observacional/README.md`, `Modelo-Relacional/Conceitos/metafora.md`, `ECO/Interface-Analista.md`), quando `ReclassificadorLacaniano::reclassificarPorTipoFreudiano()` — em produção desde a revisão pós-Sprint 17 e alcançado por `ObservacaoApplicationService::consultarCircuito()` — o produz sempre que uma Recorrência sem circuito é classificada como Chiste ou Sonho pelo Motor Freud; e divergência de status ("Implementado" vs. "Parcialmente implementado") para Recorrências entre `ECO/Interface-Analista.md` e `Representacao-Computacional/Interface-Analista.md`, reconciliada com nota cruzada.
+- [x] **7 achados moderados corrigidos**: contradição cross-camada em Transferência (Modelo Relacional negava componentes que o Modelo Observacional documentava); contradição em Objeto a ("Validação do analista"); três erros aritméticos nos grafos científicos (`Grafo-Lacan.md` contava 17 arestas em vez de 18; `Grafo-Integrado.md` herdava a inconsistência, 22+17+11=50≠51; `Grafo-Motores.md` atribuía grau máximo errado — real é Memória Discursiva=9, Motor Freud=9, não "Interface do Analista e Memória Discursiva, 6 cada"); elo "Modelo Relacional" ausente na cadeia de rastreabilidade reproduzida em `Biblioteca-Teorica/Como-os-Motores-Usam-a-Biblioteca.md` (defasada desde a Sprint 25); elo "Representação Computacional" ausente nos 21 documentos de `Modelo-Relacional/Conceitos/` (defasados desde a Sprint 27, nunca atualizados após a Sprint 29) — corrigido em lote via script.
+- [x] **Padronização terminológica**: nomenclatura ECO/"Modo Socrático" reconciliada em seis ocorrências estruturais (Matrizes, Grafos, dois documentos de Repetição); nos 229 documentos de Obra/Autor gerados por `_gerador/*.php` a partir de dados fixados na Sprint 25, "Modo Socrático" foi mantido como valor de campo com nota de equivalência histórica em `Biblioteca-Teorica/README.md` e `Modelo-de-Documento.md`, em vez de reescrita retroativa de 229 arquivos; "Desejo" sem qualificador padronizado para "Desejo (Freud)" em 3 documentos; "Ontologia computacional" (nome de etapa divergente do canônico "Ontologia") corrigido em 22 documentos; cabeçalho de tabela "Interface Analista"/"Interface Sujeito" padronizado para "Interface do Analista"/"Interface do Sujeito"; caveat de não-operacionalização do "Circuito Pulsional" (nome inspirado em Pulsão, sem operacionalizá-la) completado em `Modelo-Observacional/Conceitos/pulsao.md`.
+- [x] **Relatório de cobertura de implementação**: todo componente citado como "Implementado" nesta Sprint foi auditado contra `app/`; itens sem correspondência real classificados explicitamente como Especificado ou Planejado — nunca apresentados como implementados por antecipação (ver [Base-Cientifica-v1.0.md, "Estado atual da implementação"](Base-Cientifica-v1.0.md#estado-atual-da-implementação)).
+- [x] `docs/Base-Cientifica-v1.0.md` (novo): objetivo científico, arquitetura científica definitiva, princípios permanentes, hipóteses científicas, limites éticos, estrutura documental, cobertura da documentação, estado da implementação, critérios para futuras alterações e condições para abertura da Base Científica v2.0.
+- [x] `docs/Documento-Mestre.md` (versão 1.0), `docs/Arquitetura-Cientifica.md` (versão 1.0, novo §7 "Base Científica v1.0 — certificação"): ambos atualizados para registrar oficialmente a conclusão da Base Científica v1.0.
+- [x] Achado não corrigido, aceito com nota explícita: divergência bibliográfica de "Obra de origem" entre 5 documentos de `Modelo-Relacional/Conceitos/` (falta, registro-imaginario, registro-real, registro-simbolico, outro) e `Ontologia-Lacan.md §6` — o próprio §6 se autodeclara "sem ainda consolidar"; registrada como condição para a Base Científica v2.0, não como defeito desta Sprint.
+- [x] Atualização do Roadmap (esta seção).
+- [x] Publicação e sincronização do repositório remoto.
+
+Escopo desta sprint é exclusivamente auditoria e consolidação documental —
+sem novo conceito, sem novo componente arquitetônico, sem alteração de
+código de Domínio/Aplicação/Infraestrutura/Apresentação, sem API nova, sem
+migration, sem banco de dados, sem teste alterado. Com a conclusão desta
+Sprint, a **Fase 1 — Fundação Científica do PsycheAI** está oficialmente
+encerrada; inicia-se a **Fase 2 — Desenvolvimento Experimental**.
 
 ## Sprints futuras (não planejadas em detalhe nesta fase)
 

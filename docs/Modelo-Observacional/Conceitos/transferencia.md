@@ -69,7 +69,7 @@ Nenhuma nomeada como "transferência".
 - **Interface do Analista**: nenhuma.
 - **Timeline**: nenhum.
 - **Circuito Pulsional**: nenhum.
-- **Demais motores**: Motor de Enunciação Socrática (`GeradorDePerguntaSocraticaLLM`).
+- **Demais motores**: ECO — Estrutura Computacional de Observação (`GeradorDePerguntaSocraticaLLM`).
 
 ## Referências cruzadas do projeto
 

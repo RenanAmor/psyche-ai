@@ -19,7 +19,7 @@ Um `EventoDiscursivo` apresenta uma das marcas formais associadas às três esp�
 
 ## Dados opcionais
 
-`ContextoConversaDTO` (turnos recentes da Sessão) — usado pelo Motor de Enunciação Socrática, não pela classificação em si.
+`ContextoConversaDTO` (turnos recentes da Sessão) — usado pela ECO (Estrutura Computacional de Observação), não pela classificação em si.
 
 ## Eventos relacionados
 

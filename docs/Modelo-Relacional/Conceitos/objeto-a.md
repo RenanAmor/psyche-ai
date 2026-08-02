@@ -1,6 +1,6 @@
 # Objeto a — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/objeto-a.md](../../Biblioteca-Teorica/Conceitos/objeto-a.md); fenômeno observável em [Modelo-Observacional/Conceitos/objeto-a.md](../../Modelo-Observacional/Conceitos/objeto-a.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/objeto-a.md](../../Biblioteca-Teorica/Conceitos/objeto-a.md); fenômeno observável em [Modelo-Observacional/Conceitos/objeto-a.md](../../Modelo-Observacional/Conceitos/objeto-a.md).
 
 ## Relações Científicas
 
@@ -73,7 +73,7 @@ Todas, de forma absoluta — "o sistema não pode identificar objeto a algum" ([
 
 - **Pode ser observada diretamente?** Não — nunca, por definição.
 - **Pode ser inferida computacionalmente?** Não.
-- **Depende de validação do analista?** Não se aplica — nem o analista "identifica" o objeto a; é estrutura teórica, não dado clínico observável.
+- **Depende de validação do analista?** Sim (corrigido na Sprint 30, para consistência com o mesmo campo em [Modelo-Observacional/Conceitos/objeto-a.md](../../Modelo-Observacional/Conceitos/objeto-a.md) e com os demais conceitos de limite absoluto, como Significante e Inconsciente) — mesmo sem "identificar" o objeto a, é o analista quem avalia, sempre a partir da fundamentação teórica, se qualquer padrão observado merece leitura clínica; a validação nunca é automática (Regra 10, [Regras-Dominio.md](../../Regras-Dominio.md)).
 - **Nunca poderá ser produzida automaticamente?** Correto — limite absoluto.
 
 ## Motores envolvidos

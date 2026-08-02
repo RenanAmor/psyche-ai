@@ -68,7 +68,7 @@ Sim.
 - **Interface do Sujeito**: nenhuma.
 - **Interface do Analista**: nenhuma.
 - **Timeline**: nenhum.
-- **Circuito Pulsional**: `OcorrenciaRecorrencia`, quando presente em ≥2 Sessões.
+- **Circuito Pulsional**: `OcorrenciaRecorrencia`, quando presente em ≥2 Sessões — nome do componente inspirado neste conceito, mas sem operacionalizar a teoria pulsional em si (mesma ressalva de [Modelo-Relacional/Conceitos/pulsao.md](../../Modelo-Relacional/Conceitos/pulsao.md); o que o componente de fato implementa é o circuito/trajeto de uma Recorrência).
 - **Demais motores**: nenhum.
 
 ## Referências cruzadas do projeto

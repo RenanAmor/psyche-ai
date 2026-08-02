@@ -1,6 +1,6 @@
 # Desejo (Freud) — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/desejo-freud.md](../../Biblioteca-Teorica/Conceitos/desejo-freud.md); fenômeno observável em [Modelo-Observacional/Conceitos/desejo-freud.md](../../Modelo-Observacional/Conceitos/desejo-freud.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/desejo-freud.md](../../Biblioteca-Teorica/Conceitos/desejo-freud.md); fenômeno observável em [Modelo-Observacional/Conceitos/desejo-freud.md](../../Modelo-Observacional/Conceitos/desejo-freud.md).
 
 ## Relações Científicas
 

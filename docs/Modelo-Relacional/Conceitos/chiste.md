@@ -1,6 +1,6 @@
 # Chiste — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/chiste.md](../../Biblioteca-Teorica/Conceitos/chiste.md); fenômeno observável em [Modelo-Observacional/Conceitos/chiste.md](../../Modelo-Observacional/Conceitos/chiste.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/chiste.md](../../Biblioteca-Teorica/Conceitos/chiste.md); fenômeno observável em [Modelo-Observacional/Conceitos/chiste.md](../../Modelo-Observacional/Conceitos/chiste.md).
 
 ## Relações Científicas
 

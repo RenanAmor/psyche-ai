@@ -1,6 +1,6 @@
 # Transferência — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/transferencia.md](../../Biblioteca-Teorica/Conceitos/transferencia.md); fenômeno observável em [Modelo-Observacional/Conceitos/transferencia.md](../../Modelo-Observacional/Conceitos/transferencia.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/transferencia.md](../../Biblioteca-Teorica/Conceitos/transferencia.md); fenômeno observável em [Modelo-Observacional/Conceitos/transferencia.md](../../Modelo-Observacional/Conceitos/transferencia.md).
 
 ## Relações Científicas
 
@@ -72,12 +72,12 @@ O conteúdo psíquico redirecionado ao analista (afetos, expectativas, padrões 
 
 - **Motor Freud**: nenhum implementado — fundamentação teórica de fundo.
 - **Motor Lacan**: nenhum implementado — fundamentação teórica de fundo.
-- **Memória Discursiva**: nenhum.
+- **Memória Discursiva**: `Sessao` como unidade de agrupamento (corrigido na Sprint 30, para reconciliar com [Modelo-Observacional/Conceitos/transferencia.md](../../Modelo-Observacional/Conceitos/transferencia.md)).
 - **Timeline**: nenhum.
 - **Circuito Pulsional**: nenhum.
 - **Interface do Analista**: nenhuma.
-- **Interface do Sujeito**: nenhuma.
-- **Demais componentes impactados**: nenhum registrado nesta versão.
+- **Interface do Sujeito**: continuidade da conversa via `ContextoConversaDTO` (corrigido na Sprint 30 — a camada Observacional já registrava este componente; a Relacional o omitia por engano).
+- **Demais componentes impactados**: ECO — Estrutura Computacional de Observação (`GeradorDePerguntaSocraticaLLM`) — ver [ECO/README.md](../../ECO/README.md).
 
 ## Referências cruzadas do projeto
 

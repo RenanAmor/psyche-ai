@@ -21,7 +21,7 @@
 - **Dados necessários**: EventoDiscursivo.conteudo
 - **Dados opcionais**: Nenhum registrado nesta versão.
 - **Eventos que podem originá-lo**: Mensagem do Sujeito classificada pelo Motor Freud
-- **Relações com outros conceitos**: Espécie de Formação de compromisso; ligado ao Recalque (o que retorna) e ao Desejo (o que busca expressão) — Ontologia-Freud.md §4.
+- **Relações com outros conceitos**: Espécie de Formação de compromisso; ligado ao Recalque (o que retorna) e ao Desejo (Freud) (o que busca expressão) — Ontologia-Freud.md §4.
 - **Componentes do PsycheAI que utilizam este conceito**: TipoFormacaoFreudiana::AtoFalho; Infrastructure/AI/ClassificadorFreudianoLLM
 - **Pode ser observado automaticamente?**: Sim.
 - **Pode ser organizado automaticamente?**: Não.

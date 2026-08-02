@@ -18,7 +18,9 @@
 | Objeto a | Sujeito e falta | [../Conceitos/objeto-a.md](../Conceitos/objeto-a.md) |
 | Desejo lacaniano | Sujeito e falta | [../Conceitos/desejo-lacaniano.md](../Conceitos/desejo-lacaniano.md) |
 
-## Arestas (17)
+## Arestas (18)
+
+> Contagem corrigida na Sprint 30: a lista abaixo, expandida termo a termo, soma 18 arestas — o cabeçalho anterior ("17") estava desatualizado em relação à própria lista e à tabela-fonte.
 
 Ver tabela completa em [../Matrizes/Conceito-x-Conceito.md, bloco "Lacan × Lacan"](../Matrizes/Conceito-x-Conceito.md#bloco-lacan--lacan):
 

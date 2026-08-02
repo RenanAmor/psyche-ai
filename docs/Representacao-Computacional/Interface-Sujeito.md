@@ -4,12 +4,12 @@
 
 ## O que o Sujeito pode visualizar
 
-Fechado, sem exceção — mesma lista de [ECO/Interface-Sujeito.md](../ECO/Interface-Sujeito.md#o-que-o-sujeito-visualiza):
+Fechado, sem exceção — mesma lista de [ECO/Interface-Sujeito.md](../ECO/Interface-Sujeito.md#o-que-o-sujeito-visualiza), reproduzindo aqui também o estado de implementação de cada item (corrigido na Sprint 30 — a versão anterior desta lista omitia essas ressalvas):
 
-- **Conversa** — o diálogo com a ECO. Nunca uma representação desta pasta: a ECO nunca recebe como entrada nenhuma leitura do Motor Freud/Lacan (ver "Garantia técnica" abaixo).
-- **Histórico das suas sessões** — o próprio conteúdo do que já disse, sem nenhuma estrutura derivada (recorrência, classificação, rótulo).
-- **Consentimentos** — o que autorizou sobre o tratamento de seus dados.
-- **Configurações pessoais** — dados da própria conta.
+- **Conversa** — o diálogo com a ECO. **Implementado** desde a Sprint 12. Nunca uma representação desta pasta: a ECO nunca recebe como entrada nenhuma leitura do Motor Freud/Lacan (ver "Garantia técnica" abaixo).
+- **Histórico das suas sessões** — o próprio conteúdo do que já disse, sem nenhuma estrutura derivada (recorrência, classificação, rótulo). **Não implementado** nesta versão — a única tela de histórico existente hoje é a do Analista, atrás do Portão, e expõe recorrências/observações inadequadas para reaproveitamento direto como histórico do próprio Sujeito.
+- **Consentimentos** — o que autorizou sobre o tratamento de seus dados. **Não implementado** nesta versão.
+- **Configurações pessoais** — dados da própria conta. **Parcialmente implementado**: cadastro e login existem (Sprint 20), mas não há tela de edição de perfil ou preferências.
 
 ## Por que nenhuma representação desta pasta alcança o Sujeito
 

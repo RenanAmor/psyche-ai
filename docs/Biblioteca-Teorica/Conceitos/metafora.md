@@ -16,39 +16,39 @@
 
 ## Aplicação Computacional
 
-- **Objetivo computacional**: Fundamenta a releitura estrutural da condensação freudiana como substituição de um significante por outro — mapeado na tabela de reclassificação, mas não efetivamente disparado pela implementação atual.
+- **Objetivo computacional**: Fundamenta a releitura estrutural da condensação freudiana como substituição de um significante por outro — reclassificação disparada por ponte com o Motor Freud (Chiste/Sonho), nunca por observação direta de substituição entre dois conteúdos distintos.
 - **Fundamentação científica**: A Instância da Letra no Inconsciente ou a Razão desde Freud — ver Ontologia-Lacan.md §4 (tabela Condensação→Metáfora).
-- **Dados necessários**: Dois conteúdos distintos em relação de substituição um pelo outro — dado que DetectorRecorrencias não captura (só reconhece repetição do mesmo conteúdo normalizado)
+- **Dados necessários**: Um `EventoDiscursivo` classificado como `TipoFormacaoFreudiana::Chiste` ou `::Sonho` por `ClassificadorFreudianoLLM`, dentro de uma Recorrência sem circuito (< 2 sessões distintas) — `DetectorRecorrencias` continua sem captar diretamente a substituição entre dois conteúdos distintos que fundamentaria uma metáfora observada em primeira mão.
 - **Dados opcionais**: Nenhum registrado nesta versão.
-- **Eventos que podem originá-lo**: Nenhum evento dispara este rótulo na implementação atual
+- **Eventos que podem originá-lo**: Um Evento Discursivo cujo conteúdo o Motor Freud classifica como Chiste ou Sonho, consultado via `ObservacaoApplicationService::consultarCircuito()`.
 - **Relações com outros conceitos**: Par com Metonímia; releitura estrutural de Condensação (Ontologia-Freud.md).
-- **Componentes do PsycheAI que utilizam este conceito**: Domain/Services/ReclassificadorLacaniano — a tabela de lookup prevê o rótulo, mas nunca é retornada na prática (Roadmap.md, Sprint 16: o detector só reconhece repetição literal, nunca substituição entre dois significantes distintos)
-- **Pode ser observado automaticamente?**: Não — mapeado teoricamente, mas nunca efetivamente produzido pela implementação atual.
+- **Componentes do PsycheAI que utilizam este conceito**: `Domain/Services/ReclassificadorLacaniano::reclassificarPorTipoFreudiano()` — retorna o rótulo de metáfora quando o Motor Freud classifica o conteúdo como Chiste ou Sonho; alcançado em produção por `ObservacaoApplicationService::consultarCircuito()` → `rotularComFundamentacao()` (auditado nesta Sprint 30 contra `app/Application/Services/ObservacaoApplicationService.php`, correção de uma imprecisão presente desde a Sprint 25).
+- **Pode ser observado automaticamente?**: Não diretamente (nenhum detector reconhece substituição entre dois conteúdos distintos); Sim indiretamente, por reclassificação de uma classificação freudiana já produzida.
 - **Pode ser organizado automaticamente?**: Não.
-- **Pode ser classificado automaticamente?**: Não, na prática atual (previsto na tabela, sem caminho de código que o produza).
+- **Pode ser classificado automaticamente?**: Sim, indiretamente — via ponte com `TipoFormacaoFreudiana::Chiste`/`::Sonho`, sempre como estrutura candidata.
 - **Depende de confirmação do sujeito?**: Sim.
 - **Depende de validação do analista?**: Sim.
 - **Gera hipótese clínica?**: Nunca automaticamente.
-- **Evidências produzidas pelo sistema**: Nenhum registrado nesta versão.
-- **Limitações computacionais**: Exigiria detectar substituição entre dois conteúdos distintos, não apenas repetição do mesmo conteúdo — mudança de escopo do detector ainda não decidida com o usuário.
+- **Evidências produzidas pelo sistema**: O rótulo "Estrutura candidata: metáfora — condensação", exclusivo da interface do Analista.
+- **Limitações computacionais**: A observação direta exigiria detectar substituição entre dois conteúdos distintos, não apenas repetição do mesmo conteúdo — mudança de escopo do detector ainda não decidida com o usuário; o caminho hoje disponível depende inteiramente da classificação freudiana prévia, nunca de evidência própria de metáfora.
 - **Trabalhos científicos relacionados**: A Instância da Letra no Inconsciente ou a Razão desde Freud; As Formações do Inconsciente (Seminário V)
-- **Motores impactados**: Lacan Engine (mapeado na tabela de reclassificação, não efetivamente produzido nesta versão)
+- **Motores impactados**: Motor Freud (fornece a classificação de origem); Lacan Engine (produz o rótulo de metáfora por reclassificação)
 
 ## Representação Computacional
 
 ### Visão do Sujeito
 
-- **Como este conceito interfere na conversa?**: Não interfere — nunca é efetivamente produzido pela implementação atual.
-- **O sujeito pode perceber sua existência?**: Não — o conceito não tem manifestação computacional perceptível nesta versão; nenhuma tela ou mensagem o nomeia.
-- **Como a IA deve se comportar diante dele?**: Nenhum comportamento é derivado deste conceito nesta versão.
-- **Quais perguntas podem ser feitas?**: Nenhuma pergunta é derivada diretamente deste conceito nesta versão.
+- **Como este conceito interfere na conversa?**: Não interfere — a reclassificação lacaniana nunca compõe a resposta ao Sujeito (Documento-Mestre.md §5).
+- **O sujeito pode perceber sua existência?**: Não.
+- **Como a IA deve se comportar diante dele?**: Nenhum comportamento voltado ao Sujeito é derivado deste conceito.
+- **Quais perguntas podem ser feitas?**: Nenhuma pergunta é derivada diretamente deste conceito para o Sujeito.
 - **Quais perguntas nunca podem ser feitas?**: Qualquer pergunta que nomeie "metáfora" ou estrutura de substituição significante para o Sujeito.
 
 ### Visão do Analista
 
-- **Como o conceito é apresentado?**: Não é apresentado nesta versão — o rótulo existe na tabela de ReclassificadorLacaniano, mas nenhuma tela chega a exibi-lo porque o detector atual nunca o produz.
-- **Quais visualizações são produzidas?**: Nenhuma nesta versão.
-- **Quais relações podem ser exibidas?**: Nenhuma nesta versão.
-- **Quais evidências sustentam essa representação?**: Nenhum registrado nesta versão.
-- **Quais motores produzem essa informação?**: Nenhum registrado nesta versão.
-- **Quais componentes do sistema participam dessa construção?**: ReclassificadorLacaniano (tabela de lookup, caminho de código não alcançado)
+- **Como o conceito é apresentado?**: Como rótulo estrutural ("Estrutura candidata: metáfora — condensação") com fundamentação teórica, quando uma Recorrência sem circuito tem seu conteúdo classificado como Chiste ou Sonho pelo Motor Freud.
+- **Quais visualizações são produzidas?**: O rótulo lacaniano na tela de Observações (`/sujeitos/{id}/observacoes?vocabulario=lacan`), quando disparado.
+- **Quais relações podem ser exibidas?**: A fundamentação teórica de `ReclassificadorLacaniano::fundamentacaoPara()` (Regra 11).
+- **Quais evidências sustentam essa representação?**: A classificação freudiana prévia (`TipoFormacaoFreudiana::Chiste`/`::Sonho`) — nunca evidência própria de substituição entre dois significantes.
+- **Quais motores produzem essa informação?**: Motor Freud (classificação de origem) e Motor Lacan (reclassificação).
+- **Quais componentes do sistema participam dessa construção?**: `ClassificadorFreudianoLLM`, `ReclassificadorLacaniano::reclassificarPorTipoFreudiano()`, `ObservacaoApplicationService::consultarCircuito()`.

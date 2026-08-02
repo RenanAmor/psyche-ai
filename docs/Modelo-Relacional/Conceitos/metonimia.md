@@ -1,6 +1,6 @@
 # Metonímia — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/metonimia.md](../../Biblioteca-Teorica/Conceitos/metonimia.md); fenômeno observável em [Modelo-Observacional/Conceitos/metonimia.md](../../Modelo-Observacional/Conceitos/metonimia.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/metonimia.md](../../Biblioteca-Teorica/Conceitos/metonimia.md); fenômeno observável em [Modelo-Observacional/Conceitos/metonimia.md](../../Modelo-Observacional/Conceitos/metonimia.md).
 
 ## Relações Científicas
 

@@ -1,6 +1,6 @@
 # Registro Real — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/registro-real.md](../../Biblioteca-Teorica/Conceitos/registro-real.md); fenômeno observável em [Modelo-Observacional/Conceitos/registro-real.md](../../Modelo-Observacional/Conceitos/registro-real.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/registro-real.md](../../Biblioteca-Teorica/Conceitos/registro-real.md); fenômeno observável em [Modelo-Observacional/Conceitos/registro-real.md](../../Modelo-Observacional/Conceitos/registro-real.md).
 
 ## Relações Científicas
 

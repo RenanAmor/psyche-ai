@@ -9,7 +9,7 @@ Os dez nós de [Grafo-Freud.md](Grafo-Freud.md) + os onze nós de [Grafo-Lacan.m
 ## Arestas (51)
 
 - 22 arestas internas ao polo Freud (ver [Grafo-Freud.md](Grafo-Freud.md)).
-- 17 arestas internas ao polo Lacan (ver [Grafo-Lacan.md](Grafo-Lacan.md)).
+- 18 arestas internas ao polo Lacan (ver [Grafo-Lacan.md](Grafo-Lacan.md); contagem corrigida na Sprint 30 — 22+18+11=51, reconciliando o total abaixo, que já estava correto).
 - **11 arestas de reorganização/reclassificação entre os dois polos** (bloco "Freud × Lacan" de [../Matrizes/Conceito-x-Conceito.md](../Matrizes/Conceito-x-Conceito.md#bloco-freud--lacan-reorganização-e-reclassificação)):
 
 ```

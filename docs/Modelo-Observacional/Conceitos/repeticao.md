@@ -70,7 +70,7 @@ Sim — toda leitura de causa da repetição é do analista.
 - **Interface do Analista**: `ObservacoesSujeitoController`, `GrafoCircuitoViewModel`, `CircuitoTrajetoComponent`.
 - **Timeline**: exibição cronológica na tela de Observações.
 - **Circuito Pulsional**: grafo do circuito (D3), rota `/sujeitos/{id}/observacoes/grafo-circuito`.
-- **Demais motores**: Discourse Engine; Modo Socrático.
+- **Demais motores**: Discourse Engine; ECO — Estrutura Computacional de Observação.
 
 ## Referências cruzadas do projeto
 

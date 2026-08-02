@@ -1,6 +1,6 @@
 # Repetição — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/repeticao.md](../../Biblioteca-Teorica/Conceitos/repeticao.md); fenômeno observável em [Modelo-Observacional/Conceitos/repeticao.md](../../Modelo-Observacional/Conceitos/repeticao.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/repeticao.md](../../Biblioteca-Teorica/Conceitos/repeticao.md); fenômeno observável em [Modelo-Observacional/Conceitos/repeticao.md](../../Modelo-Observacional/Conceitos/repeticao.md).
 
 ## Relações Científicas
 
@@ -86,7 +86,7 @@ A dimensão "além do princípio do prazer" — a pulsão de morte como explica�
 - **Circuito Pulsional**: grafo D3 do circuito/trajeto ([Roadmap.md, Sprint 19](../../Roadmap.md#sprint-19--camada-de-visualização-gráfica-fundação--grafo-do-circuitotrajeto)).
 - **Interface do Analista**: exibe recorrências, circuito e reclassificação lacaniana.
 - **Interface do Sujeito**: nenhuma — recorrências não são expostas ao Sujeito ([Arquitetura-Cientifica.md §2](../../Arquitetura-Cientifica.md#2-separação-de-interface-entre-sujeito-e-analista)).
-- **Modo Socrático**: utiliza recorrências para gerar perguntas socráticas.
+- **Demais componentes impactados**: ECO — Estrutura Computacional de Observação — utiliza recorrências para gerar perguntas socráticas (rótulo padronizado na Sprint 30; era "Modo Socrático", único desvio do rótulo uniforme entre os 21 documentos desta pasta).
 
 ## Referências cruzadas do projeto
 

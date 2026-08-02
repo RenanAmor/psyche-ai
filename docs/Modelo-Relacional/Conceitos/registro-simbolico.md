@@ -1,6 +1,6 @@
 # Registro Simbólico — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/registro-simbolico.md](../../Biblioteca-Teorica/Conceitos/registro-simbolico.md); fenômeno observável em [Modelo-Observacional/Conceitos/registro-simbolico.md](../../Modelo-Observacional/Conceitos/registro-simbolico.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/registro-simbolico.md](../../Biblioteca-Teorica/Conceitos/registro-simbolico.md); fenômeno observável em [Modelo-Observacional/Conceitos/registro-simbolico.md](../../Modelo-Observacional/Conceitos/registro-simbolico.md).
 
 ## Relações Científicas
 

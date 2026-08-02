@@ -1,6 +1,6 @@
 # Inconsciente — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/inconsciente.md](../../Biblioteca-Teorica/Conceitos/inconsciente.md); fenômeno observável em [Modelo-Observacional/Conceitos/inconsciente.md](../../Modelo-Observacional/Conceitos/inconsciente.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/inconsciente.md](../../Biblioteca-Teorica/Conceitos/inconsciente.md); fenômeno observável em [Modelo-Observacional/Conceitos/inconsciente.md](../../Modelo-Observacional/Conceitos/inconsciente.md).
 
 ## Relações Científicas
 

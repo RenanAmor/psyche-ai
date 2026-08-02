@@ -1,6 +1,6 @@
 # Metáfora — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/metafora.md](../../Biblioteca-Teorica/Conceitos/metafora.md); fenômeno observável em [Modelo-Observacional/Conceitos/metafora.md](../../Modelo-Observacional/Conceitos/metafora.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/metafora.md](../../Biblioteca-Teorica/Conceitos/metafora.md); fenômeno observável em [Modelo-Observacional/Conceitos/metafora.md](../../Modelo-Observacional/Conceitos/metafora.md).
 
 ## Relações Científicas
 
@@ -27,7 +27,7 @@ Operação de substituição: "o significante substituído não desaparece, mas 
 
 ### Relações observacionais
 
-Mapeada na tabela de reclassificação do Lacan Engine, mas **nunca efetivamente produzida**: o detector atual não captura o fenômeno de substituição entre dois conteúdos distintos que a fundamentaria ([Modelo-Observacional/README.md](../../Modelo-Observacional/README.md)).
+**Efetivamente produzida, por reclassificação indireta** (corrigido na Sprint 30): sempre que uma Recorrência sem circuito tem seu conteúdo classificado como Chiste ou Sonho pelo Motor Freud, `ReclassificadorLacaniano::reclassificarPorTipoFreudiano()` devolve o rótulo de metáfora. A observação *direta* do fenômeno de substituição entre dois conteúdos distintos continua fora do alcance do detector atual ([Modelo-Observacional/README.md](../../Modelo-Observacional/README.md)).
 
 ### Relações de dependência
 
@@ -68,18 +68,18 @@ A confirmação de que uma substituição discursiva é, de fato, metáfora nunc
 ## Observabilidade
 
 - **Pode ser observada diretamente?** Não.
-- **Pode ser inferida computacionalmente?** Não hoje — mapeada na tabela de reclassificação, mas nunca disparada pelo detector atual.
+- **Pode ser inferida computacionalmente?** Sim, indiretamente — por reclassificação de uma classificação freudiana (Chiste/Sonho) já produzida.
 - **Depende de validação do analista?** Sim, sempre que sugerida como apoio à escuta.
-- **Nunca poderá ser produzida automaticamente?** A metáfora como estrutura confirmada nunca poderá ser produzida automaticamente — apenas candidata, se o detector vier a capturar o fenômeno de substituição.
+- **Nunca poderá ser produzida automaticamente?** A metáfora como estrutura confirmada nunca poderá ser produzida automaticamente — apenas candidata; o rótulo indireto já é produzido hoje, mas a confirmação permanece exclusiva do sujeito/analista.
 
 ## Motores envolvidos
 
-- **Motor Freud**: nenhum.
-- **Motor Lacan**: mapeada na tabela de reclassificação, não efetivamente produzida nesta versão.
+- **Motor Freud**: `ClassificadorFreudianoLLM` — fornece a classificação de origem (Chiste/Sonho) que a reclassificação lacaniana consome.
+- **Motor Lacan**: `ReclassificadorLacaniano::reclassificarPorTipoFreudiano()` — produz o rótulo por reclassificação.
 - **Memória Discursiva**: nenhum.
 - **Timeline**: nenhum.
-- **Circuito Pulsional**: nenhum.
-- **Interface do Analista**: nenhuma (não produzida).
+- **Circuito Pulsional**: nenhum registrado — o rótulo é produzido justamente quando NÃO há circuito.
+- **Interface do Analista**: exibe o rótulo e sua fundamentação, quando disparado.
 - **Interface do Sujeito**: nenhuma.
 - **Demais componentes impactados**: nenhum registrado nesta versão.
 

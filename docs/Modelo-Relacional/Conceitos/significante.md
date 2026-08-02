@@ -1,6 +1,6 @@
 # Significante — Modelo Relacional
 
-> Camada de Modelo Relacional, entre o Modelo Observacional e a futura Ontologia computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/significante.md](../../Biblioteca-Teorica/Conceitos/significante.md); fenômeno observável em [Modelo-Observacional/Conceitos/significante.md](../../Modelo-Observacional/Conceitos/significante.md).
+> Camada de Modelo Relacional, entre o Modelo Observacional e a Representação Computacional na [cadeia de rastreabilidade](../../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória). Fundamentação teórica completa em [Biblioteca-Teorica/Conceitos/significante.md](../../Biblioteca-Teorica/Conceitos/significante.md); fenômeno observável em [Modelo-Observacional/Conceitos/significante.md](../../Modelo-Observacional/Conceitos/significante.md).
 
 ## Relações Científicas
 
