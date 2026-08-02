@@ -32,12 +32,20 @@ final class ViewRenderer
 
     /**
      * @param array<string, mixed> $dados
+     * @param string $layout Nome do arquivo de layout em Views/ (Sprint
+     *        32) — 'layout' (padrão, chrome do Analista com sidebar) ou
+     *        'layout-eco' (superfície do Sujeito, sem NavigationMenu).
      */
-    public function renderComLayout(string $view, array $dados, string $tituloPagina, string $rotaAtiva): string
-    {
+    public function renderComLayout(
+        string $view,
+        array $dados,
+        string $tituloPagina,
+        string $rotaAtiva,
+        string $layout = 'layout'
+    ): string {
         $conteudo = $this->renderArquivo($view, $dados);
 
-        return $this->renderArquivo('layout', [
+        return $this->renderArquivo($layout, [
             'tituloPagina' => $tituloPagina,
             'rotaAtiva' => $rotaAtiva,
             'itensNavegacao' => NavigationMenu::itens(),

@@ -43,6 +43,28 @@ final class GravacaoAudioController extends Controller
     }
 
     /**
+     * Transcreve um único turno de fala e devolve só o texto, em vez de
+     * persistir uma GravacaoAudio (Sprint 32, Interface de Voz da ECO) —
+     * sem parâmetro de sessão porque não grava nada. Ver o docblock de
+     * GravacaoAudioApplicationService::transcreverTexto() para o porquê de
+     * não reaproveitar enviar()+RegistrarGravacaoAudio aqui.
+     *
+     * @param array<string, string> $params
+     */
+    public function transcrever(Request $request, array $params): Response
+    {
+        $audioBinario = $request->corpoBinario();
+
+        if ($audioBinario === '') {
+            throw HttpException::badRequest('O corpo da requisição deve conter o áudio gravado.');
+        }
+
+        $texto = $this->service->transcreverTexto($audioBinario);
+
+        return $this->sucesso(['texto' => $texto]);
+    }
+
+    /**
      * @param array<string, string> $params
      */
     public function baixar(Request $request, array $params): Response

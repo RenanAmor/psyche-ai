@@ -63,6 +63,7 @@ final class Routes
         $router->post('/sessions/{id}/messages', [$mensagens, 'enviar']);
         $router->post('/sessions/{id}/audio', [$gravacoesAudio, 'enviar']);
         $router->get('/sessions/{id}/audio', [$gravacoesAudio, 'baixar']);
+        $router->post('/audio/transcricao', [$gravacoesAudio, 'transcrever']);
 
         $router->post('/events', [$eventos, 'criar']);
         $router->get('/events', [$eventos, 'listar']);

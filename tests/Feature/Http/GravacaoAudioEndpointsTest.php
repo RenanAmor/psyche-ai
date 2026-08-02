@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace PsycheAI\Tests\Feature\Http;
 
 use DateTimeImmutable;
+use PsycheAI\Infrastructure\Contracts\DTOs\TranscriptionResultDTO;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
 use PsycheAI\Infrastructure\Providers\ApplicationServiceProvider;
 use PsycheAI\Presentation\Http\ExceptionHandler;
@@ -96,5 +97,45 @@ final class GravacaoAudioEndpointsTest extends HttpTestCase
         $response = $this->despacharBinario(Request::criar('GET', '/sessions/sessao-1/audio'));
 
         self::assertSame(404, $response->status());
+    }
+
+    /**
+     * POST /audio/transcricao (Sprint 32, Interface de Voz da ECO) não
+     * depende de Sessao/GravacaoAudio nenhuma — por isso monta seu próprio
+     * provider com uma TranscricaoStub específica, em vez de reaproveitar
+     * a instância vazia de setUp() usada pelos demais testes desta classe.
+     */
+    public function testTranscricaoDevolveOTextoTranscritoSemCriarGravacao(): void
+    {
+        $pdo = (new Connection(':memory:'))->pdo();
+        $provider = ApplicationServiceProvider::comPDO(
+            $pdo,
+            storage: new StorageStub(),
+            transcricao: new TranscricaoStub(new TranscriptionResultDTO(text: 'fala transcrita do turno'))
+        );
+        $router = new Router();
+        Routes::registrar($router, $provider);
+
+        $request = Request::criarComCorpoBinario('POST', '/audio/transcricao', 'bytes-do-turno');
+
+        try {
+            $response = $router->despachar($request);
+        } catch (Throwable $erro) {
+            $response = ExceptionHandler::converter($erro);
+        }
+
+        self::assertSame(200, $response->status());
+
+        $corpo = json_decode($response->corpo(), true);
+        self::assertSame('fala transcrita do turno', $corpo['data']['texto']);
+    }
+
+    public function testTranscricaoComCorpoVazioRetorna400(): void
+    {
+        $request = Request::criarComCorpoBinario('POST', '/audio/transcricao', '');
+
+        $response = $this->despacharBinario($request);
+
+        self::assertSame(400, $response->status());
     }
 }

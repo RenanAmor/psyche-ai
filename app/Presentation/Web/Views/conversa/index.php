@@ -2,212 +2,349 @@
 /**
  * @var string $areaConversaHtml
  * @var string $valorConteudo
+ *
+ * Interface de Voz da ECO (Sprint 32) — substitui a antiga tela de chat
+ * por um palco de estados (Pronta/Escutando/Processando/Respondendo/
+ * Encerrada), sem caixa de texto nem botão "Enviar" visíveis ao Sujeito.
+ * A gravação de um turno é segmentada automaticamente por detecção de
+ * silêncio (Web Audio API), com um botão discreto de emergência para
+ * concluir a fala manualmente. Cada turno é enviado para
+ * POST /conversa/mensagens/audio, que transcreve, segue o mesmo pipeline
+ * de uma mensagem digitada (pergunta socrática + áudio de resposta) e
+ * devolve `audioRespostaUrl` pronto para tocar — nenhum HTML de bolhas é
+ * exibido nesta tela.
+ *
+ * $areaConversaHtml/$valorConteudo continuam existindo só para o bloco
+ * #conversa-dev abaixo — ferramenta de desenvolvimento interna (texto
+ * digitado via POST /conversa/enviar), nunca exposta ao Sujeito
+ * (permanece com o atributo `hidden`, fora da árvore de acessibilidade).
  */
 
 use PsycheAI\Presentation\Web\Components\FormComponent;
 use PsycheAI\Presentation\Web\Components\Html;
 use PsycheAI\Presentation\Web\Http\BasePath;
 ?>
-<section class="pagina-conversa">
-    <p class="conversa-conta-links">
+<section class="pagina-eco" id="eco-palco" data-estado="pronta">
+    <p class="eco-conta-links">
         <a href="<?= Html::e(BasePath::url('/conversa/cadastro')) ?>">Criar conta</a> ·
         <a href="<?= Html::e(BasePath::url('/conversa/entrar')) ?>">Entrar</a>
     </p>
-    <div id="conversa-area"><?= $areaConversaHtml ?></div>
 
-    <div id="conversa-gravacao" class="conversa-gravacao" hidden>
-        <button type="button" id="conversa-gravacao-botao">Gravar</button>
-        <span id="conversa-gravacao-status"></span>
+    <div class="eco-identidade">
+        <p class="eco-nome">ECO</p>
+        <p class="eco-boas-vindas">Quando quiser, comece a falar.</p>
     </div>
 
-    <?= FormComponent::render(
-        '/conversa/enviar',
-        'POST',
-        [[
-            'nome' => 'conteudo',
-            'rotulo' => 'Mensagem',
-            'tipo' => 'textarea',
-            'valor' => $valorConteudo,
-        ]],
-        'Enviar'
-    ) ?>
+    <div class="eco-indicador" aria-hidden="true">
+        <span class="eco-indicador-anel"></span>
+    </div>
+
+    <p class="eco-status-texto" id="eco-status-texto" aria-live="polite">Pronta para começar.</p>
+
+    <p class="eco-transcricao" id="eco-transcricao" hidden></p>
+
+    <p class="eco-cronometro" id="eco-cronometro" hidden>00:00</p>
+
+    <div class="eco-controles">
+        <button type="button" id="eco-botao-iniciar" class="botao botao-primario">Iniciar sessão</button>
+        <button type="button" id="eco-botao-concluir-fala" class="botao botao-secundario" hidden>Concluir minha fala agora</button>
+        <button type="button" id="eco-botao-encerrar" class="botao botao-secundario" hidden>Encerrar sessão</button>
+    </div>
+
+    <div class="eco-encerrada" id="eco-encerrada" hidden>
+        <p>Sessão encerrada.</p>
+        <p id="eco-encerrada-duracao"></p>
+        <button type="button" id="eco-botao-nova-sessao" class="botao botao-primario">Iniciar nova sessão</button>
+    </div>
+
+    <div id="conversa-dev" hidden>
+        <div id="conversa-area"><?= $areaConversaHtml ?></div>
+        <?= FormComponent::render(
+            '/conversa/enviar',
+            'POST',
+            [[
+                'nome' => 'conteudo',
+                'rotulo' => 'Mensagem',
+                'tipo' => 'textarea',
+                'valor' => $valorConteudo,
+            ]],
+            'Enviar'
+        ) ?>
+    </div>
 </section>
 <script>
 (function () {
-    var area = document.getElementById('conversa-area');
-    var form = document.querySelector('.pagina-conversa form');
-    var campo = document.getElementById('conteudo');
+    var palco = document.getElementById('eco-palco');
+    var statusTexto = document.getElementById('eco-status-texto');
+    var transcricaoEl = document.getElementById('eco-transcricao');
+    var cronometroEl = document.getElementById('eco-cronometro');
+    var botaoIniciar = document.getElementById('eco-botao-iniciar');
+    var botaoConcluirFala = document.getElementById('eco-botao-concluir-fala');
+    var botaoEncerrar = document.getElementById('eco-botao-encerrar');
+    var painelEncerrada = document.getElementById('eco-encerrada');
+    var duracaoEncerradaEl = document.getElementById('eco-encerrada-duracao');
+    var botaoNovaSessao = document.getElementById('eco-botao-nova-sessao');
 
-    function rolarParaOFim() {
-        var historico = document.getElementById('historico-mensagens');
-        if (historico) {
-            historico.scrollTop = historico.scrollHeight;
+    if (!palco || !window.fetch || !navigator.mediaDevices || !window.MediaRecorder) {
+        if (statusTexto) {
+            statusTexto.textContent = 'Este navegador não tem suporte a voz. Peça ajuda para continuar.';
         }
-    }
-
-    rolarParaOFim();
-
-    // Sem fetch() (ou sem form/JS), o formulário continua funcionando
-    // normalmente via POST /conversa/enviar com recarregamento de página
-    // — o comportamento abaixo é só um aprimoramento progressivo.
-    if (!form || !area || !window.fetch) {
         return;
     }
 
-    var usarEnvioNativoDaProximaVez = false;
+    var LIMIAR_VOLUME = 0.02;
+    var SILENCIO_MS = 1200;
+    var FALA_MINIMA_MS = 400;
+    var TURNO_MAXIMO_MS = 30000;
 
-    form.addEventListener('submit', function (evento) {
-        if (usarEnvioNativoDaProximaVez) {
-            return;
-        }
-
-        evento.preventDefault();
-
-        var corpo = new URLSearchParams();
-        corpo.set('conteudo', campo ? campo.value : '');
-
-        fetch(<?= json_encode(BasePath::url('/conversa/mensagens'), JSON_THROW_ON_ERROR) ?>, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: corpo.toString()
-        })
-            .then(function (resposta) { return resposta.json(); })
-            .then(function (dados) {
-                area.innerHTML = dados.html;
-                rolarParaOFim();
-                tocarUltimaRespostaDoSistema();
-
-                if (!campo) {
-                    return;
-                }
-
-                campo.value = dados.sucesso ? '' : (dados.valorConteudo || '');
-            })
-            .catch(function () {
-                // Falha de rede/JS: reenvia pelo caminho clássico
-                // (POST /conversa/enviar), que não depende de fetch().
-                usarEnvioNativoDaProximaVez = true;
-                form.submit();
-            });
-    });
-
-    // Sprint 24 (Voz de Saída): um único <audio> reaproveitado por toda a
-    // tela — tanto pelo botão "🔊" manual de cada bolha (progressive
-    // enhancement do link <a href> que já funciona sem JS) quanto pela
-    // resposta mais recente do sistema, tocada automaticamente após o
-    // envio de uma mensagem.
-    var player = new Audio();
-
-    function tocarAudio(url) {
-        player.pause();
-        player.src = url;
-        player.play().catch(function () {
-            // Autoplay bloqueado pelo navegador: a pessoa ainda pode ouvir
-            // clicando manualmente no botão "🔊" da mensagem.
-        });
-    }
-
-    function tocarUltimaRespostaDoSistema() {
-        var bolhas = area.querySelectorAll('.mensagem-sistema .mensagem-ouvir');
-        var ultima = bolhas[bolhas.length - 1];
-
-        if (ultima) {
-            tocarAudio(ultima.getAttribute('data-audio-url'));
-        }
-    }
-
-    area.addEventListener('click', function (evento) {
-        var botao = evento.target.closest('.mensagem-ouvir');
-
-        if (!botao) {
-            return;
-        }
-
-        evento.preventDefault();
-        tocarAudio(botao.getAttribute('data-audio-url'));
-    });
-})();
-</script>
-<script>
-(function () {
-    // Sprint 22 (Captura de Áudio da Sessão): grava a sessão inteira como
-    // um único áudio contínuo, do clique em "Gravar" até "Encerrar e
-    // enviar" — convive com o textarea acima (nenhum dos dois substitui o
-    // outro). Sem microfone/MediaRecorder no navegador, a seção inteira
-    // permanece oculta (hidden por padrão no HTML) e a conversa continua
-    // funcionando só por texto.
-    var secao = document.getElementById('conversa-gravacao');
-    var botao = document.getElementById('conversa-gravacao-botao');
-    var status = document.getElementById('conversa-gravacao-status');
-
-    if (!secao || !botao || !status || !window.fetch || !navigator.mediaDevices || !window.MediaRecorder) {
-        return;
-    }
-
-    secao.hidden = false;
-
+    var fluxo = null;
+    var audioContext = null;
+    var analyser = null;
+    var dadosVolume = null;
     var mediaRecorder = null;
     var pedacos = [];
+    var falando = false;
+    var inicioFalaEm = 0;
+    var silencioDesdeEm = null;
+    var turnoIniciadoEm = 0;
+    var sessaoAtiva = false;
+    var inicioSessaoEm = 0;
+    var cronometroIntervalo = null;
+    var player = new Audio();
 
-    function definirStatus(texto) {
-        status.textContent = texto;
+    function definirEstado(estado, texto) {
+        palco.dataset.estado = estado;
+
+        if (statusTexto) {
+            statusTexto.textContent = texto;
+        }
     }
 
-    function iniciarGravacao() {
+    function formatarDuracao(ms) {
+        var segundosTotais = Math.floor(ms / 1000);
+        var minutos = Math.floor(segundosTotais / 60);
+        var segundos = segundosTotais % 60;
+
+        return (minutos < 10 ? '0' : '') + minutos + ':' + (segundos < 10 ? '0' : '') + segundos;
+    }
+
+    function atualizarCronometro() {
+        if (cronometroEl) {
+            cronometroEl.textContent = formatarDuracao(Date.now() - inicioSessaoEm);
+        }
+    }
+
+    function iniciarSessao() {
         navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(function (fluxo) {
-                pedacos = [];
-                mediaRecorder = new MediaRecorder(fluxo);
+            .then(function (stream) {
+                fluxo = stream;
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-                mediaRecorder.ondataavailable = function (evento) {
-                    if (evento.data && evento.data.size > 0) {
-                        pedacos.push(evento.data);
-                    }
-                };
+                var fonte = audioContext.createMediaStreamSource(fluxo);
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 512;
+                dadosVolume = new Uint8Array(analyser.frequencyBinCount);
+                fonte.connect(analyser);
 
-                mediaRecorder.onstop = function () {
-                    fluxo.getTracks().forEach(function (faixa) { faixa.stop(); });
-                    enviarGravacao(new Blob(pedacos, { type: mediaRecorder.mimeType || 'audio/webm' }));
-                };
+                sessaoAtiva = true;
+                inicioSessaoEm = Date.now();
+                cronometroEl.hidden = false;
+                cronometroIntervalo = setInterval(atualizarCronometro, 1000);
+                atualizarCronometro();
 
-                mediaRecorder.start();
-                botao.textContent = 'Encerrar e enviar gravação';
-                definirStatus('Gravando...');
+                botaoIniciar.hidden = true;
+                botaoEncerrar.hidden = false;
+                painelEncerrada.hidden = true;
+
+                iniciarEscuta();
+                requestAnimationFrame(medirVolume);
             })
             .catch(function () {
-                definirStatus('Não foi possível acessar o microfone.');
+                definirEstado('pronta', 'Não foi possível acessar o microfone.');
             });
     }
 
-    function enviarGravacao(blob) {
-        botao.disabled = true;
-        definirStatus('Enviando gravação...');
+    function medirVolume() {
+        if (!sessaoAtiva) {
+            return;
+        }
 
-        fetch(<?= json_encode(BasePath::url('/conversa/audio'), JSON_THROW_ON_ERROR) ?>, {
+        analyser.getByteTimeDomainData(dadosVolume);
+
+        var soma = 0;
+        for (var i = 0; i < dadosVolume.length; i++) {
+            var valor = (dadosVolume[i] - 128) / 128;
+            soma += valor * valor;
+        }
+        var rms = Math.sqrt(soma / dadosVolume.length);
+
+        if (palco.dataset.estado === 'escutando') {
+            avaliarSilencio(rms);
+        }
+
+        requestAnimationFrame(medirVolume);
+    }
+
+    function avaliarSilencio(rms) {
+        var agora = Date.now();
+
+        if (rms > LIMIAR_VOLUME) {
+            if (!falando) {
+                falando = true;
+                inicioFalaEm = agora;
+            }
+            silencioDesdeEm = null;
+        } else if (falando) {
+            if (silencioDesdeEm === null) {
+                silencioDesdeEm = agora;
+            } else if (agora - silencioDesdeEm >= SILENCIO_MS && agora - inicioFalaEm >= FALA_MINIMA_MS) {
+                concluirFala();
+                return;
+            }
+        }
+
+        if (falando && agora - turnoIniciadoEm >= TURNO_MAXIMO_MS) {
+            concluirFala();
+        }
+    }
+
+    function iniciarEscuta() {
+        if (!sessaoAtiva) {
+            return;
+        }
+
+        pedacos = [];
+        falando = false;
+        silencioDesdeEm = null;
+        turnoIniciadoEm = Date.now();
+
+        mediaRecorder = new MediaRecorder(fluxo);
+
+        mediaRecorder.ondataavailable = function (evento) {
+            if (evento.data && evento.data.size > 0) {
+                pedacos.push(evento.data);
+            }
+        };
+
+        mediaRecorder.onstop = function () {
+            if (pedacos.length === 0) {
+                if (sessaoAtiva) {
+                    iniciarEscuta();
+                }
+                return;
+            }
+
+            enviarTurno(new Blob(pedacos, { type: mediaRecorder.mimeType || 'audio/webm' }));
+        };
+
+        mediaRecorder.start();
+
+        if (transcricaoEl) {
+            transcricaoEl.hidden = true;
+        }
+        botaoConcluirFala.hidden = false;
+        definirEstado('escutando', 'Escutando…');
+    }
+
+    function concluirFala() {
+        if (!mediaRecorder || mediaRecorder.state !== 'recording') {
+            return;
+        }
+
+        botaoConcluirFala.hidden = true;
+        mediaRecorder.stop();
+    }
+
+    function enviarTurno(blob) {
+        definirEstado('processando', 'Processando…');
+
+        fetch(<?= json_encode(BasePath::url('/conversa/mensagens/audio'), JSON_THROW_ON_ERROR) ?>, {
             method: 'POST',
             body: blob
         })
             .then(function (resposta) { return resposta.json(); })
             .then(function (dados) {
-                definirStatus(dados.sucesso ? 'Gravação enviada.' : (dados.alerta || 'Falha ao enviar a gravação.'));
+                if (dados.textoTranscrito && transcricaoEl) {
+                    transcricaoEl.textContent = dados.textoTranscrito;
+                    transcricaoEl.hidden = false;
+                }
+
+                if (dados.audioRespostaUrl) {
+                    responder(dados.audioRespostaUrl);
+                    return;
+                }
+
+                if (sessaoAtiva) {
+                    iniciarEscuta();
+                }
             })
             .catch(function () {
-                definirStatus('Falha ao enviar a gravação.');
-            })
-            .finally(function () {
-                botao.disabled = false;
-                botao.textContent = 'Gravar';
-                mediaRecorder = null;
+                definirEstado('escutando', 'Falha ao enviar. Continue quando quiser.');
+
+                if (sessaoAtiva) {
+                    iniciarEscuta();
+                }
             });
     }
 
-    botao.addEventListener('click', function () {
+    function responder(url) {
+        definirEstado('respondendo', 'Respondendo…');
+        botaoConcluirFala.hidden = true;
+
+        var seguir = function () {
+            if (sessaoAtiva) {
+                iniciarEscuta();
+            }
+        };
+
+        player.pause();
+        player.src = url;
+        player.onended = seguir;
+        player.onerror = seguir;
+        player.play().catch(seguir);
+    }
+
+    function encerrarSessao() {
+        sessaoAtiva = false;
+
         if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.onstop = null;
             mediaRecorder.stop();
-            return;
+        }
+        if (fluxo) {
+            fluxo.getTracks().forEach(function (faixa) { faixa.stop(); });
+        }
+        if (audioContext) {
+            audioContext.close();
+        }
+        if (cronometroIntervalo) {
+            clearInterval(cronometroIntervalo);
         }
 
-        iniciarGravacao();
-    });
+        var duracaoTexto = cronometroEl ? cronometroEl.textContent : '';
+
+        botaoEncerrar.hidden = true;
+        botaoConcluirFala.hidden = true;
+        if (transcricaoEl) {
+            transcricaoEl.hidden = true;
+        }
+
+        definirEstado('encerrada', 'Sessão encerrada.');
+
+        if (duracaoEncerradaEl) {
+            duracaoEncerradaEl.textContent = 'Duração: ' + duracaoTexto;
+        }
+        painelEncerrada.hidden = false;
+    }
+
+    botaoIniciar.addEventListener('click', iniciarSessao);
+    botaoConcluirFala.addEventListener('click', concluirFala);
+    botaoEncerrar.addEventListener('click', encerrarSessao);
+
+    if (botaoNovaSessao) {
+        botaoNovaSessao.addEventListener('click', function () {
+            window.location.reload();
+        });
+    }
 })();
 </script>

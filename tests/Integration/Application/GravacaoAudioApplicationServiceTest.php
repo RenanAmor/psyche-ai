@@ -191,5 +191,36 @@ final class GravacaoAudioApplicationServiceTest extends SQLiteTestCase
 
         self::assertNull($servico->buscarPorSessao('sessao-1'));
     }
+
+    public function testTranscreverTextoDevolveOTextoDosSegmentosSemPersistirNada(): void
+    {
+        $servico = $this->novoServico(new TranscricaoStub(new TranscriptionResultDTO(
+            text: 'ignorado quando há segments',
+            segments: [
+                ['text' => 'eu quis dizer', 'inicio' => 0.0, 'fim' => 1.2],
+                ['text' => 'quero dizer', 'inicio' => 1.3, 'fim' => 2.5],
+            ]
+        )));
+
+        $texto = $servico->transcreverTexto('bytes-do-turno');
+
+        self::assertSame('eu quis dizer quero dizer', $texto);
+        self::assertNull($servico->buscarPorSessao('sessao-1'));
+        self::assertCount(0, $servico->listarPendentes());
+    }
+
+    public function testTranscreverTextoUsaTextoCorridoQuandoNaoHaSegments(): void
+    {
+        $servico = $this->novoServico(new TranscricaoStub(new TranscriptionResultDTO(text: '  fala única sem pausas  ')));
+
+        self::assertSame('fala única sem pausas', $servico->transcreverTexto('bytes-do-turno'));
+    }
+
+    public function testTranscreverTextoDevolveVazioQuandoNaoHaFalaReconhecida(): void
+    {
+        $servico = $this->novoServico(new TranscricaoStub(new TranscriptionResultDTO(text: '')));
+
+        self::assertSame('', $servico->transcreverTexto('bytes-de-silencio'));
+    }
 }
 

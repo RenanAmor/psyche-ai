@@ -335,4 +335,68 @@ final class ConversaControllerTest extends TestCase
         $this->assertSame(502, $resposta->status);
         $this->assertStringContainsString('"sucesso":false', $resposta->corpo);
     }
+
+    public function testMensagensAudioComCorpoVazioRetorna400SemChamarAApi(): void
+    {
+        $controller = new ConversaController(HttpClientStub::comFalha(ErrorType::COMUNICACAO));
+
+        $resposta = $controller->mensagensAudio(Request::criar('POST', '/conversa/mensagens/audio', [], [], ''));
+
+        $this->assertSame(400, $resposta->status);
+        $this->assertStringContainsString('vazia', $resposta->corpo);
+    }
+
+    public function testMensagensAudioTranscreveEEnviaComoUmaMensagemDigitada(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'ses-fixa';
+
+        $fake = new MensagemHttpClientFake(
+            [
+                'events' => [
+                    ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa'],
+                    ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa'],
+                ],
+            ],
+            textoTranscricao: 'Estou ansioso hoje.'
+        );
+
+        $controller = new ConversaController($fake);
+        $resposta = $controller->mensagensAudio(Request::criar('POST', '/conversa/mensagens/audio', [], [], 'bytes-do-turno'));
+
+        $this->assertSame(200, $resposta->status);
+        $corpo = json_decode($resposta->corpo, true);
+
+        $this->assertTrue($corpo['sucesso']);
+        $this->assertSame('Estou ansioso hoje.', $corpo['textoTranscrito']);
+        $this->assertStringContainsString('/conversa/mensagens/evt-2/audio', $corpo['audioRespostaUrl']);
+        $this->assertStringContainsString('Recebi sua mensagem. Continue falando livremente.', $corpo['html']);
+    }
+
+    public function testMensagensAudioSemFalaReconhecidaNaoCriaTurnoNenhum(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'ses-fixa';
+
+        $fake = new MensagemHttpClientFake(['events' => []], textoTranscricao: '   ');
+
+        $controller = new ConversaController($fake);
+        $resposta = $controller->mensagensAudio(Request::criar('POST', '/conversa/mensagens/audio', [], [], 'bytes-de-silencio'));
+
+        $this->assertSame(200, $resposta->status);
+        $corpo = json_decode($resposta->corpo, true);
+
+        $this->assertFalse($corpo['sucesso']);
+        $this->assertStringContainsString('Não conseguimos identificar fala', $resposta->corpo);
+        $this->assertNull($corpo['audioRespostaUrl']);
+    }
+
+    public function testMensagensAudioComFalhaNaTranscricaoRetorna502(): void
+    {
+        $_SESSION['psyche_conversa_sessao_id'] = 'ses-fixa';
+
+        $controller = new ConversaController(HttpClientStub::comFalha(ErrorType::COMUNICACAO));
+        $resposta = $controller->mensagensAudio(Request::criar('POST', '/conversa/mensagens/audio', [], [], 'bytes-do-turno'));
+
+        $this->assertSame(502, $resposta->status);
+        $this->assertStringContainsString('"sucesso":false', $resposta->corpo);
+    }
 }

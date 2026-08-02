@@ -134,6 +134,62 @@ final class ConversaController
     }
 
     /**
+     * Recebe um único turno de fala da Interface de Voz da ECO (Sprint 32)
+     * e o transcreve de forma síncrona via POST /audio/transcricao, para
+     * então seguir pelo mesmo caminho de processarConteudo()/enviar() que
+     * uma mensagem digitada já percorre — mesmo pipeline, mesma geração de
+     * pergunta socrática, mesmo áudio de resposta, sem tocar os Motores.
+     * Ausência de fala reconhecida não cria turno nenhum (mesmo espírito do
+     * silêncio em Fluxo-Conversacional.md).
+     */
+    public function mensagensAudio(Request $request): Response
+    {
+        $audioBinario = $request->corpoBinario();
+
+        if ($audioBinario === '') {
+            return Response::json(['sucesso' => false, 'alerta' => 'A gravação está vazia.'], 400);
+        }
+
+        $sessaoId = $this->sessaoAtivaOuNova();
+
+        if ($sessaoId === null) {
+            return Response::json(
+                ['sucesso' => false, 'alerta' => ErrorViewModelFactory::comunicacao('sessions')->mensagem],
+                502
+            );
+        }
+
+        $transcricao = $this->httpClient->postBinario('audio/transcricao', $audioBinario);
+
+        if (!$transcricao->sucesso) {
+            return Response::json(['sucesso' => false, 'alerta' => $this->mensagemErro($transcricao->erro)], 502);
+        }
+
+        $textoTranscrito = trim((string) ($transcricao->dados['texto'] ?? ''));
+
+        if ($textoTranscrito === '') {
+            return $this->renderizarConversaJson($sessaoId, 'Não conseguimos identificar fala nessa gravação.', 'erro', '', '');
+        }
+
+        $resultado = $this->processarConteudo($textoTranscrito);
+
+        if ($resultado['sessaoId'] === null) {
+            return Response::json(
+                ['sucesso' => false, 'alerta' => ErrorViewModelFactory::comunicacao('sessions')->mensagem],
+                502
+            );
+        }
+
+        return $this->renderizarConversaJson(
+            $resultado['sessaoId'],
+            $resultado['alerta'],
+            $resultado['tipoAlerta'],
+            $resultado['valorConteudo'],
+            $textoTranscrito
+        );
+    }
+
+    /**
      * Recebe a gravação contínua de áudio da sessão (Sprint 22, "Captura
      * de Áudio da Sessão") e repassa o binário bruto para
      * POST /sessions/{id}/audio — a transcrição em EventoDiscursivo
@@ -274,7 +330,8 @@ final class ConversaController
             'conversa/cadastro',
             ['erro' => $erro],
             'Criar conta',
-            self::ROTA_CADASTRO
+            self::ROTA_CADASTRO,
+            'layout-eco'
         );
     }
 
@@ -289,7 +346,8 @@ final class ConversaController
             'conversa/entrar',
             ['erro' => $erro],
             'Entrar',
-            self::ROTA_ENTRAR
+            self::ROTA_ENTRAR,
+            'layout-eco'
         );
     }
 
@@ -298,8 +356,20 @@ final class ConversaController
      */
     private function processarEnvio(Request $request): array
     {
-        $conteudo = trim((string) $request->input('conteudo', ''));
+        return $this->processarConteudo(trim((string) $request->input('conteudo', '')));
+    }
 
+    /**
+     * Núcleo de processarEnvio(), extraído na Sprint 32 para que
+     * mensagensAudio() reaproveite exatamente o mesmo caminho de uma
+     * mensagem digitada (validação, envio a POST /sessions/{id}/messages,
+     * recuperação de sessão inexistente) a partir de um texto já
+     * transcrito, em vez de um $request->input().
+     *
+     * @return array{sessaoId: ?string, alerta: ?string, tipoAlerta: string, valorConteudo: string}
+     */
+    private function processarConteudo(string $conteudo): array
+    {
         $sessaoId = $this->sessaoAtivaOuNova();
 
         if ($sessaoId === null) {
@@ -379,29 +449,59 @@ final class ConversaController
                 'valorConteudo' => $valorConteudo,
             ],
             'Conversa',
-            self::ROTA
+            self::ROTA,
+            'layout-eco'
         );
 
         return Response::ok($html);
     }
 
+    /**
+     * @param ?string $textoTranscrito Presente (mesmo vazio) só quando a
+     *        chamada vem de mensagensAudio() (Sprint 32) — null preserva a
+     *        chave 'textoTranscrito' fora do JSON devolvido a mensagens(),
+     *        que nenhum teste/consumidor existente espera.
+     */
     private function renderizarConversaJson(
         string $sessaoId,
         ?string $alerta,
         string $tipoAlerta,
-        string $valorConteudo
+        string $valorConteudo,
+        ?string $textoTranscrito = null
     ): Response {
-        [$areaConversaHtml, $alertaFinal] = $this->montarAreaConversa($sessaoId, $alerta, $tipoAlerta);
+        [$areaConversaHtml, $alertaFinal, $mensagens] = $this->montarAreaConversa($sessaoId, $alerta, $tipoAlerta);
 
-        return Response::json([
+        $corpo = [
             'sucesso' => $alertaFinal === null || $tipoAlerta !== 'erro',
             'html' => $areaConversaHtml,
             'valorConteudo' => $valorConteudo,
-        ]);
+            'audioRespostaUrl' => $this->ultimaRespostaAudioUrl($mensagens),
+        ];
+
+        if ($textoTranscrito !== null) {
+            $corpo['textoTranscrito'] = $textoTranscrito;
+        }
+
+        return Response::json($corpo);
     }
 
     /**
-     * @return array{0: string, 1: ?string}
+     * @param MensagemViewModel[] $mensagens
+     */
+    private function ultimaRespostaAudioUrl(array $mensagens): ?string
+    {
+        $mensagensDoSistema = array_values(array_filter(
+            $mensagens,
+            static fn (MensagemViewModel $mensagem): bool => $mensagem->autor === 'Sistema'
+        ));
+
+        $ultima = $mensagensDoSistema[count($mensagensDoSistema) - 1] ?? null;
+
+        return $ultima === null ? null : BasePath::url('/conversa/mensagens/' . $ultima->id . '/audio');
+    }
+
+    /**
+     * @return array{0: string, 1: ?string, 2: MensagemViewModel[]}
      */
     private function montarAreaConversa(string $sessaoId, ?string $alerta, string $tipoAlerta): array
     {
@@ -414,7 +514,7 @@ final class ConversaController
             $alerta ??= $this->mensagemErro($eventosResposta->erro);
         }
 
-        return [ConversaAreaComponent::render($mensagens, $alerta, $tipoAlerta), $alerta];
+        return [ConversaAreaComponent::render($mensagens, $alerta, $tipoAlerta), $alerta, $mensagens];
     }
 
     private function sessaoAtivaOuNova(): ?string

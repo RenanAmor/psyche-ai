@@ -1,14 +1,14 @@
 # Fluxo Conversacional da ECO — Psyche AI
 
-> Versão 1.0 — Sprint 28. Especificação do fluxo conversacional da ECO — nenhum comportamento novo foi implementado para produzir este documento. Cada etapa abaixo indica explicitamente se já está em prática hoje (com o componente real que a implementa) ou se é especificação para sprint futura, sujeita à mesma [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) de qualquer outro motor.
+> Versão 1.1 — Sprint 28; passos 1 e 8 atualizados pela Sprint 32 (Interface de Voz da ECO). Especificação do fluxo conversacional da ECO. Cada etapa abaixo indica explicitamente se já está em prática hoje (com o componente real que a implementa) ou se é especificação para sprint futura, sujeita à mesma [cadeia de rastreabilidade](../Arquitetura-Cientifica.md#1-cadeia-de-rastreabilidade-obrigatória) de qualquer outro motor.
 
 ## As nove etapas
 
 ### 1. Início da sessão
 
-O sujeito chega a `/conversa`. Se não houver Sessao ativa em `$_SESSION`, uma nova Sessao é criada automaticamente sob o Sujeito identificado pelo cookie de longa duração (`psyche_pessoa_id`) — sem exigir cadastro ou login.
+O sujeito chega a `/conversa` e vê o palco de voz da ECO em Estado 1 ("Pronta"), sem Sessao ainda ativa em `$_SESSION`. Ao clicar em "Iniciar sessão", o navegador pede acesso ao microfone e a ECO passa a escutar continuamente (Estado 2); a Sessao é criada automaticamente sob o Sujeito identificado pelo cookie de longa duração (`psyche_pessoa_id`) no primeiro turno enviado — sem exigir cadastro ou login.
 
-**Estado**: implementado desde a Sprint 12, identidade por cookie desde a Sprint 17 (`ConversaController::sessaoAtivaOuNova()`).
+**Estado**: implementado desde a Sprint 12, identidade por cookie desde a Sprint 17 (`ConversaController::sessaoAtivaOuNova()`); interface de voz (captura contínua com segmentação automática de turno por silêncio, transcrição síncrona via `POST /conversa/mensagens/audio`) desde a Sprint 32.
 
 ### 2. Abertura
 
@@ -48,9 +48,9 @@ Quando um tema já discutido em sessões anteriores reaparece, a ECO pode devolv
 
 ### 8. Encerramento
 
-O sujeito pode interromper a conversa a qualquer momento, sem qualquer exigência de fechamento formal — nenhuma pergunta de despedida é imposta, nenhuma síntese da sessão é oferecida ao sujeito. Preservar tudo o que foi dito, mesmo sem encerramento formal, é o mesmo Princípio da Neutralidade Observacional que já vale para o sistema inteiro ([Arquitetura-Cientifica.md §4](../Arquitetura-Cientifica.md#4-princípio-da-neutralidade-observacional)).
+O sujeito pode interromper a conversa a qualquer momento clicando em "Encerrar sessão" — a ECO para de escutar (mic e temporizador desligados no navegador) e mostra um resumo puramente operacional (duração da sessão), nunca uma análise. Isso é uma pausa do lado do cliente, não um fechamento formal do lado do Domínio: nenhuma pergunta de despedida é imposta, nenhuma síntese do conteúdo da sessão é oferecida ao sujeito, e a Sessao em si permanece aberta e disponível — "Iniciar nova sessão" apenas recarrega o palco de voz e retoma a mesma Sessao ativa. Preservar tudo o que foi dito, mesmo sem encerramento formal do lado do Domínio, é o mesmo Princípio da Neutralidade Observacional que já vale para o sistema inteiro ([Arquitetura-Cientifica.md §4](../Arquitetura-Cientifica.md#4-princípio-da-neutralidade-observacional)).
 
-**Estado**: implementado por ausência de exigência — não há fluxo de "finalizar sessão" na interface do sujeito; a Sessao permanece registrada com tudo o que já foi dito.
+**Estado**: implementado — Estado 5 ("Sessão encerrada") da interface de voz desde a Sprint 32, inteiramente client-side; não há (nem esta Sprint introduziu) um fluxo de "finalizar Sessao" no Domínio/API — a Sessao permanece registrada com tudo o que já foi dito.
 
 ### 9. Nova sessão
 

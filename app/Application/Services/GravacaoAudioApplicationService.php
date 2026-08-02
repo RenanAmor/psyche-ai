@@ -134,6 +134,39 @@ final class GravacaoAudioApplicationService implements ApplicationServiceInterfa
     }
 
     /**
+     * Transcreve um único turno de fala (Sprint 32, Interface de Voz da
+     * ECO) e devolve só o texto — ao contrário de registrar()/transcrever(),
+     * não persiste nada (nenhum GravacaoAudio, Discurso ou EventoDiscursivo).
+     * Existe para que a Presentation Web tenha um caminho síncrono
+     * voz→texto reaproveitando o mesmo TranscriptionInterface (Whisper) já
+     * usado pelo pipeline assíncrono, sem duplicar turnos: o texto
+     * devolvido aqui segue para MensagemApplicationService::enviar() (via
+     * POST /sessions/{id}/messages), que é quem de fato grava o turno do
+     * Sujeito e gera a resposta socrática — o mesmo caminho que uma
+     * mensagem digitada já percorre.
+     */
+    public function transcreverTexto(string $audioBinario): string
+    {
+        $arquivoTemporario = tempnam(sys_get_temp_dir(), 'psyche-audio-');
+        file_put_contents($arquivoTemporario, $audioBinario);
+
+        try {
+            $resultado = $this->transcricao->transcribe($arquivoTemporario);
+        } finally {
+            unlink($arquivoTemporario);
+        }
+
+        if ($resultado->segments !== []) {
+            return trim(implode(' ', array_map(
+                static fn (array $segmento): string => trim($segmento['text']),
+                $resultado->segments
+            )));
+        }
+
+        return trim($resultado->text);
+    }
+
+    /**
      * Exposto para a camada HTTP servir a reprodução do áudio original ao
      * analista (Regra 2: o áudio bruto nunca é editado, só lido).
      */

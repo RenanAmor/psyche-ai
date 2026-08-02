@@ -24,10 +24,15 @@ final class MensagemHttpClientFake implements HttpClientInterface
 
     /**
      * @param array<string, array<int, array<string, mixed>>> $recursos
+     * @param ?string $textoTranscricao Sprint 32 (Interface de Voz da ECO):
+     *        quando informado, simula a resposta de POST /audio/transcricao
+     *        (`{"texto": ...}`) em vez de delegar a HttpClientStub — que não
+     *        conhece esse recurso específico.
      */
     public function __construct(
         array $recursos = ['events' => []],
-        private ?ErrorType $falhaNoProximoEnvioDeMensagem = null
+        private ?ErrorType $falhaNoProximoEnvioDeMensagem = null,
+        private readonly ?string $textoTranscricao = null
     ) {
         $this->delegado = new HttpClientStub($recursos);
     }
@@ -77,6 +82,10 @@ final class MensagemHttpClientFake implements HttpClientInterface
 
     public function postBinario(string $recurso, string $binario): ApiResponse
     {
+        if (trim($recurso, '/') === 'audio/transcricao' && $this->textoTranscricao !== null) {
+            return ApiResponse::sucesso(['texto' => $this->textoTranscricao]);
+        }
+
         return $this->delegado->postBinario($recurso, $binario);
     }
 

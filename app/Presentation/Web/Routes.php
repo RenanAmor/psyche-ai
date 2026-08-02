@@ -72,6 +72,7 @@ final class Routes
         $router->get('/conversa', $conversa->iniciar(...));
         $router->post('/conversa/enviar', $conversa->enviar(...));
         $router->post('/conversa/mensagens', $conversa->mensagens(...));
+        $router->post('/conversa/mensagens/audio', $conversa->mensagensAudio(...));
         $router->post('/conversa/audio', $conversa->audio(...));
         $router->get('/conversa/mensagens/{id}/audio', $conversa->audioResposta(...));
         $router->get('/conversa/cadastro', $conversa->cadastro(...));

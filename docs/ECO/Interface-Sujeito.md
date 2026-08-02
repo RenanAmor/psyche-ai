@@ -1,12 +1,12 @@
 # Interface do Sujeito — Psyche AI
 
-> Versão 1.0 — Sprint 28. Especificação da interface do Sujeito na ECO. Cada item indica se já está em produção hoje ou se é especificação para sprint futura — nenhuma tela nova foi criada para produzir este documento.
+> Versão 1.1 — Sprint 28; redesenhada pela Sprint 32 (Interface de Voz da ECO). Especificação da interface do Sujeito na ECO. Cada item indica se já está em produção hoje ou se é especificação para sprint futura.
 
 ## O que o sujeito visualiza
 
 A interface do Sujeito é composta exclusivamente por:
 
-- **Conversa** — a tela de diálogo com a ECO (`/conversa`). **Implementado** desde a Sprint 12, com identidade por cookie (Sprint 17), captura de áudio (Sprint 22) e voz de saída (Sprint 24).
+- **Conversa** — o palco de voz da ECO (`/conversa`). **Implementado**, redesenhado na Sprint 32: comunicação exclusivamente por voz, sem caixa de texto nem botão "Enviar" visíveis. Cinco estados (Pronta, Escutando, Processando, Respondendo, Encerrada) guiam a sessão; a segmentação de cada turno de fala é automática, por detecção de silêncio no navegador, com um botão discreto de emergência ("Concluir minha fala agora") como via manual. Identidade por cookie (Sprint 17), transcrição síncrona por turno via Whisper (Sprint 32, reaproveitando o provedor da Sprint 22) e voz de saída (Sprint 24) — nenhum histórico em bolhas de chat é exibido ao Sujeito. A antiga tela de texto (caixa + "Enviar", Sprint 12/17) permanece no HTML como ferramenta de desenvolvimento interno, oculta via `hidden` e nunca alcançável pela navegação do Sujeito — ver [Fluxo-Conversacional.md](Fluxo-Conversacional.md).
 - **Histórico de suas sessões** — a possibilidade de o próprio sujeito revisitar o que já foi dito em sessões anteriores, sem qualquer estrutura produzida pelos motores. **Não implementado** nesta versão: a única tela de histórico existente (`/sujeitos/{id}/historico`) fica atrás do Portão do Analista ([Interface-Analista.md](Interface-Analista.md)) e expõe recorrências e observações — inadequada, tal como está hoje, para ser reaproveitada como histórico do próprio sujeito sem antes remover essas estruturas. Especificação para sprint futura.
 - **Configurações pessoais** — dados da conta do sujeito (e-mail, senha). **Parcialmente implementado**: cadastro e login existem (`/conversa/cadastro`, `/conversa/entrar`, Sprint 20), mas não há tela de edição de perfil ou preferências pessoais.
 - **Consentimentos** — registro do que o sujeito autorizou sobre o tratamento de seus dados (captura de áudio, retenção de histórico, uso do discurso para observação computacional). **Não implementado** nesta versão — especificação para sprint futura, sujeita a decisão explícita do usuário sobre o modelo de consentimento antes de qualquer código.
