@@ -6,7 +6,7 @@ namespace PsycheAI\Presentation;
 
 use PsycheAI\Infrastructure\Providers\ApplicationServiceProvider;
 use PsycheAI\Presentation\Controllers\AutenticacaoController;
-use PsycheAI\Presentation\Controllers\AutenticacaoSujeitoController;
+use PsycheAI\Presentation\Controllers\AutenticacaoParticipanteController;
 use PsycheAI\Presentation\Controllers\DiscursoController;
 use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
 use PsycheAI\Presentation\Controllers\GravacaoAudioController;
@@ -39,17 +39,16 @@ final class Routes
         $linhaDoTempo = new LinhaDoTempoController($provider->linhaDoTempo(), $provider->consolidacao());
         $observacoes = new ObservacaoController($provider->observacoes());
         $autenticacao = new AutenticacaoController($provider->analistas());
-        $autenticacaoSujeito = new AutenticacaoSujeitoController($provider->sujeitos());
+        $autenticacaoParticipante = new AutenticacaoParticipanteController($provider->participantes());
 
         $router->post('/auth/login', [$autenticacao, 'autenticar']);
-        $router->post('/auth/subject/login', [$autenticacaoSujeito, 'autenticar']);
+        $router->post('/auth/participante/login', [$autenticacaoParticipante, 'autenticar']);
 
         $router->post('/subjects', [$sujeitos, 'criar']);
         $router->get('/subjects', [$sujeitos, 'listar']);
         $router->get('/subjects/{id}', [$sujeitos, 'buscar']);
         $router->put('/subjects/{id}', [$sujeitos, 'atualizar']);
         $router->delete('/subjects/{id}', [$sujeitos, 'excluir']);
-        $router->post('/subjects/{id}/account', [$sujeitos, 'registrarConta']);
         $router->get('/subjects/{id}/timeline', [$linhaDoTempo, 'timeline']);
         $router->get('/subjects/{id}/consolidation', [$linhaDoTempo, 'consolidacao']);
         $router->get('/subjects/{id}/observations', [$observacoes, 'observar']);

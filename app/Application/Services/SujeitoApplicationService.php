@@ -11,7 +11,6 @@ use PsycheAI\Application\UseCases\CadastrarSujeito\CadastrarSujeitoCommand;
 use PsycheAI\Application\UseCases\CadastrarSujeito\CadastrarSujeitoHandler;
 use PsycheAI\Domain\Entities\Sujeito;
 use PsycheAI\Domain\Repositories\SujeitoRepository;
-use PsycheAI\Domain\ValueObjects\Email;
 use PsycheAI\Domain\ValueObjects\Identificador;
 use PsycheAI\Domain\ValueObjects\NomeSujeito;
 
@@ -75,54 +74,6 @@ final class SujeitoApplicationService implements ApplicationServiceInterface
             static fn (Sujeito $sujeito): SujeitoDTO => SujeitoDTO::fromEntity($sujeito),
             $this->sujeitoRepository->findAll()
         );
-    }
-
-    public function buscarPorEmail(string $email): ?SujeitoDTO
-    {
-        $sujeito = $this->sujeitoRepository->findByEmail($email);
-
-        return $sujeito === null ? null : SujeitoDTO::fromEntity($sujeito);
-    }
-
-    /**
-     * Liga uma conta real (e-mail + senha) a um Sujeito já existente —
-     * nunca cria um Sujeito novo. Preserva as Sessões já acumuladas sob o
-     * cookie pseudônimo (Sprint 17): é o mesmo Sujeito, agora com um
-     * espaço singular estável em vez de só um id de navegador.
-     */
-    public function registrarConta(string $id, string $email, string $senha): SujeitoDTO
-    {
-        $existente = $this->buscarEntidadePorId($id);
-
-        $comConta = new Sujeito(
-            new Identificador($id),
-            $existente->nome(),
-            new Email($email),
-            password_hash($senha, PASSWORD_DEFAULT)
-        );
-
-        foreach ($existente->sessoes() as $sessao) {
-            $comConta->adicionarSessao($sessao);
-        }
-
-        $this->sujeitoRepository->save($comConta);
-
-        return SujeitoDTO::fromEntity($comConta);
-    }
-
-    /**
-     * Nunca distingue e-mail inexistente de senha errada no retorno —
-     * mesmo cuidado de AnalistaApplicationService::autenticar().
-     */
-    public function autenticar(string $email, string $senha): ?SujeitoDTO
-    {
-        $sujeito = $this->sujeitoRepository->findByEmail($email);
-
-        if ($sujeito === null || !$sujeito->verificarSenha($senha)) {
-            return null;
-        }
-
-        return SujeitoDTO::fromEntity($sujeito);
     }
 
     private function buscarEntidadePorId(string $id): Sujeito

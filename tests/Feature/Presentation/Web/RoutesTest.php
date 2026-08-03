@@ -11,6 +11,7 @@ use PsycheAI\Presentation\Web\Http\Router;
 use PsycheAI\Presentation\Web\Navigation\NavigationMenu;
 use PsycheAI\Presentation\Web\Routes;
 use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
+use PsycheAI\Presentation\Web\Security\PortaoDeParticipante;
 use PsycheAI\Tests\Support\HttpClientStub;
 use PsycheAI\Tests\Support\ObservacoesHttpClientFake;
 
@@ -211,53 +212,54 @@ final class RoutesTest extends TestCase
         $this->assertFalse(PortaoDeAnalista::estaAutenticado());
     }
 
-    public function testRotaDeCadastroDoSujeitoNaoEProtegida(): void
+    public function testRotaProtegidaDeConversaSemSessaoDeParticipanteRedirecionaParaEntrar(): void
     {
         $_SESSION = [];
 
-        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/conversa/cadastro'));
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/conversa'));
+
+        $this->assertSame(302, $resposta->status);
+        $this->assertSame('/participante/entrar', $resposta->headers['Location']);
+    }
+
+    public function testRotaDeEntrarDoParticipanteNaoEProtegida(): void
+    {
+        $_SESSION = [];
+
+        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/participante/entrar'));
 
         $this->assertSame(200, $resposta->status);
         $this->assertStringContainsString('<form', $resposta->corpo);
     }
 
-    public function testRotaDeEntrarDoSujeitoNaoEProtegida(): void
-    {
-        $_SESSION = [];
-
-        $resposta = $this->criarRouter()->despachar(Request::criar('GET', '/conversa/entrar'));
-
-        $this->assertSame(200, $resposta->status);
-        $this->assertStringContainsString('<form', $resposta->corpo);
-    }
-
-    public function testFluxoDeAutenticacaoDoSujeitoFuncionalAtravesDasRotas(): void
+    public function testFluxoDeAutenticacaoDoParticipanteFuncionalAtravesDasRotas(): void
     {
         $_SESSION = [];
         $router = $this->criarRouter();
 
         $comSenhaErrada = $router->despachar(
-            Request::criar('POST', '/conversa/entrar', [], [
-                'email' => HttpClientStub::SUJEITO_EMAIL_PADRAO,
+            Request::criar('POST', '/participante/entrar', [], [
+                'email' => HttpClientStub::PARTICIPANTE_EMAIL_PADRAO,
                 'senha' => 'errada',
             ])
         );
         $this->assertSame(422, $comSenhaErrada->status);
+        $this->assertFalse(PortaoDeParticipante::estaAutenticado());
 
         $comSenhaCerta = $router->despachar(
-            Request::criar('POST', '/conversa/entrar', [], [
-                'email' => HttpClientStub::SUJEITO_EMAIL_PADRAO,
-                'senha' => HttpClientStub::SUJEITO_SENHA_PADRAO,
+            Request::criar('POST', '/participante/entrar', [], [
+                'email' => HttpClientStub::PARTICIPANTE_EMAIL_PADRAO,
+                'senha' => HttpClientStub::PARTICIPANTE_SENHA_PADRAO,
             ])
         );
         $this->assertSame(302, $comSenhaCerta->status);
         $this->assertSame('/conversa', $comSenhaCerta->headers['Location']);
-        $this->assertSame(HttpClientStub::SUJEITO_ID_PADRAO, $_COOKIE['psyche_pessoa_id']);
+        $this->assertTrue(PortaoDeParticipante::estaAutenticado());
 
-        $sair = $router->despachar(Request::criar('POST', '/conversa/sair'));
+        $sair = $router->despachar(Request::criar('POST', '/participante/sair'));
         $this->assertSame(302, $sair->status);
-        $this->assertSame('/conversa', $sair->headers['Location']);
-        $this->assertArrayNotHasKey('psyche_pessoa_id', $_COOKIE);
+        $this->assertSame('/participante/entrar', $sair->headers['Location']);
+        $this->assertFalse(PortaoDeParticipante::estaAutenticado());
     }
 
     public function testComPrefixoDeBaseConfiguradoOsLinksDoMenuVemPrefixados(): void

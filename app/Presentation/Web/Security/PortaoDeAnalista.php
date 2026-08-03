@@ -19,8 +19,8 @@ use PsycheAI\Presentation\Web\Http\Response;
  * de sessão simples. Desde a Sprint 18 (Plataforma), a verificação de
  * credencial em si não é mais responsabilidade desta classe: ela só
  * abre/fecha/consulta a sessão (`psyche_analista_autenticado`, distinta
- * de `psyche_pessoa_id`/`psyche_conversa_sessao_id`, usadas pelo
- * Sujeito). Quem verifica a senha é a API REST, via
+ * de `psyche_participante_autenticado`/`psyche_conversa_sessao_id`,
+ * usadas pela ECO). Quem verifica a senha é a API REST, via
  * `POST /auth/login` (`AnalistaApplicationService::autenticar()`,
  * contas reais em vez da antiga `PSYCHEAI_SENHA_ANALISTA` única) —
  * `AutenticacaoAnalistaController` chama a API e só então abre a sessão

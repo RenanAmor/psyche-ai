@@ -31,12 +31,14 @@ final class HttpClientStub implements HttpClientInterface
     public const ANALISTA_SENHA_PADRAO = 'senha-de-teste';
 
     /**
-     * Idem, para `POST /auth/subject/login` (Sprint 20) — a conta do
-     * Sujeito, distinta da conta do analista acima.
+     * Idem, para `POST /auth/participante/login` — a conta da ECO,
+     * sistema de autenticação totalmente independente do analista acima
+     * (própria tabela/sessão, provisionada pelo Analista via
+     * bin/criar-participante.php, sem autocadastro público).
      */
-    public const SUJEITO_ID_PADRAO = 'sujeito-teste';
-    public const SUJEITO_EMAIL_PADRAO = 'sujeito@psyche.ai';
-    public const SUJEITO_SENHA_PADRAO = 'senha-do-sujeito';
+    public const PARTICIPANTE_ID_PADRAO = 'participante-teste';
+    public const PARTICIPANTE_EMAIL_PADRAO = 'participante@psyche.ai';
+    public const PARTICIPANTE_SENHA_PADRAO = 'senha-do-participante';
 
     private const RECURSOS_PADRAO = [
         'subjects' => [
@@ -124,12 +126,8 @@ final class HttpClientStub implements HttpClientInterface
             return $this->autenticar($dados);
         }
 
-        if ($chave === 'auth/subject/login') {
-            return $this->autenticarSujeito($dados);
-        }
-
-        if (preg_match('#^subjects/([^/]+)/account$#', $chave, $referencias) === 1) {
-            return $this->registrarContaSujeito($referencias[1], $dados);
+        if ($chave === 'auth/participante/login') {
+            return $this->autenticarParticipante($dados);
         }
 
         $this->armazenamento[$chave][] = $dados;
@@ -155,38 +153,16 @@ final class HttpClientStub implements HttpClientInterface
     /**
      * @param array<string, string> $dados
      */
-    private function autenticarSujeito(array $dados): ApiResponse
+    private function autenticarParticipante(array $dados): ApiResponse
     {
-        $credenciaisValidas = ($dados['email'] ?? null) === self::SUJEITO_EMAIL_PADRAO
-            && ($dados['senha'] ?? null) === self::SUJEITO_SENHA_PADRAO;
+        $credenciaisValidas = ($dados['email'] ?? null) === self::PARTICIPANTE_EMAIL_PADRAO
+            && ($dados['senha'] ?? null) === self::PARTICIPANTE_SENHA_PADRAO;
 
         if (!$credenciaisValidas) {
             return ApiResponse::falha(ErrorViewModelFactory::validacao(['credenciais' => 'E-mail ou senha inválidos.']));
         }
 
-        return ApiResponse::sucesso(['id' => self::SUJEITO_ID_PADRAO, 'email' => self::SUJEITO_EMAIL_PADRAO]);
-    }
-
-    /**
-     * @param array<string, string> $dados
-     */
-    private function registrarContaSujeito(string $id, array $dados): ApiResponse
-    {
-        foreach ($this->armazenamento['subjects'] ?? [] as $indice => $sujeito) {
-            if (($sujeito['id'] ?? null) !== $id) {
-                continue;
-            }
-
-            if (($sujeito['email'] ?? null) !== null) {
-                return ApiResponse::falha(ErrorViewModelFactory::validacao(['email' => 'Este sujeito já possui conta.']));
-            }
-
-            $this->armazenamento['subjects'][$indice]['email'] = $dados['email'] ?? null;
-
-            return ApiResponse::sucesso($this->armazenamento['subjects'][$indice]);
-        }
-
-        return ApiResponse::falha(ErrorViewModelFactory::naoEncontrado('subjects'));
+        return ApiResponse::sucesso(['id' => self::PARTICIPANTE_ID_PADRAO, 'email' => self::PARTICIPANTE_EMAIL_PADRAO]);
     }
 
     /**

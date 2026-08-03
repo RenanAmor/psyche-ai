@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace PsycheAI\Presentation\Requests;
 
-final class RegistrarContaSujeitoRequest extends HttpRequestData
+final class AutenticarParticipanteRequest extends HttpRequestData
 {
     public function __construct(
         public readonly string $email,

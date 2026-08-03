@@ -7,6 +7,7 @@ namespace PsycheAI\Presentation\Web;
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
 use PsycheAI\Presentation\Web\Controllers\AbstractCrudResourceController;
 use PsycheAI\Presentation\Web\Controllers\AutenticacaoAnalistaController;
+use PsycheAI\Presentation\Web\Controllers\AutenticacaoParticipanteController;
 use PsycheAI\Presentation\Web\Controllers\ConversaController;
 use PsycheAI\Presentation\Web\Controllers\DashboardController;
 use PsycheAI\Presentation\Web\Controllers\DiscursosController;
@@ -19,6 +20,7 @@ use PsycheAI\Presentation\Web\Controllers\SessoesController;
 use PsycheAI\Presentation\Web\Controllers\SujeitosController;
 use PsycheAI\Presentation\Web\Http\Router;
 use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
+use PsycheAI\Presentation\Web\Security\PortaoDeParticipante;
 
 /**
  * Registra todas as rotas internas da interface web sobre um Router já
@@ -37,8 +39,13 @@ use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
  * Desde a revisão pós-Sprint 16 (docs/Roadmap.md), toda rota de
  * coleta/análise de dados (`/`, CRUDs, histórico, observações, eventos
  * discursivos) passa por `PortaoDeAnalista::proteger()`. `/conversa*`
- * (superfície do Sujeito) e `/entrar`/`/sair`/`/erros/*` permanecem
- * deliberadamente fora do Portão.
+ * (superfície do Participante da ECO) passa, desde então, por um segundo
+ * portão, totalmente independente: `PortaoDeParticipante::proteger()` —
+ * sessão, tabela e provisionamento próprios (`bin/criar-participante.php`),
+ * sem qualquer relação com `PortaoDeAnalista`. `/entrar`/`/sair`
+ * (Analista) e `/participante/entrar`/`/participante/sair` (Participante)
+ * ficam, cada um, fora do seu respectivo portão — são a porta de acesso a
+ * ele — exatamente como `/erros/*`.
  */
 final class Routes
 {
@@ -55,6 +62,7 @@ final class Routes
         $observacoes = new ObservacoesSujeitoController($httpClient);
         $erros = new ErrorController();
         $autenticacao = new AutenticacaoAnalistaController($httpClient);
+        $autenticacaoParticipante = new AutenticacaoParticipanteController($httpClient);
 
         $router->get('/', PortaoDeAnalista::proteger($dashboard->index(...)));
 
@@ -69,17 +77,16 @@ final class Routes
 
         $router->get('/eventos-discursivos', PortaoDeAnalista::proteger($eventosDiscursivos->index(...)));
 
-        $router->get('/conversa', $conversa->iniciar(...));
-        $router->post('/conversa/enviar', $conversa->enviar(...));
-        $router->post('/conversa/mensagens', $conversa->mensagens(...));
-        $router->post('/conversa/mensagens/audio', $conversa->mensagensAudio(...));
-        $router->post('/conversa/audio', $conversa->audio(...));
-        $router->get('/conversa/mensagens/{id}/audio', $conversa->audioResposta(...));
-        $router->get('/conversa/cadastro', $conversa->cadastro(...));
-        $router->post('/conversa/cadastro', $conversa->cadastrar(...));
-        $router->get('/conversa/entrar', $conversa->entrar(...));
-        $router->post('/conversa/entrar', $conversa->autenticar(...));
-        $router->post('/conversa/sair', $conversa->sair(...));
+        $router->get('/conversa', PortaoDeParticipante::proteger($conversa->iniciar(...)));
+        $router->post('/conversa/enviar', PortaoDeParticipante::proteger($conversa->enviar(...)));
+        $router->post('/conversa/mensagens', PortaoDeParticipante::proteger($conversa->mensagens(...)));
+        $router->post('/conversa/mensagens/audio', PortaoDeParticipante::proteger($conversa->mensagensAudio(...)));
+        $router->post('/conversa/audio', PortaoDeParticipante::proteger($conversa->audio(...)));
+        $router->get('/conversa/mensagens/{id}/audio', PortaoDeParticipante::proteger($conversa->audioResposta(...)));
+
+        $router->get('/participante/entrar', $autenticacaoParticipante->entrar(...));
+        $router->post('/participante/entrar', $autenticacaoParticipante->autenticar(...));
+        $router->post('/participante/sair', $autenticacaoParticipante->sair(...));
 
         $router->get('/entrar', $autenticacao->entrar(...));
         $router->post('/entrar', $autenticacao->autenticar(...));

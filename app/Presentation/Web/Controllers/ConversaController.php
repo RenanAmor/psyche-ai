@@ -14,6 +14,7 @@ use PsycheAI\Presentation\Web\Http\BasePath;
 use PsycheAI\Presentation\Web\Http\Request;
 use PsycheAI\Presentation\Web\Http\Response;
 use PsycheAI\Presentation\Web\Http\ViewRenderer;
+use PsycheAI\Presentation\Web\Security\PortaoDeParticipante;
 use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
 
 /**
@@ -24,49 +25,31 @@ use PsycheAI\Presentation\Web\ViewModels\MensagemViewModel;
  * filtrando GET /events por sessaoId, reaproveitando um endpoint já
  * existente em vez de criar mais um só para leitura.
  *
- * Sprint 17 (Interface Conversacional) acrescenta duas coisas, ainda sem
- * autenticação real (isso é a Sprint 18):
+ * A identidade do Sujeito é o id do Participante autenticado por
+ * `PortaoDeParticipante` (`/conversa*` é gateado por ele em `Routes.php`) —
+ * o mesmo id é usado como id do Sujeito (`garantirSujeito()`), preservando
+ * o histórico entre visitas sem depender de cookie algum. Isso substitui
+ * duas gerações anteriores: o cookie pseudônimo de longa duração da Sprint
+ * 17 e a conta real opcional (self-signup) da Sprint 20 — ambas retiradas
+ * em favor de contas de Participante provisionadas pelo Analista, sem
+ * autocadastro público.
  *
- * 1. Identidade por cookie: em vez do Sujeito "visitante" fixo
- *    compartilhado por todo mundo, cada navegador recebe um cookie de
- *    longa duração (CHAVE_PESSOA_ID) com um id pseudônimo estável. Isso
- *    isola o discurso de cada pessoa que usa a conversa — necessário
- *    para que os motores Freud/Lacan (Sprints 15-16) observem
- *    recorrências de UM sujeito, não a mistura de todos os visitantes.
- *    Continua sem login: é só uma identidade anônima estável por
- *    navegador, que a Sprint 18 poderá ligar a uma conta real sem
- *    perder o histórico já acumulado.
- * 2. Atualização incremental via fetch(): a rota JSON
- *    POST /conversa/mensagens (método mensagens()) devolve só o
- *    fragmento HTML da área de conversa (ConversaAreaComponent), que o
- *    JS da view troca no DOM sem recarregar a página inteira. A rota
- *    HTML POST /conversa/enviar (método enviar()) continua existindo
- *    tal como antes — é o fallback funcional quando JavaScript está
- *    desabilitado.
+ * Atualização incremental via fetch(): a rota JSON POST /conversa/mensagens
+ * (método mensagens()) devolve só o fragmento HTML da área de conversa
+ * (ConversaAreaComponent), que o JS da view troca no DOM sem recarregar a
+ * página inteira. A rota HTML POST /conversa/enviar (método enviar())
+ * continua existindo tal como antes — é o fallback funcional quando
+ * JavaScript está desabilitado.
  *
  * Não estende AbstractResourceController/AbstractCrudResourceController:
  * o ceremonial de listagem/CRUD genérico não se aplica a uma tela de
  * conversa com fluxo próprio de iniciar/enviar.
- *
- * Sprint 20 ("Contas reais do Sujeito") acrescenta cadastro/login/logout
- * reais, sem substituir a identidade por cookie — só a complementa: o
- * cookie continua sendo como o Sujeito é identificado a cada requisição;
- * cadastrar-se liga um e-mail/senha ao Sujeito que o cookie já aponta
- * (preservando o histórico), e logar troca o cookie para apontar para o
- * Sujeito da conta, permitindo recuperar o mesmo espaço de outro
- * navegador/dispositivo. Continua fora do Portão do Analista — é a
- * superfície pública do Sujeito.
  */
 final class ConversaController
 {
     private const SUJEITO_NOME_PADRAO = 'Visitante';
     private const CHAVE_SESSAO_ATIVA = 'psyche_conversa_sessao_id';
-    private const CHAVE_PESSOA_ID = 'psyche_pessoa_id';
-    private const DURACAO_COOKIE_PESSOA_EM_SEGUNDOS = 60 * 60 * 24 * 365;
     private const ROTA = '/conversa';
-    private const ROTA_CADASTRO = '/conversa/cadastro';
-    private const ROTA_ENTRAR = '/conversa/entrar';
-    private const MENSAGEM_CREDENCIAIS_INVALIDAS = 'E-mail ou senha inválidos.';
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -194,8 +177,9 @@ final class ConversaController
      * de Áudio da Sessão") e repassa o binário bruto para
      * POST /sessions/{id}/audio — a transcrição em EventoDiscursivo
      * acontece depois, de forma assíncrona (bin/transcrever-gravacoes.php),
-     * nunca aqui. Mesma identidade por cookie/Sessao ativa do restante de
-     * /conversa*, sem tocar os Motores Freud/Lacan (Regra 11).
+     * nunca aqui. Mesma identidade por Participante autenticado/Sessao
+     * ativa do restante de /conversa*, sem tocar os Motores Freud/Lacan
+     * (Regra 11).
      */
     public function audio(Request $request): Response
     {
@@ -239,116 +223,6 @@ final class ConversaController
         }
 
         return new Response($resposta->bytes, 200, ['Content-Type' => $resposta->contentType ?? 'audio/mpeg']);
-    }
-
-    public function cadastro(Request $request): Response
-    {
-        return $this->renderizarCadastro();
-    }
-
-    /**
-     * Liga e-mail/senha ao Sujeito que o cookie atual já aponta —
-     * garante que o Sujeito exista primeiro (quem chega direto nesta
-     * tela sem nunca ter passado por /conversa ainda não tem um), depois
-     * preserva o histórico já acumulado sob esse id.
-     */
-    public function cadastrar(Request $request): Response
-    {
-        $pessoaId = $this->pessoaIdAtivaOuNova();
-
-        if (!$this->garantirSujeito($pessoaId)) {
-            return ErrorController::renderizar(
-                ErrorViewModelFactory::comunicacao('subjects'),
-                $this->viewRenderer,
-                self::ROTA_CADASTRO
-            );
-        }
-
-        $email = (string) $request->input('email', '');
-        $senha = (string) $request->input('senha', '');
-
-        $resposta = $this->httpClient->post('subjects/' . $pessoaId . '/account', ['email' => $email, 'senha' => $senha]);
-
-        if (!$resposta->sucesso) {
-            return Response::erroValidacao($this->renderizarCadastroHtml($this->mensagemErro($resposta->erro)));
-        }
-
-        return Response::redirecionar(self::ROTA);
-    }
-
-    public function entrar(Request $request): Response
-    {
-        return $this->renderizarEntrar();
-    }
-
-    /**
-     * Troca o cookie de identidade para o Sujeito da conta — é assim que
-     * o mesmo espaço singular é recuperado a partir de outro
-     * navegador/dispositivo. A Sessao ativa (se houver) pertence à
-     * identidade anterior, então é descartada.
-     */
-    public function autenticar(Request $request): Response
-    {
-        $email = (string) $request->input('email', '');
-        $senha = (string) $request->input('senha', '');
-
-        $resposta = $this->httpClient->post('auth/subject/login', ['email' => $email, 'senha' => $senha]);
-
-        if (!$resposta->sucesso) {
-            return Response::erroValidacao($this->renderizarEntrarHtml(self::MENSAGEM_CREDENCIAIS_INVALIDAS));
-        }
-
-        /** @var string $sujeitoId */
-        $sujeitoId = $resposta->dados['id'];
-
-        $this->definirCookiePessoa($sujeitoId);
-        $this->limparSessaoAtiva();
-
-        return Response::redirecionar(self::ROTA);
-    }
-
-    /**
-     * Remove a identidade atual do navegador — a próxima visita a
-     * /conversa gera um novo Sujeito anônimo, como um primeiro acesso.
-     */
-    public function sair(Request $request): Response
-    {
-        $this->removerCookiePessoa();
-        $this->limparSessaoAtiva();
-
-        return Response::redirecionar(self::ROTA);
-    }
-
-    private function renderizarCadastro(?string $erro = null): Response
-    {
-        return Response::ok($this->renderizarCadastroHtml($erro));
-    }
-
-    private function renderizarCadastroHtml(?string $erro = null): string
-    {
-        return $this->viewRenderer->renderComLayout(
-            'conversa/cadastro',
-            ['erro' => $erro],
-            'Criar conta',
-            self::ROTA_CADASTRO,
-            'layout-eco'
-        );
-    }
-
-    private function renderizarEntrar(?string $erro = null): Response
-    {
-        return Response::ok($this->renderizarEntrarHtml($erro));
-    }
-
-    private function renderizarEntrarHtml(?string $erro = null): string
-    {
-        return $this->viewRenderer->renderComLayout(
-            'conversa/entrar',
-            ['erro' => $erro],
-            'Entrar',
-            self::ROTA_ENTRAR,
-            'layout-eco'
-        );
     }
 
     /**
@@ -530,9 +404,16 @@ final class ConversaController
 
     private function criarNovaSessao(): ?string
     {
-        $pessoaId = $this->pessoaIdAtivaOuNova();
+        $participanteId = PortaoDeParticipante::participanteId();
 
-        if (!$this->garantirSujeito($pessoaId)) {
+        if ($participanteId === null) {
+            // Defensivo: /conversa* é protegida por PortaoDeParticipante::proteger()
+            // em Routes.php, então uma requisição autenticada sempre chega aqui
+            // com um id de participante — isso nunca deveria disparar em produção.
+            return null;
+        }
+
+        if (!$this->garantirSujeito($participanteId)) {
             return null;
         }
 
@@ -540,7 +421,7 @@ final class ConversaController
 
         $resposta = $this->httpClient->post('sessions', [
             'id' => $id,
-            'sujeitoId' => $pessoaId,
+            'sujeitoId' => $participanteId,
             'data' => (new DateTimeImmutable())->format('Y-m-d H:i:s'),
         ]);
 
@@ -551,62 +432,6 @@ final class ConversaController
         $_SESSION[self::CHAVE_SESSAO_ATIVA] = $id;
 
         return $id;
-    }
-
-    /**
-     * Cookie de longa duração, independente de $_SESSION: identifica de
-     * forma pseudônima e estável cada navegador, para que suas Sessões
-     * fiquem sempre sob o mesmo Sujeito ao longo de visitas diferentes
-     * (ver docblock da classe). Só é lido/gerado quando uma nova Sessao
-     * precisa ser criada — reaproveitar uma Sessao já ativa em
-     * $_SESSION não exige tocar no cookie.
-     */
-    private function pessoaIdAtivaOuNova(): string
-    {
-        $pessoaId = $_COOKIE[self::CHAVE_PESSOA_ID] ?? null;
-
-        if (is_string($pessoaId) && $pessoaId !== '') {
-            return $pessoaId;
-        }
-
-        $novoPessoaId = bin2hex(random_bytes(16));
-        $this->definirCookiePessoa($novoPessoaId);
-
-        return $novoPessoaId;
-    }
-
-    /**
-     * Grava o cookie de identidade — usado tanto para gerar um id novo
-     * (visitante anônimo) quanto para trocar de identidade no login
-     * (Sprint 20), que aponta o cookie para o Sujeito da conta em vez de
-     * gerar um pseudônimo novo.
-     */
-    private function definirCookiePessoa(string $pessoaId): void
-    {
-        $_COOKIE[self::CHAVE_PESSOA_ID] = $pessoaId;
-
-        if (!headers_sent()) {
-            setcookie(self::CHAVE_PESSOA_ID, $pessoaId, [
-                'expires' => time() + self::DURACAO_COOKIE_PESSOA_EM_SEGUNDOS,
-                'path' => BasePath::url('/'),
-                'httponly' => true,
-                'samesite' => 'Lax',
-            ]);
-        }
-    }
-
-    private function removerCookiePessoa(): void
-    {
-        unset($_COOKIE[self::CHAVE_PESSOA_ID]);
-
-        if (!headers_sent()) {
-            setcookie(self::CHAVE_PESSOA_ID, '', [
-                'expires' => time() - 3600,
-                'path' => BasePath::url('/'),
-                'httponly' => true,
-                'samesite' => 'Lax',
-            ]);
-        }
     }
 
     private function garantirSujeito(string $sujeitoId): bool

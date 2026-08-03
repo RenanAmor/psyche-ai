@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace PsycheAI\Presentation\Web\Navigation;
 
 /**
- * Fonte única dos itens do menu lateral. Tanto a Sidebar quanto o
- * Router/Routes desta Sprint devem apontar para as mesmas sete seções
- * definidas aqui, evitando que a navegação e as rotas divirjam.
+ * Fonte única dos itens do menu lateral (superfície do Analista, atrás de
+ * `PortaoDeAnalista`). Tanto a Sidebar quanto o Router/Routes desta Sprint
+ * devem apontar para as mesmas seis seções definidas aqui, evitando que a
+ * navegação e as rotas divirjam. "Conversa" não faz parte deste menu: a
+ * ECO (`/conversa*`) agora exige uma conta de Participante — um sistema de
+ * autenticação independente do Analista (`PortaoDeParticipante`) — então um
+ * link aqui levaria o Analista a uma tela de login à qual ele nunca tem
+ * conta, por decisão de arquitetura.
  */
 final class NavigationMenu
 {
@@ -18,7 +23,6 @@ final class NavigationMenu
     {
         return [
             new NavigationItem('Dashboard', '/', 'grid'),
-            new NavigationItem('Conversa', '/conversa', 'message-circle'),
             new NavigationItem('Sujeitos', '/sujeitos', 'user'),
             new NavigationItem('Sessões', '/sessoes', 'calendar'),
             new NavigationItem('Discursos', '/discursos', 'message'),

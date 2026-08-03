@@ -13,6 +13,7 @@ use PsycheAI\Application\Services\LinhaDoTempoApplicationService;
 use PsycheAI\Application\Services\MemoriaApplicationService;
 use PsycheAI\Application\Services\MensagemApplicationService;
 use PsycheAI\Application\Services\ObservacaoApplicationService;
+use PsycheAI\Application\Services\ParticipanteApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
 use PsycheAI\Application\UseCases\ClassificarFormacaoFreudiana\ClassificarFormacaoFreudianaHandler;
@@ -34,6 +35,7 @@ use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteAnalistaReposi
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteGravacaoAudioRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteMemoriaRepository;
+use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteParticipanteRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSujeitoRepository;
 use PsycheAI\Infrastructure\Storage\LocalFilesystemStorage;
@@ -61,7 +63,8 @@ final class ApplicationServiceProvider
         private readonly ObservacaoApplicationService $observacoes,
         private readonly AnalistaApplicationService $analistas,
         private readonly GravacaoAudioApplicationService $gravacoesAudio,
-        private readonly SujeitoRepository $sujeitoRepository
+        private readonly SujeitoRepository $sujeitoRepository,
+        private readonly ParticipanteApplicationService $participantes
     ) {
     }
 
@@ -87,6 +90,7 @@ final class ApplicationServiceProvider
         $discursoRepository = new SQLiteDiscursoRepository($pdo);
         $memoriaRepository = new SQLiteMemoriaRepository($pdo);
         $analistaRepository = new SQLiteAnalistaRepository($pdo);
+        $participanteRepository = new SQLiteParticipanteRepository($pdo);
         $gravacaoAudioRepository = new SQLiteGravacaoAudioRepository($pdo);
         $uuidGenerator ??= new RandomUuidGenerator();
         $classificarFormacaoFreudiana ??= new ClassificarFormacaoFreudianaHandler(
@@ -125,7 +129,8 @@ final class ApplicationServiceProvider
                 $transcricao,
                 $uuidGenerator
             ),
-            $sujeitoRepository
+            $sujeitoRepository,
+            new ParticipanteApplicationService($participanteRepository, $uuidGenerator)
         );
     }
 
@@ -188,5 +193,10 @@ final class ApplicationServiceProvider
     public function sujeitoRepository(): SujeitoRepository
     {
         return $this->sujeitoRepository;
+    }
+
+    public function participantes(): ParticipanteApplicationService
+    {
+        return $this->participantes;
     }
 }
