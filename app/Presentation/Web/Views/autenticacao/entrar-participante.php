@@ -7,10 +7,13 @@
 
 use PsycheAI\Presentation\Web\Components\AlertComponent;
 use PsycheAI\Presentation\Web\Components\FormComponent;
+use PsycheAI\Presentation\Web\Components\Html;
+use PsycheAI\Presentation\Web\Http\AssetVersion;
 
 $abrirListaDeEspera = ($mensagemInscricao ?? null) !== null;
 ?>
 <div class="pagina-entrada-eco">
+    <img class="eco-logo" src="<?= Html::e(AssetVersion::url('/assets/img/logo-eco-psycheai.png')) ?>" alt="ECO · PsycheAI">
     <section class="pagina-formulario">
         <h2>Entrar na ECO</h2>
         <?php if ($erro !== null): ?>
