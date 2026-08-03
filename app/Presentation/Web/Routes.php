@@ -8,6 +8,7 @@ use PsycheAI\Presentation\Web\Client\HttpClientInterface;
 use PsycheAI\Presentation\Web\Controllers\AbstractCrudResourceController;
 use PsycheAI\Presentation\Web\Controllers\AutenticacaoAnalistaController;
 use PsycheAI\Presentation\Web\Controllers\AutenticacaoParticipanteController;
+use PsycheAI\Presentation\Web\Controllers\ConsentimentoController;
 use PsycheAI\Presentation\Web\Controllers\ConversaController;
 use PsycheAI\Presentation\Web\Controllers\DashboardController;
 use PsycheAI\Presentation\Web\Controllers\DiscursosController;
@@ -22,6 +23,7 @@ use PsycheAI\Presentation\Web\Controllers\SessoesController;
 use PsycheAI\Presentation\Web\Controllers\SujeitosController;
 use PsycheAI\Presentation\Web\Http\Router;
 use PsycheAI\Presentation\Web\Security\PortaoDeAnalista;
+use PsycheAI\Presentation\Web\Security\PortaoDeConsentimento;
 use PsycheAI\Presentation\Web\Security\PortaoDeParticipante;
 
 /**
@@ -48,6 +50,12 @@ use PsycheAI\Presentation\Web\Security\PortaoDeParticipante;
  * (Analista) e `/participante/entrar`/`/participante/sair` (Participante)
  * ficam, cada um, fora do seu respectivo portão — são a porta de acesso a
  * ele — exatamente como `/erros/*`.
+ *
+ * `GET /conversa` — onde `ConversaController::iniciar()` já cria uma Sessao
+ * e a view pede acesso ao microfone — passa ainda por um terceiro portão,
+ * empilhado sobre `PortaoDeParticipante`: `PortaoDeConsentimento::proteger()`,
+ * que garante que o Participante viu a tela de explicação/consentimento
+ * (`/conversa/consentimento`) antes de qualquer gravação real começar.
  */
 final class Routes
 {
@@ -60,6 +68,7 @@ final class Routes
         $memorias = new MemoriasController($httpClient);
         $eventosDiscursivos = new EventosDiscursivosController($httpClient);
         $conversa = new ConversaController($httpClient);
+        $consentimento = new ConsentimentoController();
         $historico = new HistoricoSujeitoController($httpClient);
         $observacoes = new ObservacoesSujeitoController($httpClient);
         $erros = new ErrorController();
@@ -84,7 +93,10 @@ final class Routes
         $router->get('/lista-espera', PortaoDeAnalista::proteger($inscritosListaDeEspera->index(...)));
         $router->post('/lista-espera', $listaDeEspera->inscrever(...));
 
-        $router->get('/conversa', PortaoDeParticipante::proteger($conversa->iniciar(...)));
+        $router->get('/conversa/consentimento', PortaoDeParticipante::proteger($consentimento->mostrar(...)));
+        $router->post('/conversa/consentimento', PortaoDeParticipante::proteger($consentimento->aceitar(...)));
+
+        $router->get('/conversa', PortaoDeParticipante::proteger(PortaoDeConsentimento::proteger($conversa->iniciar(...))));
         $router->post('/conversa/enviar', PortaoDeParticipante::proteger($conversa->enviar(...)));
         $router->post('/conversa/mensagens', PortaoDeParticipante::proteger($conversa->mensagens(...)));
         $router->post('/conversa/mensagens/audio', PortaoDeParticipante::proteger($conversa->mensagensAudio(...)));
