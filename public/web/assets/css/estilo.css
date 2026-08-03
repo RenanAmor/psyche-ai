@@ -345,6 +345,30 @@ h1, h2, h3 {
     border-color: var(--cor-erro);
 }
 
+.campo-formulario:has(input[type="checkbox"]) {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: .6rem;
+}
+
+.campo-formulario input[type="checkbox"] {
+    order: -1;
+    flex: 0 0 auto;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: .15rem;
+    padding: 0;
+    border: none;
+    background: none;
+    accent-color: var(--cor-acento);
+}
+
+.campo-formulario:has(input[type="checkbox"]) label {
+    font-size: .85rem;
+    font-weight: 400;
+    color: var(--cor-texto);
+}
+
 .mensagem-erro {
     color: var(--cor-erro);
     font-size: .8rem;
@@ -438,10 +462,39 @@ h1, h2, h3 {
     }
 }
 
-/* ---------- ECO (Interface de Voz, Sprint 32) ---------- */
+/* ---------- ECO (Interface de Voz, Sprint 32) ----------
+ * Identidade visual escura/dourada espelhada de investimentos369.com/eco
+ * (mesma paleta: --gold #d4af37, --dark #060606) — sobrescrita só nas
+ * variáveis já usadas por todos os Components (Form/Button/Alert/Table),
+ * então herdam o tema novo sem precisar de regra própria por componente.
+ */
 
 .corpo-eco {
+    color-scheme: dark;
+    --cor-fundo: #060606;
+    --cor-fundo-elevado: #141414;
+    --cor-fundo-sutil: #0e0e0e;
+    --cor-borda: #232323;
+    --cor-texto: #e8e8e8;
+    --cor-texto-suave: #9a9a9a;
+    --cor-acento: #d4af37;
+    --cor-acento-hover: #ffd700;
+    --cor-acento-texto: #111111;
+    --cor-sucesso: #4ade80;
+    --cor-sucesso-fundo: rgba(74, 222, 128, .12);
+    --cor-erro: #ff6b6b;
+    --cor-erro-fundo: rgba(255, 107, 107, .12);
+    --cor-aviso: #ffd700;
+    --cor-aviso-fundo: rgba(255, 215, 0, .12);
+    --cor-info: #b8b8b8;
+    --cor-info-fundo: rgba(184, 184, 184, .12);
+    --fonte: 'Segoe UI', Arial, sans-serif;
     background: var(--cor-fundo);
+}
+
+.corpo-eco .campo-formulario input:focus,
+.corpo-eco .campo-formulario textarea:focus {
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, .18);
 }
 
 .layout-eco {
@@ -456,13 +509,14 @@ h1, h2, h3 {
     align-items: center;
     justify-content: space-between;
     padding: 1.1rem 1.5rem;
+    border-bottom: 1px solid var(--cor-borda);
 }
 
 .eco-marca {
-    font-weight: 700;
+    font-weight: 800;
     font-size: .95rem;
-    letter-spacing: .08em;
-    color: var(--cor-texto-suave);
+    letter-spacing: .12em;
+    color: var(--cor-acento);
 }
 
 .eco-voltar {
@@ -485,29 +539,63 @@ h1, h2, h3 {
     flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    text-align: center;
     gap: 2rem;
     width: 100%;
-    max-width: 640px;
+    max-width: 460px;
     margin: 0 auto;
-    padding: 2rem 1.5rem 3rem;
+    padding: 3rem 1.5rem 4rem;
+}
+
+.pagina-entrada-eco h2 {
+    color: #fff;
+    font-size: 1.35rem;
+    text-align: center;
+    margin: 0 0 .5rem;
+}
+
+.pagina-entrada-eco .pagina-formulario {
+    width: 100%;
+    text-align: left;
+}
+
+.pagina-entrada-eco .pagina-formulario > p {
+    text-align: center;
+    color: var(--cor-texto-suave);
+    font-size: .92rem;
+}
+
+.pagina-entrada-eco .formulario {
+    max-width: none;
 }
 
 .lista-espera-toggle {
-    max-width: 960px;
+    width: 100%;
 }
 
 .lista-espera-toggle summary {
     cursor: pointer;
     font-weight: 600;
     color: var(--cor-acento);
+    text-align: center;
+    list-style: none;
 }
 
 .lista-espera-toggle summary::-webkit-details-marker {
-    color: var(--cor-acento);
+    display: none;
+}
+
+.lista-espera-toggle summary::before {
+    content: "+ ";
+}
+
+.lista-espera-toggle[open] summary::before {
+    content: "– ";
 }
 
 .lista-espera-toggle .pagina-formulario {
-    margin-top: 1.25rem;
+    margin-top: 1.5rem;
 }
 
 .pagina-eco {
