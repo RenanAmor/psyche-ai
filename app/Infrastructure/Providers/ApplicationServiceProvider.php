@@ -26,10 +26,12 @@ use PsycheAI\Infrastructure\AI\GeradorDePerguntaSocraticaLLM;
 use PsycheAI\Infrastructure\AI\OpenAIWhisperTranscriptionService;
 use PsycheAI\Infrastructure\AI\RespostaEcoRecorrenciaService;
 use PsycheAI\Infrastructure\AI\RespostaSocraticaService;
+use PsycheAI\Infrastructure\Contracts\EmailInterface;
 use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
 use PsycheAI\Infrastructure\Contracts\StorageInterface;
 use PsycheAI\Infrastructure\Contracts\TranscriptionInterface;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
+use PsycheAI\Infrastructure\Mail\SmtpEmailService;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
 use PsycheAI\Infrastructure\Persistence\SQLite\Migrations\MigrationRunner;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteAnalistaRepository;
@@ -84,7 +86,8 @@ final class ApplicationServiceProvider
         ?RespostaAutomaticaInterface $respostaAutomatica = null,
         ?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana = null,
         ?StorageInterface $storage = null,
-        ?TranscriptionInterface $transcricao = null
+        ?TranscriptionInterface $transcricao = null,
+        ?EmailInterface $email = null
     ): self {
         MigrationRunner::comMigrationsPadrao($pdo)->run();
 
@@ -102,6 +105,7 @@ final class ApplicationServiceProvider
         );
         $storage ??= new LocalFilesystemStorage();
         $transcricao ??= new OpenAIWhisperTranscriptionService();
+        $email ??= new SmtpEmailService();
         $respostaAutomatica ??= new RespostaSocraticaService(
             $sujeitoRepository,
             $sessaoRepository,
@@ -135,7 +139,7 @@ final class ApplicationServiceProvider
             ),
             $sujeitoRepository,
             new ParticipanteApplicationService($participanteRepository, $uuidGenerator),
-            new ListaDeEsperaApplicationService($listaDeEsperaRepository, $uuidGenerator)
+            new ListaDeEsperaApplicationService($listaDeEsperaRepository, $uuidGenerator, $email)
         );
     }
 

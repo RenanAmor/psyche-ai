@@ -25,8 +25,9 @@ use PsycheAI\Presentation\Web\Http\AssetVersion;
 </head>
 <body class="corpo-eco">
 <div class="layout-eco">
-    <header class="eco-cabecalho" aria-hidden="true">
+    <header class="eco-cabecalho">
         <span class="eco-marca">ECO</span>
+        <a class="eco-voltar" href="https://investimentos369.com/eco/">← Voltar ao site</a>
     </header>
     <main class="eco-conteudo">
         <?= $conteudo ?>

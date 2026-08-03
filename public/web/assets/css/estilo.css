@@ -452,6 +452,9 @@ h1, h2, h3 {
 
 .eco-cabecalho {
     flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 1.1rem 1.5rem;
 }
 
@@ -462,9 +465,49 @@ h1, h2, h3 {
     color: var(--cor-texto-suave);
 }
 
+.eco-voltar {
+    font-size: .8rem;
+    font-weight: 500;
+    color: var(--cor-texto-suave);
+    text-decoration: none;
+}
+
+.eco-voltar:hover {
+    color: var(--cor-acento);
+}
+
 .eco-conteudo {
     flex: 1;
     display: flex;
+}
+
+.pagina-entrada-eco {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+}
+
+.lista-espera-toggle {
+    max-width: 960px;
+}
+
+.lista-espera-toggle summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--cor-acento);
+}
+
+.lista-espera-toggle summary::-webkit-details-marker {
+    color: var(--cor-acento);
+}
+
+.lista-espera-toggle .pagina-formulario {
+    margin-top: 1.25rem;
 }
 
 .pagina-eco {
