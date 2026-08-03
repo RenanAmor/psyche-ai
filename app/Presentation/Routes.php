@@ -11,6 +11,7 @@ use PsycheAI\Presentation\Controllers\DiscursoController;
 use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
 use PsycheAI\Presentation\Controllers\GravacaoAudioController;
 use PsycheAI\Presentation\Controllers\LinhaDoTempoController;
+use PsycheAI\Presentation\Controllers\ListaDeEsperaController;
 use PsycheAI\Presentation\Controllers\MemoriaController;
 use PsycheAI\Presentation\Controllers\MensagemController;
 use PsycheAI\Presentation\Controllers\ObservacaoController;
@@ -40,9 +41,13 @@ final class Routes
         $observacoes = new ObservacaoController($provider->observacoes());
         $autenticacao = new AutenticacaoController($provider->analistas());
         $autenticacaoParticipante = new AutenticacaoParticipanteController($provider->participantes());
+        $listaDeEspera = new ListaDeEsperaController($provider->listaDeEspera());
 
         $router->post('/auth/login', [$autenticacao, 'autenticar']);
         $router->post('/auth/participante/login', [$autenticacaoParticipante, 'autenticar']);
+
+        $router->post('/waitlist', [$listaDeEspera, 'inscrever']);
+        $router->get('/waitlist', [$listaDeEspera, 'listar']);
 
         $router->post('/subjects', [$sujeitos, 'criar']);
         $router->get('/subjects', [$sujeitos, 'listar']);

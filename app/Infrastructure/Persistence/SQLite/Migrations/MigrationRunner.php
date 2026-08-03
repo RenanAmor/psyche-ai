@@ -48,6 +48,7 @@ final class MigrationRunner
             new AddContaToSujeitosTable(),
             new CreateGravacoesAudioTable(),
             new CreateParticipantesTable(),
+            new CreateListaDeEsperaTable(),
         ];
     }
 

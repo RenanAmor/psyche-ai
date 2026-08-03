@@ -10,6 +10,7 @@ use PsycheAI\Application\Services\ConsolidacaoApplicationService;
 use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Application\Services\GravacaoAudioApplicationService;
 use PsycheAI\Application\Services\LinhaDoTempoApplicationService;
+use PsycheAI\Application\Services\ListaDeEsperaApplicationService;
 use PsycheAI\Application\Services\MemoriaApplicationService;
 use PsycheAI\Application\Services\MensagemApplicationService;
 use PsycheAI\Application\Services\ObservacaoApplicationService;
@@ -34,6 +35,7 @@ use PsycheAI\Infrastructure\Persistence\SQLite\Migrations\MigrationRunner;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteAnalistaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteGravacaoAudioRepository;
+use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteListaDeEsperaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteMemoriaRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteParticipanteRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
@@ -64,7 +66,8 @@ final class ApplicationServiceProvider
         private readonly AnalistaApplicationService $analistas,
         private readonly GravacaoAudioApplicationService $gravacoesAudio,
         private readonly SujeitoRepository $sujeitoRepository,
-        private readonly ParticipanteApplicationService $participantes
+        private readonly ParticipanteApplicationService $participantes,
+        private readonly ListaDeEsperaApplicationService $listaDeEspera
     ) {
     }
 
@@ -91,6 +94,7 @@ final class ApplicationServiceProvider
         $memoriaRepository = new SQLiteMemoriaRepository($pdo);
         $analistaRepository = new SQLiteAnalistaRepository($pdo);
         $participanteRepository = new SQLiteParticipanteRepository($pdo);
+        $listaDeEsperaRepository = new SQLiteListaDeEsperaRepository($pdo);
         $gravacaoAudioRepository = new SQLiteGravacaoAudioRepository($pdo);
         $uuidGenerator ??= new RandomUuidGenerator();
         $classificarFormacaoFreudiana ??= new ClassificarFormacaoFreudianaHandler(
@@ -130,7 +134,8 @@ final class ApplicationServiceProvider
                 $uuidGenerator
             ),
             $sujeitoRepository,
-            new ParticipanteApplicationService($participanteRepository, $uuidGenerator)
+            new ParticipanteApplicationService($participanteRepository, $uuidGenerator),
+            new ListaDeEsperaApplicationService($listaDeEsperaRepository, $uuidGenerator)
         );
     }
 
@@ -198,5 +203,10 @@ final class ApplicationServiceProvider
     public function participantes(): ParticipanteApplicationService
     {
         return $this->participantes;
+    }
+
+    public function listaDeEspera(): ListaDeEsperaApplicationService
+    {
+        return $this->listaDeEspera;
     }
 }

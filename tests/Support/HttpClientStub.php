@@ -58,6 +58,7 @@ final class HttpClientStub implements HttpClientInterface
             ['id' => 'mem-001', 'quantidadeDeSessoes' => 3],
         ],
         'events' => [],
+        'waitlist' => [],
     ];
 
     /**

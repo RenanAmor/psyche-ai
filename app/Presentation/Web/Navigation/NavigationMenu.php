@@ -7,7 +7,7 @@ namespace PsycheAI\Presentation\Web\Navigation;
 /**
  * Fonte única dos itens do menu lateral (superfície do Analista, atrás de
  * `PortaoDeAnalista`). Tanto a Sidebar quanto o Router/Routes desta Sprint
- * devem apontar para as mesmas seis seções definidas aqui, evitando que a
+ * devem apontar para as mesmas seções definidas aqui, evitando que a
  * navegação e as rotas divirjam. "Conversa" não faz parte deste menu: a
  * ECO (`/conversa*`) agora exige uma conta de Participante — um sistema de
  * autenticação independente do Analista (`PortaoDeParticipante`) — então um
@@ -28,6 +28,7 @@ final class NavigationMenu
             new NavigationItem('Discursos', '/discursos', 'message'),
             new NavigationItem('Memórias', '/memorias', 'archive'),
             new NavigationItem('Eventos Discursivos', '/eventos-discursivos', 'activity'),
+            new NavigationItem('Lista de Espera', '/lista-espera', 'mail'),
         ];
     }
 }

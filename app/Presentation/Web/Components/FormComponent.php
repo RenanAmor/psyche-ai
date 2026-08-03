@@ -25,20 +25,26 @@ final class FormComponent
             $valor = $campo['valor'] ?? '';
             $erro = $campo['erro'] ?? null;
 
-            $controle = $tipo === 'textarea'
-                ? sprintf(
+            $controle = match ($tipo) {
+                'textarea' => sprintf(
                     '<textarea id="%s" name="%s" rows="6">%s</textarea>',
                     Html::e($campo['nome']),
                     Html::e($campo['nome']),
                     Html::e($valor)
-                )
-                : sprintf(
+                ),
+                'checkbox' => sprintf(
+                    '<input type="checkbox" id="%s" name="%s" value="1">',
+                    Html::e($campo['nome']),
+                    Html::e($campo['nome'])
+                ),
+                default => sprintf(
                     '<input type="%s" id="%s" name="%s" value="%s">',
                     Html::e($tipo),
                     Html::e($campo['nome']),
                     Html::e($campo['nome']),
                     Html::e($valor)
-                );
+                ),
+            };
 
             $camposHtml .= sprintf(
                 '<div class="campo-formulario%s"><label for="%s">%s</label>%s%s</div>',

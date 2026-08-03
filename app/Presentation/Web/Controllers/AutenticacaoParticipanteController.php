@@ -24,6 +24,8 @@ final class AutenticacaoParticipanteController
 {
     private const ROTA = '/participante/entrar';
     private const MENSAGEM_CREDENCIAIS_INVALIDAS = 'E-mail ou senha inválidos.';
+    private const MENSAGEM_INSCRITO_NA_LISTA_DE_ESPERA = 'Você entrou na lista de espera! Avisaremos por e-mail assim que houver vaga.';
+    private const MENSAGEM_ERRO_LISTA_DE_ESPERA = 'Não foi possível registrar seu e-mail na lista de espera. Tente novamente.';
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
@@ -31,9 +33,22 @@ final class AutenticacaoParticipanteController
     ) {
     }
 
+    /**
+     * Além do formulário de login, esta tela é o ponto de atrito exato de
+     * quem tenta acessar a ECO sem conta (sem autocadastro público) — por
+     * isso também reflete o resultado do cadastro na lista de espera
+     * (`ListaDeEsperaController::inscrever()`), repassado via query string
+     * após o redirect de `POST /lista-espera`.
+     */
     public function entrar(Request $request): Response
     {
-        return $this->renderizarFormulario();
+        [$mensagemInscricao, $tipoInscricao] = match (true) {
+            $request->query('inscrito') === '1' => [self::MENSAGEM_INSCRITO_NA_LISTA_DE_ESPERA, 'sucesso'],
+            $request->query('erro_lista_espera') === '1' => [self::MENSAGEM_ERRO_LISTA_DE_ESPERA, 'erro'],
+            default => [null, null],
+        };
+
+        return $this->renderizarFormulario(null, $mensagemInscricao, $tipoInscricao);
     }
 
     public function autenticar(Request $request): Response
@@ -62,16 +77,22 @@ final class AutenticacaoParticipanteController
         return Response::redirecionar(self::ROTA);
     }
 
-    private function renderizarFormulario(?string $erro = null): Response
-    {
-        return Response::ok($this->renderizarFormularioHtml($erro));
+    private function renderizarFormulario(
+        ?string $erro = null,
+        ?string $mensagemInscricao = null,
+        ?string $tipoInscricao = null
+    ): Response {
+        return Response::ok($this->renderizarFormularioHtml($erro, $mensagemInscricao, $tipoInscricao));
     }
 
-    private function renderizarFormularioHtml(?string $erro = null): string
-    {
+    private function renderizarFormularioHtml(
+        ?string $erro = null,
+        ?string $mensagemInscricao = null,
+        ?string $tipoInscricao = null
+    ): string {
         return $this->viewRenderer->renderComLayout(
             'autenticacao/entrar-participante',
-            ['erro' => $erro],
+            ['erro' => $erro, 'mensagemInscricao' => $mensagemInscricao, 'tipoInscricao' => $tipoInscricao],
             'Entrar',
             self::ROTA,
             'layout-eco'

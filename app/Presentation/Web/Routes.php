@@ -14,6 +14,8 @@ use PsycheAI\Presentation\Web\Controllers\DiscursosController;
 use PsycheAI\Presentation\Web\Controllers\ErrorController;
 use PsycheAI\Presentation\Web\Controllers\EventosDiscursivosController;
 use PsycheAI\Presentation\Web\Controllers\HistoricoSujeitoController;
+use PsycheAI\Presentation\Web\Controllers\InscritosListaDeEsperaController;
+use PsycheAI\Presentation\Web\Controllers\ListaDeEsperaController;
 use PsycheAI\Presentation\Web\Controllers\MemoriasController;
 use PsycheAI\Presentation\Web\Controllers\ObservacoesSujeitoController;
 use PsycheAI\Presentation\Web\Controllers\SessoesController;
@@ -63,6 +65,8 @@ final class Routes
         $erros = new ErrorController();
         $autenticacao = new AutenticacaoAnalistaController($httpClient);
         $autenticacaoParticipante = new AutenticacaoParticipanteController($httpClient);
+        $listaDeEspera = new ListaDeEsperaController($httpClient);
+        $inscritosListaDeEspera = new InscritosListaDeEsperaController($httpClient);
 
         $router->get('/', PortaoDeAnalista::proteger($dashboard->index(...)));
 
@@ -76,6 +80,9 @@ final class Routes
         self::registrarCrud($router, '/memorias', $memorias);
 
         $router->get('/eventos-discursivos', PortaoDeAnalista::proteger($eventosDiscursivos->index(...)));
+
+        $router->get('/lista-espera', PortaoDeAnalista::proteger($inscritosListaDeEspera->index(...)));
+        $router->post('/lista-espera', $listaDeEspera->inscrever(...));
 
         $router->get('/conversa', PortaoDeParticipante::proteger($conversa->iniciar(...)));
         $router->post('/conversa/enviar', PortaoDeParticipante::proteger($conversa->enviar(...)));

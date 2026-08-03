@@ -34,6 +34,27 @@ final class AutenticacaoParticipanteControllerTest extends TestCase
         $this->assertStringContainsString('senha', $resposta->corpo);
     }
 
+    public function testEntrarComFlagDeInscritoExibeMensagemDeSucessoDaListaDeEspera(): void
+    {
+        $controller = new AutenticacaoParticipanteController(new HttpClientStub());
+
+        $resposta = $controller->entrar(Request::criar('GET', '/participante/entrar', ['inscrito' => '1']));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('lista de espera', $resposta->corpo);
+        $this->assertStringContainsString('alerta-sucesso', $resposta->corpo);
+    }
+
+    public function testEntrarComFlagDeErroDaListaDeEsperaExibeMensagemDeErro(): void
+    {
+        $controller = new AutenticacaoParticipanteController(new HttpClientStub());
+
+        $resposta = $controller->entrar(Request::criar('GET', '/participante/entrar', ['erro_lista_espera' => '1']));
+
+        $this->assertSame(200, $resposta->status);
+        $this->assertStringContainsString('alerta-erro', $resposta->corpo);
+    }
+
     public function testAutenticarComCredenciaisCorretasRedirecionaParaAConversa(): void
     {
         $controller = new AutenticacaoParticipanteController(new HttpClientStub());
