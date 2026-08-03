@@ -16,7 +16,7 @@ use PsycheAI\Presentation\Web\Http\BasePath;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= Html::e($tituloPagina) ?> — Psyche AI</title>
-    <link rel="stylesheet" href="<?= Html::e(AssetVersion::url('/assets/css/estilo.css')) ?>">
+    <link rel="stylesheet" href="<?= Html::e(AssetVersion::url('/assets/css/estilo.2.css')) ?>">
 </head>
 <body>
 <div class="layout-principal">

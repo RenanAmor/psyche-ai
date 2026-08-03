@@ -21,7 +21,7 @@ use PsycheAI\Presentation\Web\Http\AssetVersion;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= Html::e($tituloPagina) ?> — Psyche AI</title>
-    <link rel="stylesheet" href="<?= Html::e(AssetVersion::url('/assets/css/estilo.css')) ?>">
+    <link rel="stylesheet" href="<?= Html::e(AssetVersion::url('/assets/css/estilo.2.css')) ?>">
 </head>
 <body class="corpo-eco">
 <div class="layout-eco">
