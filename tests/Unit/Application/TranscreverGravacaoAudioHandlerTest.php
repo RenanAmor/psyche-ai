@@ -12,6 +12,7 @@ use PsycheAI\Domain\Entities\EventoDiscursivo;
 use PsycheAI\Domain\Entities\GravacaoAudio;
 use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
 use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Locutor;
 use PsycheAI\Domain\ValueObjects\Posicao;
 use PsycheAI\Domain\ValueObjects\StatusTranscricao;
 
@@ -38,6 +39,30 @@ final class TranscreverGravacaoAudioHandlerTest extends TestCase
         $this->assertSame('quero dizer', $result->eventos()[1]->conteudo()->valor());
         $this->assertSame(1, $result->eventos()[1]->posicao()->valor());
         $this->assertSame([$result->eventos()[0], $result->eventos()[1]], $discurso->eventos());
+    }
+
+    public function testTodoSegmentoHerdaOLocutorDaGravacao(): void
+    {
+        $discurso = new Discurso(new Identificador('d1'), new ConteudoDiscursivo('Conversa'));
+        $gravacao = new GravacaoAudio(
+            new Identificador('g1'),
+            'sessao-1',
+            'sessoes/sessao-1.webm',
+            locutor: Locutor::Analista
+        );
+
+        $handler = new TranscreverGravacaoAudioHandler();
+        $result = $handler->handle(new TranscreverGravacaoAudioCommand(
+            $discurso,
+            $gravacao,
+            [
+                ['id' => 'e1', 'texto' => 'primeiro segmento'],
+                ['id' => 'e2', 'texto' => 'segundo segmento'],
+            ]
+        ));
+
+        $this->assertSame(Locutor::Analista, $result->eventos()[0]->locutor());
+        $this->assertSame(Locutor::Analista, $result->eventos()[1]->locutor());
     }
 
     public function testContinuaAPartirDaProximaPosicaoDisponivel(): void

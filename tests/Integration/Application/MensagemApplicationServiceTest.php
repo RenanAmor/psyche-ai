@@ -46,9 +46,11 @@ final class MensagemApplicationServiceTest extends SQLiteTestCase
 
         $this->assertSame('Estou me sentindo ansioso hoje.', $resultado->mensagemUsuario->conteudo);
         $this->assertSame(0, $resultado->mensagemUsuario->posicao);
+        $this->assertSame('sujeito', $resultado->mensagemUsuario->locutor);
 
         $this->assertSame('Recebi sua mensagem. Continue falando livremente.', $resultado->respostaSistema->conteudo);
         $this->assertSame(1, $resultado->respostaSistema->posicao);
+        $this->assertSame('sistema', $resultado->respostaSistema->locutor);
 
         $sessaoRecuperada = $this->sessaoRepository->findById('sessao-1');
         $this->assertCount(1, $sessaoRecuperada->discursos());

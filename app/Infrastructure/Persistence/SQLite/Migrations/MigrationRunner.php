@@ -49,6 +49,10 @@ final class MigrationRunner
             new CreateGravacoesAudioTable(),
             new CreateParticipantesTable(),
             new CreateListaDeEsperaTable(),
+            new AddLocutorToEventosDiscursivosTable(),
+            new AddLocutorToGravacoesAudioTable(),
+            new CreateAnotacoesSessaoTable(),
+            new CreateChamadasSessaoTable(),
         ];
     }
 

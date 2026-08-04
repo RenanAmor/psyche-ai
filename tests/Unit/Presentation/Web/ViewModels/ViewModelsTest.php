@@ -84,10 +84,10 @@ final class ViewModelsTest extends TestCase
         $this->assertSame(3, $vm->posicao);
     }
 
-    public function testMensagemViewModelMarcaPosicaoParComoAutorVoceEImparComoSistema(): void
+    public function testMensagemViewModelMapeiaLocutorParaOAutorExibido(): void
     {
-        $usuario = MensagemViewModel::fromArray(['id' => 'evt-1', 'conteudo' => 'Olá', 'posicao' => 0]);
-        $sistema = MensagemViewModel::fromArray(['id' => 'evt-2', 'conteudo' => 'Continue', 'posicao' => 1]);
+        $usuario = MensagemViewModel::fromArray(['id' => 'evt-1', 'conteudo' => 'Olá', 'posicao' => 0, 'locutor' => 'sujeito']);
+        $sistema = MensagemViewModel::fromArray(['id' => 'evt-2', 'conteudo' => 'Continue', 'posicao' => 1, 'locutor' => 'sistema']);
 
         $this->assertSame('Você', $usuario->autor);
         $this->assertSame('Sistema', $sistema->autor);

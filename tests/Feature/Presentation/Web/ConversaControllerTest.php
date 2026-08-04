@@ -103,8 +103,8 @@ final class ConversaControllerTest extends TestCase
 
         $fake = new MensagemHttpClientFake([
             'events' => [
-                ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa'],
-                ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa'],
+                ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa', 'locutor' => 'sujeito'],
+                ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa', 'locutor' => 'sistema'],
             ],
         ]);
 
@@ -154,8 +154,8 @@ final class ConversaControllerTest extends TestCase
 
         $fake = new MensagemHttpClientFake([
             'events' => [
-                ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa'],
-                ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa'],
+                ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa', 'locutor' => 'sujeito'],
+                ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa', 'locutor' => 'sistema'],
             ],
         ]);
 
@@ -253,8 +253,8 @@ final class ConversaControllerTest extends TestCase
         $fake = new MensagemHttpClientFake(
             [
                 'events' => [
-                    ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa'],
-                    ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa'],
+                    ['id' => 'evt-1', 'conteudo' => 'Estou ansioso hoje.', 'posicao' => 0, 'sessaoId' => 'ses-fixa', 'locutor' => 'sujeito'],
+                    ['id' => 'evt-2', 'conteudo' => 'Recebi sua mensagem. Continue falando livremente.', 'posicao' => 1, 'sessaoId' => 'ses-fixa', 'locutor' => 'sistema'],
                 ],
             ],
             textoTranscricao: 'Estou ansioso hoje.'

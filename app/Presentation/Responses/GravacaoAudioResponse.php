@@ -29,6 +29,7 @@ final class GravacaoAudioResponse
             'status' => $this->dto->status,
             'criadaEm' => $this->dto->criadaEm,
             'transcritaEm' => $this->dto->transcritaEm,
+            'locutor' => $this->dto->locutor,
         ];
     }
 }

@@ -30,6 +30,7 @@ final class EventoDiscursivoResponse
             'conteudo' => $this->dto->conteudo,
             'posicao' => $this->dto->posicao,
             'criadoEm' => $this->dto->criadoEm,
+            'locutor' => $this->dto->locutor,
         ];
     }
 }

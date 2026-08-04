@@ -6,6 +6,8 @@ namespace PsycheAI\Infrastructure\Providers;
 
 use PDO;
 use PsycheAI\Application\Services\AnalistaApplicationService;
+use PsycheAI\Application\Services\AnotacaoSessaoApplicationService;
+use PsycheAI\Application\Services\ChamadaDeVideoApplicationService;
 use PsycheAI\Application\Services\ConsolidacaoApplicationService;
 use PsycheAI\Application\Services\DiscursoApplicationService;
 use PsycheAI\Application\Services\GravacaoAudioApplicationService;
@@ -31,10 +33,13 @@ use PsycheAI\Infrastructure\Contracts\RespostaAutomaticaInterface;
 use PsycheAI\Infrastructure\Contracts\StorageInterface;
 use PsycheAI\Infrastructure\Contracts\TranscriptionInterface;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
+use PsycheAI\Infrastructure\Contracts\VideoConferenceInterface;
 use PsycheAI\Infrastructure\Mail\SmtpEmailService;
 use PsycheAI\Infrastructure\Persistence\SQLite\Connection;
 use PsycheAI\Infrastructure\Persistence\SQLite\Migrations\MigrationRunner;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteAnalistaRepository;
+use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteAnotacaoSessaoRepository;
+use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteChamadaSessaoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteDiscursoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteGravacaoAudioRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteListaDeEsperaRepository;
@@ -44,6 +49,7 @@ use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoReposito
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSujeitoRepository;
 use PsycheAI\Infrastructure\Storage\LocalFilesystemStorage;
 use PsycheAI\Infrastructure\UUID\RandomUuidGenerator;
+use PsycheAI\Infrastructure\Video\DailyCoVideoConferenceService;
 
 /**
  * Raiz de composição da aplicação: monta a conexão SQLite, aplica as
@@ -69,7 +75,9 @@ final class ApplicationServiceProvider
         private readonly GravacaoAudioApplicationService $gravacoesAudio,
         private readonly SujeitoRepository $sujeitoRepository,
         private readonly ParticipanteApplicationService $participantes,
-        private readonly ListaDeEsperaApplicationService $listaDeEspera
+        private readonly ListaDeEsperaApplicationService $listaDeEspera,
+        private readonly AnotacaoSessaoApplicationService $anotacoesSessao,
+        private readonly ChamadaDeVideoApplicationService $chamadasDeVideo
     ) {
     }
 
@@ -88,7 +96,8 @@ final class ApplicationServiceProvider
         ?StorageInterface $storage = null,
         ?TranscriptionInterface $transcricao = null,
         ?EmailInterface $email = null,
-        ?EmailInterface $emailEcopsy = null
+        ?EmailInterface $emailEcopsy = null,
+        ?VideoConferenceInterface $videoConference = null
     ): self {
         MigrationRunner::comMigrationsPadrao($pdo)->run();
 
@@ -100,12 +109,15 @@ final class ApplicationServiceProvider
         $participanteRepository = new SQLiteParticipanteRepository($pdo);
         $listaDeEsperaRepository = new SQLiteListaDeEsperaRepository($pdo);
         $gravacaoAudioRepository = new SQLiteGravacaoAudioRepository($pdo);
+        $anotacaoSessaoRepository = new SQLiteAnotacaoSessaoRepository($pdo);
+        $chamadaSessaoRepository = new SQLiteChamadaSessaoRepository($pdo);
         $uuidGenerator ??= new RandomUuidGenerator();
         $classificarFormacaoFreudiana ??= new ClassificarFormacaoFreudianaHandler(
             new ClassificadorFreudianoLLM(new AnthropicLLMService())
         );
         $storage ??= new LocalFilesystemStorage();
         $transcricao ??= new OpenAIWhisperTranscriptionService();
+        $videoConference ??= new DailyCoVideoConferenceService();
         $email ??= new SmtpEmailService();
         $emailEcopsy ??= new SmtpEmailService(
             host: getenv('SMTP_ECOPSY_HOST') ?: null,
@@ -120,6 +132,13 @@ final class ApplicationServiceProvider
             $sessaoRepository,
             new GerarPerguntaSocraticaHandler(new GeradorDePerguntaSocraticaLLM(new AnthropicLLMService())),
             new RespostaEcoRecorrenciaService($sujeitoRepository)
+        );
+        $gravacoesAudio = new GravacaoAudioApplicationService(
+            $gravacaoAudioRepository,
+            $sessaoRepository,
+            $storage,
+            $transcricao,
+            $uuidGenerator
         );
 
         return new self(
@@ -139,13 +158,7 @@ final class ApplicationServiceProvider
                 classificarFormacaoFreudiana: $classificarFormacaoFreudiana
             ),
             new AnalistaApplicationService($analistaRepository, $uuidGenerator),
-            new GravacaoAudioApplicationService(
-                $gravacaoAudioRepository,
-                $sessaoRepository,
-                $storage,
-                $transcricao,
-                $uuidGenerator
-            ),
+            $gravacoesAudio,
             $sujeitoRepository,
             new ParticipanteApplicationService($participanteRepository, $uuidGenerator),
             new ListaDeEsperaApplicationService(
@@ -153,6 +166,15 @@ final class ApplicationServiceProvider
                 $uuidGenerator,
                 $email,
                 emailEcopsy: $emailEcopsy
+            ),
+            new AnotacaoSessaoApplicationService($anotacaoSessaoRepository, $sessaoRepository, $uuidGenerator),
+            new ChamadaDeVideoApplicationService(
+                $chamadaSessaoRepository,
+                $sessaoRepository,
+                $videoConference,
+                $uuidGenerator,
+                $gravacoesAudio,
+                ttlHoras: (int) (getenv('PSYCHEAI_VIDEOCALL_LINK_TTL_HORAS') ?: 24)
             )
         );
     }
@@ -226,5 +248,15 @@ final class ApplicationServiceProvider
     public function listaDeEspera(): ListaDeEsperaApplicationService
     {
         return $this->listaDeEspera;
+    }
+
+    public function anotacoesSessao(): AnotacaoSessaoApplicationService
+    {
+        return $this->anotacoesSessao;
+    }
+
+    public function chamadasDeVideo(): ChamadaDeVideoApplicationService
+    {
+        return $this->chamadasDeVideo;
     }
 }

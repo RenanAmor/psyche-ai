@@ -36,7 +36,8 @@ final class TranscreverGravacaoAudioHandler implements UseCaseInterface
                     $command->discurso,
                     $segmento['id'],
                     $segmento['texto'],
-                    $posicaoInicial + $indice
+                    $posicaoInicial + $indice,
+                    $command->gravacao->locutor()
                 ))
                 ->evento();
         }

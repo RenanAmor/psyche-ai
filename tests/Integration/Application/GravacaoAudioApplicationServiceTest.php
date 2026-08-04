@@ -10,6 +10,7 @@ use PsycheAI\Application\Exceptions\TranscricaoFalhouException;
 use PsycheAI\Application\Services\GravacaoAudioApplicationService;
 use PsycheAI\Application\Services\SessaoApplicationService;
 use PsycheAI\Application\Services\SujeitoApplicationService;
+use PsycheAI\Domain\ValueObjects\Locutor;
 use PsycheAI\Infrastructure\Contracts\DTOs\TranscriptionResultDTO;
 use PsycheAI\Infrastructure\Contracts\TranscriptionInterface;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
@@ -17,6 +18,7 @@ use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteGravacaoAudioR
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSessaoRepository;
 use PsycheAI\Infrastructure\Persistence\SQLite\Repositories\SQLiteSujeitoRepository;
 use PsycheAI\Tests\Integration\Persistence\SQLite\SQLiteTestCase;
+use PsycheAI\Tests\Support\QueuedTranscricaoStub;
 use PsycheAI\Tests\Support\StorageStub;
 use PsycheAI\Tests\Support\TranscricaoStub;
 use RuntimeException;
@@ -221,6 +223,66 @@ final class GravacaoAudioApplicationServiceTest extends SQLiteTestCase
         $servico = $this->novoServico(new TranscricaoStub(new TranscriptionResultDTO(text: '')));
 
         self::assertSame('', $servico->transcreverTexto('bytes-de-silencio'));
+    }
+
+    public function testProcessarTrilhasDeChamadaFundeSegmentosPorHorarioAbsolutoEntreTrilhas(): void
+    {
+        // Analista fala nos instantes absolutos 0.0 e 3.0; Sujeito responde
+        // no meio, em 1.5 — a ordem cronológica real intercala os dois,
+        // mesmo a trilha do Analista tendo sido processada primeiro.
+        $servico = $this->novoServico(new QueuedTranscricaoStub(
+            new TranscriptionResultDTO(text: '', segments: [
+                ['text' => 'Pergunta 1', 'inicio' => 0.0, 'fim' => 1.0],
+                ['text' => 'Pergunta 2', 'inicio' => 3.0, 'fim' => 4.0],
+            ]),
+            new TranscriptionResultDTO(text: '', segments: [
+                ['text' => 'Resposta 1', 'inicio' => 1.5, 'fim' => 2.5],
+            ])
+        ));
+
+        $servico->processarTrilhasDeChamada('sessao-1', [
+            ['locutor' => Locutor::Analista, 'bytes' => 'audio-analista', 'offsetInicioSegundos' => 0.0],
+            ['locutor' => Locutor::Sujeito, 'bytes' => 'audio-sujeito', 'offsetInicioSegundos' => 0.0],
+        ]);
+
+        $eventos = $this->sessaoRepository->findById('sessao-1')->discursos()[0]->eventos();
+
+        self::assertCount(3, $eventos);
+        self::assertSame('Pergunta 1', $eventos[0]->conteudo()->valor());
+        self::assertSame(Locutor::Analista, $eventos[0]->locutor());
+        self::assertSame('Resposta 1', $eventos[1]->conteudo()->valor());
+        self::assertSame(Locutor::Sujeito, $eventos[1]->locutor());
+        self::assertSame('Pergunta 2', $eventos[2]->conteudo()->valor());
+        self::assertSame(Locutor::Analista, $eventos[2]->locutor());
+    }
+
+    public function testProcessarTrilhasDeChamadaConsideraOOffsetDeInicioDaTrilha(): void
+    {
+        // Mesma ideia, mas o offset de início da trilha (não só o inicio do
+        // segmento dentro dela) participa do cálculo do horário absoluto.
+        $servico = $this->novoServico(new QueuedTranscricaoStub(
+            new TranscriptionResultDTO(text: '', segments: [['text' => 'Início da chamada', 'inicio' => 0.0, 'fim' => 1.0]]),
+            new TranscriptionResultDTO(text: '', segments: [['text' => 'Entrou depois', 'inicio' => 0.0, 'fim' => 1.0]])
+        ));
+
+        $servico->processarTrilhasDeChamada('sessao-1', [
+            ['locutor' => Locutor::Analista, 'bytes' => 'audio-analista', 'offsetInicioSegundos' => 0.0],
+            ['locutor' => Locutor::Sujeito, 'bytes' => 'audio-sujeito', 'offsetInicioSegundos' => 10.0],
+        ]);
+
+        $eventos = $this->sessaoRepository->findById('sessao-1')->discursos()[0]->eventos();
+
+        self::assertSame('Início da chamada', $eventos[0]->conteudo()->valor());
+        self::assertSame('Entrou depois', $eventos[1]->conteudo()->valor());
+    }
+
+    public function testProcessarTrilhasDeChamadaLancaExcecaoQuandoSessaoNaoExiste(): void
+    {
+        $servico = $this->novoServico();
+
+        $this->expectException(RecursoNaoEncontradoException::class);
+
+        $servico->processarTrilhasDeChamada('sessao-inexistente', []);
     }
 }
 

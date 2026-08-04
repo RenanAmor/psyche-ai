@@ -13,7 +13,8 @@ final class GravacaoAudioDTO
         public readonly string $sessaoId,
         public readonly string $status,
         public readonly string $criadaEm,
-        public readonly ?string $transcritaEm
+        public readonly ?string $transcritaEm,
+        public readonly string $locutor = 'sujeito'
     ) {
     }
 
@@ -24,7 +25,8 @@ final class GravacaoAudioDTO
             sessaoId: $gravacao->sessaoId(),
             status: $gravacao->status()->value,
             criadaEm: $gravacao->criadaEm()->format('Y-m-d H:i:s'),
-            transcritaEm: $gravacao->transcritaEm()?->format('Y-m-d H:i:s')
+            transcritaEm: $gravacao->transcritaEm()?->format('Y-m-d H:i:s'),
+            locutor: $gravacao->locutor()->value
         );
     }
 }

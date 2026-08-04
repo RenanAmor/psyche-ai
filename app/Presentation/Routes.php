@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace PsycheAI\Presentation;
 
 use PsycheAI\Infrastructure\Providers\ApplicationServiceProvider;
+use PsycheAI\Presentation\Controllers\AnotacaoSessaoController;
 use PsycheAI\Presentation\Controllers\AutenticacaoController;
 use PsycheAI\Presentation\Controllers\AutenticacaoParticipanteController;
+use PsycheAI\Presentation\Controllers\ChamadaDeVideoController;
 use PsycheAI\Presentation\Controllers\DiscursoController;
 use PsycheAI\Presentation\Controllers\EventoDiscursivoController;
 use PsycheAI\Presentation\Controllers\GravacaoAudioController;
@@ -49,6 +51,8 @@ final class Routes
         $autenticacao = new AutenticacaoController($provider->analistas());
         $autenticacaoParticipante = new AutenticacaoParticipanteController($provider->participantes());
         $listaDeEspera = new ListaDeEsperaController($provider->listaDeEspera());
+        $anotacoes = new AnotacaoSessaoController($provider->anotacoesSessao());
+        $chamadas = new ChamadaDeVideoController($provider->chamadasDeVideo());
 
         $router->post('/auth/login', [$autenticacao, 'autenticar']);
         $router->post('/auth/participante/login', [$autenticacaoParticipante, 'autenticar']);
@@ -77,6 +81,11 @@ final class Routes
         $router->post('/sessions/{id}/audio', [$gravacoesAudio, 'enviar']);
         $router->get('/sessions/{id}/audio', [$gravacoesAudio, 'baixar']);
         $router->post('/audio/transcricao', [$gravacoesAudio, 'transcrever']);
+        $router->put('/sessions/{id}/annotation', [$anotacoes, 'salvar']);
+        $router->get('/sessions/{id}/annotation', [$anotacoes, 'buscar']);
+        $router->post('/sessions/{id}/videocall', [$chamadas, 'iniciar']);
+        $router->post('/sessions/{id}/videocall/encerrar', [$chamadas, 'encerrar']);
+        $router->post('/videocalls/{token}/join', [$chamadas, 'entrar']);
 
         $router->post('/events', [$eventos, 'criar']);
         $router->get('/events', [$eventos, 'listar']);

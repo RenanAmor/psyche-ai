@@ -10,6 +10,8 @@ use PsycheAI\Application\Exceptions\RecursoNaoEncontradoException;
 use PsycheAI\Application\Exceptions\TranscricaoFalhouException;
 use PsycheAI\Application\UseCases\RegistrarDiscurso\RegistrarDiscursoCommand;
 use PsycheAI\Application\UseCases\RegistrarDiscurso\RegistrarDiscursoHandler;
+use PsycheAI\Application\UseCases\RegistrarEventoDiscursivo\RegistrarEventoDiscursivoCommand;
+use PsycheAI\Application\UseCases\RegistrarEventoDiscursivo\RegistrarEventoDiscursivoHandler;
 use PsycheAI\Application\UseCases\RegistrarGravacaoAudio\RegistrarGravacaoAudioCommand;
 use PsycheAI\Application\UseCases\RegistrarGravacaoAudio\RegistrarGravacaoAudioHandler;
 use PsycheAI\Application\UseCases\TranscreverGravacaoAudio\TranscreverGravacaoAudioCommand;
@@ -21,6 +23,7 @@ use PsycheAI\Domain\Repositories\GravacaoAudioRepository;
 use PsycheAI\Domain\Repositories\SessaoRepository;
 use PsycheAI\Infrastructure\Contracts\StorageInterface;
 use PsycheAI\Infrastructure\Contracts\TranscriptionInterface;
+use PsycheAI\Domain\ValueObjects\Locutor;
 use PsycheAI\Infrastructure\Contracts\UuidGeneratorInterface;
 use RuntimeException;
 use Throwable;
@@ -45,11 +48,12 @@ final class GravacaoAudioApplicationService implements ApplicationServiceInterfa
         private readonly UuidGeneratorInterface $uuidGenerator,
         private readonly RegistrarGravacaoAudioHandler $registrarGravacao = new RegistrarGravacaoAudioHandler(),
         private readonly RegistrarDiscursoHandler $registrarDiscurso = new RegistrarDiscursoHandler(),
-        private readonly TranscreverGravacaoAudioHandler $transcreverGravacao = new TranscreverGravacaoAudioHandler()
+        private readonly TranscreverGravacaoAudioHandler $transcreverGravacao = new TranscreverGravacaoAudioHandler(),
+        private readonly RegistrarEventoDiscursivoHandler $registrarEvento = new RegistrarEventoDiscursivoHandler()
     ) {
     }
 
-    public function registrar(string $sessaoId, string $audioBinario): GravacaoAudioDTO
+    public function registrar(string $sessaoId, string $audioBinario, Locutor $locutor = Locutor::Sujeito): GravacaoAudioDTO
     {
         if ($this->sessaoRepository->findById($sessaoId) === null) {
             throw RecursoNaoEncontradoException::paraId('Sessao', $sessaoId);
@@ -61,7 +65,7 @@ final class GravacaoAudioApplicationService implements ApplicationServiceInterfa
         $this->storage->put($caminho, $audioBinario);
 
         $gravacao = $this->registrarGravacao
-            ->handle(new RegistrarGravacaoAudioCommand($id, $sessaoId, $caminho))
+            ->handle(new RegistrarGravacaoAudioCommand($id, $sessaoId, $caminho, $locutor))
             ->gravacao();
 
         $this->gravacaoAudioRepository->save($gravacao);
@@ -182,6 +186,70 @@ final class GravacaoAudioApplicationService implements ApplicationServiceInterfa
     }
 
     /**
+     * Processa as trilhas de áudio de uma videochamada encerrada (uma por
+     * participante, Sprint da Videochamada Embutida) — transcreve cada
+     * trilha separadamente (cada uma tem um único locutor, determinístico)
+     * e depois FUNDE os segmentos de todas as trilhas por horário absoluto
+     * (offsetInicioSegundos da trilha + inicio do segmento dentro dela)
+     * antes de registrar os EventoDiscursivo. Sem esse merge cronológico,
+     * o resultado seria "toda fala do Analista antes de toda fala do
+     * Sujeito" em vez da ordem real da conversa. Chamado pelo worker
+     * assíncrono (bin/processar-chamadas-de-video.php), nunca por uma
+     * rota HTTP síncrona.
+     *
+     * @param array<int, array{locutor: Locutor, bytes: string, offsetInicioSegundos: float}> $trilhas
+     */
+    public function processarTrilhasDeChamada(string $sessaoId, array $trilhas): void
+    {
+        $sessao = $this->sessaoRepository->findById($sessaoId);
+
+        if ($sessao === null) {
+            throw RecursoNaoEncontradoException::paraId('Sessao', $sessaoId);
+        }
+
+        $segmentosFundidos = [];
+
+        foreach ($trilhas as $trilha) {
+            $id = $this->uuidGenerator->generate();
+            $caminho = sprintf('sessoes/%s/%s.%s', $sessaoId, $id, self::EXTENSAO_ARQUIVO);
+            $this->storage->put($caminho, $trilha['bytes']);
+
+            $gravacao = $this->registrarGravacao
+                ->handle(new RegistrarGravacaoAudioCommand($id, $sessaoId, $caminho, $trilha['locutor']))
+                ->gravacao();
+
+            foreach ($this->transcreverAudioComTempos($gravacao) as $segmento) {
+                $segmentosFundidos[] = [
+                    'id' => $segmento['id'],
+                    'texto' => $segmento['texto'],
+                    'locutor' => $trilha['locutor'],
+                    'inicioAbsoluto' => $trilha['offsetInicioSegundos'] + $segmento['inicio'],
+                ];
+            }
+
+            $gravacao->marcarTranscrita();
+            $this->gravacaoAudioRepository->save($gravacao);
+        }
+
+        usort($segmentosFundidos, static fn (array $a, array $b): int => $a['inicioAbsoluto'] <=> $b['inicioAbsoluto']);
+
+        $discurso = $this->discursoDaConversa($sessao);
+        $posicaoInicial = count($discurso->eventos());
+
+        foreach (array_values($segmentosFundidos) as $indice => $segmento) {
+            $this->registrarEvento->handle(new RegistrarEventoDiscursivoCommand(
+                $discurso,
+                $segmento['id'],
+                $segmento['texto'],
+                $posicaoInicial + $indice,
+                $segmento['locutor']
+            ));
+        }
+
+        $this->sessaoRepository->save($sessao);
+    }
+
+    /**
      * @return array<int, array{id: string, texto: string}>
      */
     private function transcreverAudio(GravacaoAudio $gravacao): array
@@ -206,6 +274,45 @@ final class GravacaoAudioApplicationService implements ApplicationServiceInterfa
 
         if (trim($resultado->text) !== '') {
             return [['id' => $this->uuidGenerator->generate(), 'texto' => $resultado->text]];
+        }
+
+        return [];
+    }
+
+    /**
+     * Variante de transcreverAudio() que preserva o `inicio` de cada
+     * segmento dentro da trilha — necessário para o merge cronológico de
+     * processarTrilhasDeChamada(), que soma esse valor ao offset de início
+     * da trilha na chamada.
+     *
+     * @return array<int, array{id: string, texto: string, inicio: float}>
+     */
+    private function transcreverAudioComTempos(GravacaoAudio $gravacao): array
+    {
+        $bytes = $this->storage->get($gravacao->caminhoArmazenamento());
+
+        $arquivoTemporario = tempnam(sys_get_temp_dir(), 'psyche-audio-');
+        file_put_contents($arquivoTemporario, $bytes);
+
+        try {
+            $resultado = $this->transcricao->transcribe($arquivoTemporario);
+        } finally {
+            unlink($arquivoTemporario);
+        }
+
+        if ($resultado->segments !== []) {
+            return array_map(
+                fn (array $segmento): array => [
+                    'id' => $this->uuidGenerator->generate(),
+                    'texto' => $segmento['text'],
+                    'inicio' => (float) $segmento['inicio'],
+                ],
+                array_values(array_filter($resultado->segments, static fn (array $s): bool => trim($s['text']) !== ''))
+            );
+        }
+
+        if (trim($resultado->text) !== '') {
+            return [['id' => $this->uuidGenerator->generate(), 'texto' => $resultado->text, 'inicio' => 0.0]];
         }
 
         return [];

@@ -14,7 +14,8 @@ final class EventoDiscursivoDTO
         public readonly int $posicao,
         public readonly string $discursoId = '',
         public readonly ?string $sessaoId = null,
-        public readonly string $criadoEm = ''
+        public readonly string $criadoEm = '',
+        public readonly string $locutor = 'desconhecido'
     ) {
     }
 
@@ -26,7 +27,8 @@ final class EventoDiscursivoDTO
             posicao: $evento->posicao()->valor(),
             discursoId: $discursoId,
             sessaoId: $sessaoId,
-            criadoEm: $evento->criadoEm()->format('Y-m-d H:i:s')
+            criadoEm: $evento->criadoEm()->format('Y-m-d H:i:s'),
+            locutor: $evento->locutor()->value
         );
     }
 }

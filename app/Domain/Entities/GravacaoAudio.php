@@ -6,6 +6,7 @@ namespace PsycheAI\Domain\Entities;
 
 use DateTimeImmutable;
 use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Locutor;
 use PsycheAI\Domain\ValueObjects\StatusTranscricao;
 
 /**
@@ -29,7 +30,8 @@ final class GravacaoAudio extends Entity
         private readonly string $caminhoArmazenamento,
         ?StatusTranscricao $status = null,
         ?DateTimeImmutable $criadaEm = null,
-        ?DateTimeImmutable $transcritaEm = null
+        ?DateTimeImmutable $transcritaEm = null,
+        private readonly Locutor $locutor = Locutor::Sujeito
     ) {
         parent::__construct($id);
 
@@ -61,6 +63,11 @@ final class GravacaoAudio extends Entity
     public function transcritaEm(): ?DateTimeImmutable
     {
         return $this->transcritaEm;
+    }
+
+    public function locutor(): Locutor
+    {
+        return $this->locutor;
     }
 
     public function marcarTranscrita(?DateTimeImmutable $transcritaEm = null): void

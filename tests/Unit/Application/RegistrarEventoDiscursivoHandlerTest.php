@@ -11,6 +11,7 @@ use PsycheAI\Application\UseCases\RegistrarEventoDiscursivo\RegistrarEventoDiscu
 use PsycheAI\Domain\Entities\Discurso;
 use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
 use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Locutor;
 
 final class RegistrarEventoDiscursivoHandlerTest extends TestCase
 {
@@ -25,6 +26,18 @@ final class RegistrarEventoDiscursivoHandlerTest extends TestCase
         $this->assertSame('e1', $result->dto()->id);
         $this->assertSame('lapso', $result->dto()->conteudo);
         $this->assertSame(3, $result->dto()->posicao);
+        $this->assertSame('desconhecido', $result->dto()->locutor);
+    }
+
+    public function testRegistraEventoComLocutorExplicito(): void
+    {
+        $discurso = new Discurso(new Identificador('d1'), new ConteudoDiscursivo('Discurso de teste.'));
+
+        $handler = new RegistrarEventoDiscursivoHandler();
+        $result = $handler->handle(new RegistrarEventoDiscursivoCommand($discurso, 'e1', 'lapso', 0, Locutor::Analista));
+
+        $this->assertSame(Locutor::Analista, $result->evento()->locutor());
+        $this->assertSame('analista', $result->dto()->locutor);
     }
 
     public function testLancaComandoInvalidoQuandoConteudoVazio(): void

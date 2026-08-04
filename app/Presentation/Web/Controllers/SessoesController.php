@@ -50,6 +50,36 @@ final class SessoesController extends AbstractCrudResourceController
         return SessaoViewModel::fromArrayList($dados);
     }
 
+    /**
+     * Sobrescreve o mostrar() genérico para também trazer a anotação do
+     * analista (autosave) junto com os dados da sessão — mesma disciplina
+     * de audio(), que também busca um recurso adicional à parte do CRUD
+     * genérico de AbstractCrudResourceController.
+     */
+    public function mostrar(Request $request): Response
+    {
+        $id = (string) $request->routeParam('id', '');
+        $resposta = $this->httpClient->get($this->recurso() . '/' . $id);
+
+        if (!$resposta->sucesso) {
+            return ErrorController::renderizar($this->erroDe($resposta), $this->viewRenderer, $this->rota());
+        }
+
+        $sessao = $this->mapearViewModelUnico($resposta->dados);
+
+        $respostaAnotacao = $this->httpClient->get($this->recurso() . '/' . $id . '/annotation');
+        $anotacao = $respostaAnotacao->sucesso ? $respostaAnotacao->dados : ['conteudo' => '', 'atualizadoEm' => null];
+
+        $html = $this->viewRenderer->renderComLayout(
+            $this->viewMostrar(),
+            [$this->chaveViewModelUnico() => $sessao, 'anotacao' => $anotacao],
+            $this->tituloPagina(),
+            $this->rota()
+        );
+
+        return Response::ok($html);
+    }
+
     public function novo(Request $request): Response
     {
         $html = $this->viewRenderer->renderComLayout(

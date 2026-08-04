@@ -6,13 +6,20 @@ namespace PsycheAI\Presentation\Web\ViewModels;
 
 /**
  * Projeção somente-leitura de um EventoDiscursivo para a tela de
- * Conversa. O Domínio não guarda quem falou — como o fluxo da Sprint 12
- * sempre alterna estritamente usuário/sistema a cada envio, a posição do
- * evento (par/ímpar) é quem determina o autor exibido, sem exigir nenhum
- * campo novo no Domínio.
+ * Conversa. Desde a Videochamada Embutida, o Domínio guarda quem falou
+ * explicitamente (Locutor) — esta classe só traduz o valor bruto
+ * ('sujeito'/'sistema'/'analista') para o rótulo exibido, sem inferir
+ * nada pela posição (a antiga heurística de paridade já falhava em
+ * silêncio para transcrição de áudio com múltiplos segmentos).
  */
 final class MensagemViewModel
 {
+    private const ROTULOS_POR_LOCUTOR = [
+        'sujeito' => 'Você',
+        'sistema' => 'Sistema',
+        'analista' => 'Analista',
+    ];
+
     public function __construct(
         public readonly string $id,
         public readonly string $autor,
@@ -27,13 +34,13 @@ final class MensagemViewModel
      */
     public static function fromArray(array $dados): self
     {
-        $posicao = (int) ($dados['posicao'] ?? 0);
+        $locutor = (string) ($dados['locutor'] ?? 'desconhecido');
 
         return new self(
             id: (string) ($dados['id'] ?? ''),
-            autor: $posicao % 2 === 0 ? 'Você' : 'Sistema',
+            autor: self::ROTULOS_POR_LOCUTOR[$locutor] ?? 'Desconhecido',
             conteudo: (string) ($dados['conteudo'] ?? ''),
-            posicao: $posicao,
+            posicao: (int) ($dados['posicao'] ?? 0),
             criadoEm: (string) ($dados['criadoEm'] ?? '')
         );
     }

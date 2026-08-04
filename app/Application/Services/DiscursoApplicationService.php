@@ -148,7 +148,8 @@ final class DiscursoApplicationService implements ApplicationServiceInterface
             new Identificador($eventoId),
             new ConteudoDiscursivo($novoConteudo),
             new Posicao($novaPosicao),
-            $original->criadoEm()
+            $original->criadoEm(),
+            $original->locutor()
         );
 
         foreach ($discurso->eventos() as $evento) {

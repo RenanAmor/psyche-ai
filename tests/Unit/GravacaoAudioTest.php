@@ -7,6 +7,7 @@ namespace PsycheAI\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 use PsycheAI\Domain\Entities\GravacaoAudio;
 use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Locutor;
 use PsycheAI\Domain\ValueObjects\StatusTranscricao;
 
 final class GravacaoAudioTest extends TestCase
@@ -23,6 +24,25 @@ final class GravacaoAudioTest extends TestCase
         $this->assertSame('sessoes/sessao-1.webm', $gravacao->caminhoArmazenamento());
         $this->assertSame(StatusTranscricao::Pendente, $gravacao->status());
         $this->assertNull($gravacao->transcritaEm());
+    }
+
+    public function testLocutorPadraoESujeito(): void
+    {
+        $gravacao = new GravacaoAudio(new Identificador('g1'), 'sessao-1', 'sessoes/sessao-1.webm');
+
+        $this->assertSame(Locutor::Sujeito, $gravacao->locutor());
+    }
+
+    public function testExposesLocutorExplicito(): void
+    {
+        $gravacao = new GravacaoAudio(
+            new Identificador('g1'),
+            'sessao-1',
+            'sessoes/sessao-1.webm',
+            locutor: Locutor::Analista
+        );
+
+        $this->assertSame(Locutor::Analista, $gravacao->locutor());
     }
 
     public function testMarcarTranscritaAtualizaStatusEData(): void

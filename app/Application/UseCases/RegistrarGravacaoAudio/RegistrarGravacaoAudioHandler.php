@@ -18,7 +18,8 @@ final class RegistrarGravacaoAudioHandler implements UseCaseInterface
             $gravacao = new GravacaoAudio(
                 new Identificador($command->id),
                 $command->sessaoId,
-                $command->caminhoArmazenamento
+                $command->caminhoArmazenamento,
+                locutor: $command->locutor
             );
         } catch (InvalidArgumentException $erro) {
             throw ComandoInvalidoException::fromInvalidArgument($erro);

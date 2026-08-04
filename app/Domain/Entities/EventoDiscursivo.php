@@ -7,6 +7,7 @@ namespace PsycheAI\Domain\Entities;
 use DateTimeImmutable;
 use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
 use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Locutor;
 use PsycheAI\Domain\ValueObjects\Posicao;
 
 final class EventoDiscursivo extends Entity
@@ -17,7 +18,8 @@ final class EventoDiscursivo extends Entity
         Identificador $id,
         private readonly ConteudoDiscursivo $conteudo,
         private readonly Posicao $posicao,
-        ?DateTimeImmutable $criadoEm = null
+        ?DateTimeImmutable $criadoEm = null,
+        private readonly Locutor $locutor = Locutor::Desconhecido
     ) {
         parent::__construct($id);
 
@@ -37,5 +39,10 @@ final class EventoDiscursivo extends Entity
     public function criadoEm(): DateTimeImmutable
     {
         return $this->criadoEm;
+    }
+
+    public function locutor(): Locutor
+    {
+        return $this->locutor;
     }
 }

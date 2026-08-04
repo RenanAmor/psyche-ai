@@ -20,7 +20,8 @@ final class RegistrarEventoDiscursivoHandler implements UseCaseInterface
             $evento = new EventoDiscursivo(
                 new Identificador($command->id),
                 new ConteudoDiscursivo($command->conteudo),
-                new Posicao($command->posicao)
+                new Posicao($command->posicao),
+                locutor: $command->locutor
             );
         } catch (InvalidArgumentException $erro) {
             throw ComandoInvalidoException::fromInvalidArgument($erro);

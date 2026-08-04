@@ -6,8 +6,11 @@ namespace PsycheAI\Presentation\Web;
 
 use PsycheAI\Presentation\Web\Client\HttpClientInterface;
 use PsycheAI\Presentation\Web\Controllers\AbstractCrudResourceController;
+use PsycheAI\Presentation\Web\Controllers\AnotacoesSessaoController;
 use PsycheAI\Presentation\Web\Controllers\AutenticacaoAnalistaController;
 use PsycheAI\Presentation\Web\Controllers\AutenticacaoParticipanteController;
+use PsycheAI\Presentation\Web\Controllers\ChamadaDeVideoController;
+use PsycheAI\Presentation\Web\Controllers\ChamadaMagicaController;
 use PsycheAI\Presentation\Web\Controllers\ConsentimentoController;
 use PsycheAI\Presentation\Web\Controllers\ConversaController;
 use PsycheAI\Presentation\Web\Controllers\DashboardController;
@@ -68,6 +71,9 @@ final class Routes
         $memorias = new MemoriasController($httpClient);
         $eventosDiscursivos = new EventosDiscursivosController($httpClient);
         $conversa = new ConversaController($httpClient);
+        $anotacoes = new AnotacoesSessaoController($httpClient);
+        $chamadas = new ChamadaDeVideoController($httpClient);
+        $chamadaMagica = new ChamadaMagicaController($httpClient);
         $consentimento = new ConsentimentoController();
         $historico = new HistoricoSujeitoController($httpClient);
         $observacoes = new ObservacoesSujeitoController($httpClient);
@@ -85,6 +91,9 @@ final class Routes
         $router->get('/sujeitos/{id}/observacoes/grafo-circuito', PortaoDeAnalista::proteger($observacoes->grafoCircuito(...)));
         self::registrarCrud($router, '/sessoes', $sessoes);
         $router->get('/sessoes/{id}/audio', PortaoDeAnalista::proteger($sessoes->audio(...)));
+        $router->post('/sessoes/{id}/anotacoes', PortaoDeAnalista::proteger($anotacoes->salvar(...)));
+        $router->get('/sessoes/{id}/videochamada', PortaoDeAnalista::proteger($chamadas->iniciar(...)));
+        $router->post('/sessoes/{id}/videochamada/encerrar', PortaoDeAnalista::proteger($chamadas->encerrar(...)));
         self::registrarCrud($router, '/discursos', $discursos);
         self::registrarCrud($router, '/memorias', $memorias);
 
@@ -102,6 +111,8 @@ final class Routes
         $router->post('/conversa/mensagens/audio', PortaoDeParticipante::proteger($conversa->mensagensAudio(...)));
         $router->post('/conversa/audio', PortaoDeParticipante::proteger($conversa->audio(...)));
         $router->get('/conversa/mensagens/{id}/audio', PortaoDeParticipante::proteger($conversa->audioResposta(...)));
+
+        $router->get('/videochamada/entrar/{token}', $chamadaMagica->entrar(...));
 
         $router->get('/participante/entrar', $autenticacaoParticipante->entrar(...));
         $router->post('/participante/entrar', $autenticacaoParticipante->autenticar(...));

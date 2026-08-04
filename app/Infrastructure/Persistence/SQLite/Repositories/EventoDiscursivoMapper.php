@@ -9,6 +9,7 @@ use PDO;
 use PsycheAI\Domain\Entities\EventoDiscursivo;
 use PsycheAI\Domain\ValueObjects\ConteudoDiscursivo;
 use PsycheAI\Domain\ValueObjects\Identificador;
+use PsycheAI\Domain\ValueObjects\Locutor;
 use PsycheAI\Domain\ValueObjects\Posicao;
 
 /**
@@ -25,12 +26,13 @@ final class EventoDiscursivoMapper
 
         if ($discursoId !== null) {
             $statement = $pdo->prepare(
-                'INSERT INTO eventos_discursivos (id, discurso_id, conteudo, posicao, criado_em)
-                 VALUES (:id, :discurso_id, :conteudo, :posicao, :criado_em)
+                'INSERT INTO eventos_discursivos (id, discurso_id, conteudo, posicao, criado_em, locutor)
+                 VALUES (:id, :discurso_id, :conteudo, :posicao, :criado_em, :locutor)
                  ON CONFLICT(id) DO UPDATE SET
                     discurso_id = excluded.discurso_id,
                     conteudo = excluded.conteudo,
-                    posicao = excluded.posicao'
+                    posicao = excluded.posicao,
+                    locutor = excluded.locutor'
             );
             $statement->execute([
                 'id' => $evento->id()->valor(),
@@ -38,30 +40,33 @@ final class EventoDiscursivoMapper
                 'conteudo' => $evento->conteudo()->valor(),
                 'posicao' => $evento->posicao()->valor(),
                 'criado_em' => $criadoEm,
+                'locutor' => $evento->locutor()->value,
             ]);
 
             return;
         }
 
         $statement = $pdo->prepare(
-            'INSERT INTO eventos_discursivos (id, discurso_id, conteudo, posicao, criado_em)
-             VALUES (:id, NULL, :conteudo, :posicao, :criado_em)
+            'INSERT INTO eventos_discursivos (id, discurso_id, conteudo, posicao, criado_em, locutor)
+             VALUES (:id, NULL, :conteudo, :posicao, :criado_em, :locutor)
              ON CONFLICT(id) DO UPDATE SET
                 conteudo = excluded.conteudo,
-                posicao = excluded.posicao'
+                posicao = excluded.posicao,
+                locutor = excluded.locutor'
         );
         $statement->execute([
             'id' => $evento->id()->valor(),
             'conteudo' => $evento->conteudo()->valor(),
             'posicao' => $evento->posicao()->valor(),
             'criado_em' => $criadoEm,
+            'locutor' => $evento->locutor()->value,
         ]);
     }
 
     public static function findById(PDO $pdo, string $id): ?EventoDiscursivo
     {
         $statement = $pdo->prepare(
-            'SELECT id, conteudo, posicao, criado_em FROM eventos_discursivos WHERE id = :id'
+            'SELECT id, conteudo, posicao, criado_em, locutor FROM eventos_discursivos WHERE id = :id'
         );
         $statement->execute(['id' => $id]);
 
@@ -80,7 +85,7 @@ final class EventoDiscursivoMapper
     public static function findByDiscursoId(PDO $pdo, string $discursoId): array
     {
         $statement = $pdo->prepare(
-            'SELECT id, conteudo, posicao, criado_em FROM eventos_discursivos
+            'SELECT id, conteudo, posicao, criado_em, locutor FROM eventos_discursivos
              WHERE discurso_id = :discurso_id
              ORDER BY posicao ASC'
         );
@@ -101,7 +106,8 @@ final class EventoDiscursivoMapper
             new Identificador((string) $linha['id']),
             new ConteudoDiscursivo((string) $linha['conteudo']),
             new Posicao((int) $linha['posicao']),
-            new DateTimeImmutable((string) $linha['criado_em'])
+            new DateTimeImmutable((string) $linha['criado_em']),
+            Locutor::from((string) $linha['locutor'])
         );
     }
 }
