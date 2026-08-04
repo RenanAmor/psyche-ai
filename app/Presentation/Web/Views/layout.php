@@ -18,7 +18,7 @@ use PsycheAI\Presentation\Web\Http\BasePath;
     <title><?= Html::e($tituloPagina) ?> — Psyche AI</title>
     <link rel="stylesheet" href="<?= Html::e(AssetVersion::url('/assets/css/estilo.2.css')) ?>">
 </head>
-<body>
+<body class="corpo-analista">
 <div class="layout-principal">
     <a href="https://investimentos369.com/public/index.php?page=lab-dashboard" class="voltar-laboratorio">← Voltar ao Laboratório 369</a>
     <?php include __DIR__ . '/partials/header.php'; ?>

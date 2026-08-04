@@ -246,6 +246,11 @@ h1, h2, h3 {
     background: var(--cor-fundo-sutil);
 }
 
+.formulario-exclusao-linha {
+    display: inline-block;
+    margin: 0;
+}
+
 .estado-vazio {
     padding: 2rem 1rem;
     text-align: center;
@@ -467,9 +472,11 @@ h1, h2, h3 {
  * (mesma paleta: --gold #d4af37, --dark #060606) — sobrescrita só nas
  * variáveis já usadas por todos os Components (Form/Button/Alert/Table),
  * então herdam o tema novo sem precisar de regra própria por componente.
+ * `.corpo-analista` reaproveita o mesmo bloco de variáveis (layout.php) —
+ * a mesma identidade visual, agora também na área do Analista.
  */
 
-.corpo-eco {
+.corpo-eco, .corpo-analista {
     color-scheme: dark;
     --cor-fundo: #060606;
     --cor-fundo-elevado: #141414;
@@ -493,7 +500,9 @@ h1, h2, h3 {
 }
 
 .corpo-eco .campo-formulario input:focus,
-.corpo-eco .campo-formulario textarea:focus {
+.corpo-eco .campo-formulario textarea:focus,
+.corpo-analista .campo-formulario input:focus,
+.corpo-analista .campo-formulario textarea:focus {
     box-shadow: 0 0 0 3px rgba(212, 175, 55, .18);
 }
 

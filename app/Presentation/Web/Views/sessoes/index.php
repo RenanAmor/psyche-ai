@@ -2,6 +2,7 @@
 /** @var \PsycheAI\Presentation\Web\ViewModels\SessaoViewModel[] $sessoes */
 
 use PsycheAI\Presentation\Web\Components\ButtonComponent;
+use PsycheAI\Presentation\Web\Components\Html;
 use PsycheAI\Presentation\Web\Components\TableComponent;
 
 $linhas = array_map(
@@ -10,7 +11,12 @@ $linhas = array_map(
         'data' => $sessao->data,
         'quantidadeDeDiscursos' => $sessao->quantidadeDeDiscursos,
         'acoes' => ButtonComponent::link('Ver', '/sessoes/' . $sessao->id, 'secundario')
-            . ' ' . ButtonComponent::link('Editar', '/sessoes/' . $sessao->id . '/editar', 'secundario'),
+            . ' ' . ButtonComponent::link('Editar', '/sessoes/' . $sessao->id . '/editar', 'secundario')
+            . ' ' . sprintf(
+                '<form class="formulario-exclusao formulario-exclusao-linha" action="%s" method="POST">%s</form>',
+                Html::e('/sessoes/' . $sessao->id . '/excluir'),
+                ButtonComponent::submit('Excluir', 'perigo')
+            ),
     ],
     $sessoes
 );
