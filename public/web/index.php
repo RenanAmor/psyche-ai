@@ -69,6 +69,6 @@ $method = (string) ($_SERVER['REQUEST_METHOD'] ?? 'GET');
 $request = Request::criar($method, $requestUri, $_GET, $_POST, (string) (file_get_contents('php://input') ?: ''));
 
 $router = new Router();
-Routes::registrar($router, new ApiHttpClient($apiBaseUrl));
+Routes::registrar($router, new ApiHttpClient($apiBaseUrl, apiKeyInterna: getenv('PSYCHEAI_API_INTERNAL_KEY') ?: null));
 
 $router->despachar($request)->enviar();

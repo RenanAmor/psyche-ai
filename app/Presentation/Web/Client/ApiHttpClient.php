@@ -20,7 +20,8 @@ final class ApiHttpClient implements HttpClientInterface
 {
     public function __construct(
         private readonly string $baseUrl,
-        private readonly int $timeoutSegundos = 5
+        private readonly int $timeoutSegundos = 5,
+        private readonly ?string $apiKeyInterna = null
     ) {
     }
 
@@ -121,12 +122,18 @@ final class ApiHttpClient implements HttpClientInterface
 
         $handle = curl_init($url);
 
+        $cabecalhos = ['Content-Type: application/json', 'Accept: application/json'];
+
+        if ($this->apiKeyInterna !== null && $this->apiKeyInterna !== '') {
+            $cabecalhos[] = 'X-Internal-Api-Key: ' . $this->apiKeyInterna;
+        }
+
         $opcoes = [
             CURLOPT_CUSTOMREQUEST => $metodo,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CONNECTTIMEOUT => $this->timeoutSegundos,
             CURLOPT_TIMEOUT => $this->timeoutSegundos,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'Accept: application/json'],
+            CURLOPT_HTTPHEADER => $cabecalhos,
         ];
 
         if ($corpo !== null) {

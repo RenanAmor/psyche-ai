@@ -17,7 +17,7 @@ $databasePath = getenv('PSYCHEAI_DATABASE_PATH') ?: __DIR__ . '/../storage/data/
 $provider = ApplicationServiceProvider::comSQLite($databasePath);
 
 $router = new Router();
-Routes::registrar($router, $provider);
+Routes::registrar($router, $provider, getenv('PSYCHEAI_API_INTERNAL_KEY') ?: null);
 
 $request = Request::capturarDoGlobals();
 

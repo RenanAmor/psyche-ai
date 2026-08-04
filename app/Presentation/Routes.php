@@ -17,6 +17,7 @@ use PsycheAI\Presentation\Controllers\MensagemController;
 use PsycheAI\Presentation\Controllers\ObservacaoController;
 use PsycheAI\Presentation\Controllers\SessaoController;
 use PsycheAI\Presentation\Controllers\SujeitoController;
+use PsycheAI\Presentation\Http\ApiKeyGuard;
 use PsycheAI\Presentation\Http\Router;
 
 /**
@@ -28,7 +29,13 @@ use PsycheAI\Presentation\Http\Router;
  */
 final class Routes
 {
-    public static function registrar(Router $router, ApplicationServiceProvider $provider): void
+    /**
+     * @param ?string $apiKeyInterna valor de PSYCHEAI_API_INTERNAL_KEY —
+     *     protege só GET /waitlist (achado de segurança: listava toda a
+     *     lista de espera sem credencial nenhuma). POST /waitlist
+     *     continua público de propósito (cadastro é aberto).
+     */
+    public static function registrar(Router $router, ApplicationServiceProvider $provider, ?string $apiKeyInterna = null): void
     {
         $sujeitos = new SujeitoController($provider->sujeitos());
         $sessoes = new SessaoController($provider->sessoes());
@@ -46,8 +53,10 @@ final class Routes
         $router->post('/auth/login', [$autenticacao, 'autenticar']);
         $router->post('/auth/participante/login', [$autenticacaoParticipante, 'autenticar']);
 
+        $apiKeyGuard = new ApiKeyGuard($apiKeyInterna);
+
         $router->post('/waitlist', [$listaDeEspera, 'inscrever']);
-        $router->get('/waitlist', [$listaDeEspera, 'listar']);
+        $router->get('/waitlist', $apiKeyGuard->proteger([$listaDeEspera, 'listar']));
 
         $router->post('/subjects', [$sujeitos, 'criar']);
         $router->get('/subjects', [$sujeitos, 'listar']);

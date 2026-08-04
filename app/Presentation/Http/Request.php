@@ -24,12 +24,14 @@ final class Request
 
     /**
      * @param array<string, mixed> $query
+     * @param array<string, string> $headers chave já normalizada em minúsculas
      */
     private function __construct(
         private readonly string $metodo,
         private readonly string $path,
         private readonly string $corpoBruto,
-        private readonly array $query
+        private readonly array $query,
+        private readonly array $headers = []
     ) {
     }
 
@@ -39,16 +41,36 @@ final class Request
         $path = self::normalizarPath((string) ($_SERVER['REQUEST_URI'] ?? '/'));
         $corpoBruto = (string) (file_get_contents('php://input') ?: '');
 
-        return new self($metodo, $path, $corpoBruto, $_GET);
+        return new self($metodo, $path, $corpoBruto, $_GET, self::capturarCabecalhosDoGlobals());
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function capturarCabecalhosDoGlobals(): array
+    {
+        $headers = [];
+
+        foreach ($_SERVER as $chave => $valor) {
+            if (!is_string($chave) || !is_string($valor) || !str_starts_with($chave, 'HTTP_')) {
+                continue;
+            }
+
+            $nome = strtolower(str_replace('_', '-', substr($chave, 5)));
+            $headers[$nome] = $valor;
+        }
+
+        return $headers;
     }
 
     /**
      * @param array<string, mixed> $corpo
      * @param array<string, mixed> $query
+     * @param array<string, string> $headers
      */
-    public static function criar(string $metodo, string $path, array $corpo = [], array $query = []): self
+    public static function criar(string $metodo, string $path, array $corpo = [], array $query = [], array $headers = []): self
     {
-        $instancia = new self(strtoupper($metodo), self::normalizarPath($path), '', $query);
+        $instancia = new self(strtoupper($metodo), self::normalizarPath($path), '', $query, self::normalizarChavesDeCabecalho($headers));
         $instancia->corpoDecodificado = $corpo;
 
         return $instancia;
@@ -63,6 +85,21 @@ final class Request
     public static function criarComCorpoBinario(string $metodo, string $path, string $corpoBinario, array $query = []): self
     {
         return new self(strtoupper($metodo), self::normalizarPath($path), $corpoBinario, $query);
+    }
+
+    /**
+     * @param array<string, string> $headers
+     * @return array<string, string>
+     */
+    private static function normalizarChavesDeCabecalho(array $headers): array
+    {
+        $normalizado = [];
+
+        foreach ($headers as $nome => $valor) {
+            $normalizado[strtolower($nome)] = $valor;
+        }
+
+        return $normalizado;
     }
 
     private static function normalizarPath(string $uri): string
@@ -123,6 +160,11 @@ final class Request
     public function query(string $chave, mixed $default = null): mixed
     {
         return $this->query[$chave] ?? $default;
+    }
+
+    public function cabecalho(string $nome): ?string
+    {
+        return $this->headers[strtolower($nome)] ?? null;
     }
 
     /**

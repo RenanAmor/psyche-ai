@@ -110,14 +110,33 @@ final class ListaDeEsperaEndpointsTest extends HttpTestCase
         self::assertSame($primeira['data']['id'], $segunda['data']['id']);
     }
 
-    public function testGetListaTodasAsInscricoes(): void
+    public function testGetListaTodasAsInscricoesComChaveInternaValida(): void
     {
         $this->despachar('POST', '/waitlist', $this->camposValidos('um@psyche.ai'));
         $this->despachar('POST', '/waitlist', $this->camposValidos('dois@psyche.ai'));
 
-        $response = $this->despachar('GET', '/waitlist');
+        $response = $this->despachar('GET', '/waitlist', headers: ['X-Internal-Api-Key' => self::CHAVE_API_INTERNA_DE_TESTE]);
 
         self::assertSame(200, $response->status());
         self::assertCount(2, $this->decodificar($response)['data']);
+    }
+
+    public function testGetSemChaveInternaRetorna401(): void
+    {
+        $this->despachar('POST', '/waitlist', $this->camposValidos());
+
+        $response = $this->despachar('GET', '/waitlist');
+
+        self::assertSame(401, $response->status());
+        self::assertFalse($this->decodificar($response)['success']);
+    }
+
+    public function testGetComChaveInternaErradaRetorna401(): void
+    {
+        $this->despachar('POST', '/waitlist', $this->camposValidos());
+
+        $response = $this->despachar('GET', '/waitlist', headers: ['X-Internal-Api-Key' => 'chave-errada']);
+
+        self::assertSame(401, $response->status());
     }
 }

@@ -22,6 +22,13 @@ use Throwable;
  */
 abstract class HttpTestCase extends TestCase
 {
+    /**
+     * Valor fixo só pra testes — usado por quem precisar exercitar rotas
+     * protegidas por ApiKeyGuard (hoje só GET /waitlist) autenticadas,
+     * via despachar(..., headers: ['X-Internal-Api-Key' => self::CHAVE_API_INTERNA_DE_TESTE]).
+     */
+    protected const CHAVE_API_INTERNA_DE_TESTE = 'chave-de-teste-nao-usar-em-producao';
+
     protected Router $router;
     protected ApplicationServiceProvider $provider;
 
@@ -31,16 +38,17 @@ abstract class HttpTestCase extends TestCase
         $this->provider = ApplicationServiceProvider::comPDO($pdo);
 
         $this->router = new Router();
-        Routes::registrar($this->router, $this->provider);
+        Routes::registrar($this->router, $this->provider, self::CHAVE_API_INTERNA_DE_TESTE);
     }
 
     /**
      * @param array<string, mixed> $corpo
      * @param array<string, mixed> $query
+     * @param array<string, string> $headers
      */
-    protected function despachar(string $metodo, string $path, array $corpo = [], array $query = []): JsonResponse
+    protected function despachar(string $metodo, string $path, array $corpo = [], array $query = [], array $headers = []): JsonResponse
     {
-        $request = Request::criar($metodo, $path, $corpo, $query);
+        $request = Request::criar($metodo, $path, $corpo, $query, $headers);
 
         try {
             $response = $this->router->despachar($request);
