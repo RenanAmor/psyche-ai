@@ -6,6 +6,7 @@
 
 use PsycheAI\Presentation\Web\Components\ButtonComponent;
 use PsycheAI\Presentation\Web\Components\Html;
+use PsycheAI\Presentation\Web\Http\BasePath;
 ?>
 <section class="pagina-detalhe">
     <div class="campo-formulario">
@@ -17,7 +18,7 @@ use PsycheAI\Presentation\Web\Components\Html;
     <div id="chamada-container" class="chamada-video-container"></div>
 
     <div class="pagina-detalhe-acoes">
-        <form action="<?= Html::e('/sessoes/' . $sessaoId . '/videochamada/encerrar') ?>" method="POST">
+        <form action="<?= Html::e(BasePath::url('/sessoes/' . $sessaoId . '/videochamada/encerrar')) ?>" method="POST">
             <?= ButtonComponent::submit('Encerrar chamada', 'perigo') ?>
         </form>
         <?= ButtonComponent::link('Voltar', '/sessoes/' . $sessaoId, 'secundario') ?>

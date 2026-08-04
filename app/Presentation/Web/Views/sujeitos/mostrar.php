@@ -4,6 +4,7 @@
 use PsycheAI\Presentation\Web\Components\ButtonComponent;
 use PsycheAI\Presentation\Web\Components\Html;
 use PsycheAI\Presentation\Web\Components\TableComponent;
+use PsycheAI\Presentation\Web\Http\BasePath;
 
 $linhas = [[
     'id' => $sujeito->id,
@@ -19,7 +20,7 @@ $linhas = [[
     <div class="pagina-detalhe-acoes">
         <?= ButtonComponent::link('Ver Histórico', '/sujeitos/' . $sujeito->id . '/historico', 'secundario') ?>
         <?= ButtonComponent::link('Editar', '/sujeitos/' . $sujeito->id . '/editar') ?>
-        <form class="formulario-exclusao" action="<?= Html::e('/sujeitos/' . $sujeito->id . '/excluir') ?>" method="POST">
+        <form class="formulario-exclusao" action="<?= Html::e(BasePath::url('/sujeitos/' . $sujeito->id . '/excluir')) ?>" method="POST">
             <?= ButtonComponent::submit('Excluir', 'perigo') ?>
         </form>
         <?= ButtonComponent::link('Voltar', '/sujeitos', 'secundario') ?>

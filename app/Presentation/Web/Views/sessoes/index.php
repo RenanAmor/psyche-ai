@@ -4,6 +4,7 @@
 use PsycheAI\Presentation\Web\Components\ButtonComponent;
 use PsycheAI\Presentation\Web\Components\Html;
 use PsycheAI\Presentation\Web\Components\TableComponent;
+use PsycheAI\Presentation\Web\Http\BasePath;
 
 $linhas = array_map(
     static fn ($sessao) => [
@@ -14,7 +15,7 @@ $linhas = array_map(
             . ' ' . ButtonComponent::link('Editar', '/sessoes/' . $sessao->id . '/editar', 'secundario')
             . ' ' . sprintf(
                 '<form class="formulario-exclusao formulario-exclusao-linha" action="%s" method="POST">%s</form>',
-                Html::e('/sessoes/' . $sessao->id . '/excluir'),
+                Html::e(BasePath::url('/sessoes/' . $sessao->id . '/excluir')),
                 ButtonComponent::submit('Excluir', 'perigo')
             ),
     ],

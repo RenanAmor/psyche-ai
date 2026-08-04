@@ -36,7 +36,7 @@ $linhas = [[
     <div class="pagina-detalhe-acoes">
         <?= ButtonComponent::link('Iniciar Videochamada', '/sessoes/' . $sessao->id . '/videochamada') ?>
         <?= ButtonComponent::link('Editar', '/sessoes/' . $sessao->id . '/editar') ?>
-        <form class="formulario-exclusao" action="<?= Html::e('/sessoes/' . $sessao->id . '/excluir') ?>" method="POST">
+        <form class="formulario-exclusao" action="<?= Html::e(BasePath::url('/sessoes/' . $sessao->id . '/excluir')) ?>" method="POST">
             <?= ButtonComponent::submit('Excluir', 'perigo') ?>
         </form>
         <?= ButtonComponent::link('Voltar', '/sessoes', 'secundario') ?>
