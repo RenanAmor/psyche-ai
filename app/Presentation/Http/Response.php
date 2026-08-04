@@ -40,6 +40,22 @@ class Response
         return $this->headers;
     }
 
+    /**
+     * Devolve uma nova instância com cabeçalhos extra mesclados (ex.:
+     * Access-Control-Allow-Origin do CORS) — headers é readonly, então não
+     * dá pra mutar a resposta já montada pelo Controller. Sempre devolve
+     * um Response "puro" (não `static`): subclasses como JsonResponse têm
+     * construtor privado com assinatura própria, então `new static(...)`
+     * quebraria ali — enviar() só depende de status/corpo/headers, então
+     * isso não perde informação nenhuma.
+     *
+     * @param array<string, string> $extra
+     */
+    public function comCabecalhosAdicionais(array $extra): self
+    {
+        return new self($this->status, $this->corpo, [...$this->headers, ...$extra]);
+    }
+
     public function enviar(): void
     {
         http_response_code($this->status);

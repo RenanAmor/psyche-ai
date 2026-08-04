@@ -92,6 +92,40 @@ final class ListaDeEsperaApplicationServiceTest extends SQLiteTestCase
         $this->assertCount(1, $this->emailSpy->enviados);
     }
 
+    public function testInscreverComOrigemEcopsyEnviaPeloEmailDedicadoEmVezDoPadrao(): void
+    {
+        $emailEcopsy = new EmailSpy();
+        $servicoComIdentidadeEcopsy = new ListaDeEsperaApplicationService(
+            new SQLiteListaDeEsperaRepository($this->pdo),
+            new RandomUuidGenerator(),
+            $this->emailSpy,
+            emailEcopsy: $emailEcopsy
+        );
+
+        $servicoComIdentidadeEcopsy->inscrever(
+            'interessado@psyche.ai',
+            'Ana Interessada',
+            null,
+            null,
+            'Brasil/SP',
+            'Quero participar da pesquisa.',
+            true,
+            true,
+            'ecopsy'
+        );
+
+        $this->assertCount(1, $emailEcopsy->enviados);
+        $this->assertCount(0, $this->emailSpy->enviados);
+        $this->assertStringContainsString('contato@ecopsy.online', $emailEcopsy->enviados[0]['corpoTexto']);
+    }
+
+    public function testInscreverSemOrigemContinuaUsandoOEmailPadraoComContatoDoInvestimentos369(): void
+    {
+        $this->inscrever();
+
+        $this->assertStringContainsString('contato@investimentos369.com', $this->emailSpy->enviados[0]['corpoTexto']);
+    }
+
     public function testFalhaAoEnviarOEmailDeConfirmacaoNaoImpedeAInscricao(): void
     {
         $servicoComEmailFalho = new ListaDeEsperaApplicationService(

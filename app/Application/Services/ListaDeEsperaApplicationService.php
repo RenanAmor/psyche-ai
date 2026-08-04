@@ -25,7 +25,8 @@ final class ListaDeEsperaApplicationService implements ApplicationServiceInterfa
         private readonly ListaDeEsperaRepository $listaDeEsperaRepository,
         private readonly UuidGeneratorInterface $uuidGenerator,
         private readonly EmailInterface $email,
-        private readonly InscreverNaListaDeEsperaHandler $inscreverNaListaDeEspera = new InscreverNaListaDeEsperaHandler()
+        private readonly InscreverNaListaDeEsperaHandler $inscreverNaListaDeEspera = new InscreverNaListaDeEsperaHandler(),
+        private readonly ?EmailInterface $emailEcopsy = null
     ) {
     }
 
@@ -44,7 +45,8 @@ final class ListaDeEsperaApplicationService implements ApplicationServiceInterfa
         string $paisEstado,
         string $motivoInteresse,
         bool $aceitouPoliticaPrivacidade,
-        bool $aceitouTermoConsentimento
+        bool $aceitouTermoConsentimento,
+        ?string $origem = null
     ): InscricaoListaDeEsperaDTO {
         $existente = $this->listaDeEsperaRepository->findByEmail($email);
 
@@ -67,7 +69,7 @@ final class ListaDeEsperaApplicationService implements ApplicationServiceInterfa
             ->inscricao();
 
         $this->listaDeEsperaRepository->save($inscricao);
-        $this->enviarEmailDeConfirmacao($inscricao);
+        $this->enviarEmailDeConfirmacao($inscricao, $origem);
 
         return InscricaoListaDeEsperaDTO::fromEntity($inscricao);
     }
@@ -86,11 +88,21 @@ final class ListaDeEsperaApplicationService implements ApplicationServiceInterfa
     /**
      * Falha de envio nunca deve derrubar a inscrição, que já foi
      * persistida com sucesso — só registrada, nunca propagada.
+     *
+     * Inscrições vindas do formulário estático de ecopsy.online
+     * (`origem: "ecopsy"`) caem na mesma lista/banco de todo mundo, mas o
+     * e-mail de confirmação sai por uma caixa/identidade dedicada
+     * (contato@ecopsy.online) em vez da padrão do investimentos369 — só
+     * essa diferença, nenhuma lógica de negócio muda por origem.
      */
-    private function enviarEmailDeConfirmacao(InscricaoListaDeEspera $inscricao): void
+    private function enviarEmailDeConfirmacao(InscricaoListaDeEspera $inscricao, ?string $origem): void
     {
+        $ehEcopsy = $origem === 'ecopsy' && $this->emailEcopsy !== null;
+        $email = $ehEcopsy ? $this->emailEcopsy : $this->email;
+        $contato = $ehEcopsy ? 'contato@ecopsy.online' : 'contato@investimentos369.com';
+
         try {
-            $this->email->enviar(
+            $email->enviar(
                 $inscricao->email()->valor(),
                 $inscricao->nome(),
                 'Você entrou na lista de espera da ECO',
@@ -98,9 +110,10 @@ final class ListaDeEsperaApplicationService implements ApplicationServiceInterfa
                     "Olá, %s!\n\n" .
                     "Recebemos sua inscrição na lista de espera da ECO (PsycheAI). " .
                     "Assim que houver vaga disponível, entraremos em contato por este e-mail.\n\n" .
-                    "Qualquer dúvida, escreva para contato@investimentos369.com.\n\n" .
+                    "Qualquer dúvida, escreva para %s.\n\n" .
                     "— Equipe PsycheAI",
-                    $inscricao->nome()
+                    $inscricao->nome(),
+                    $contato
                 )
             );
         } catch (Throwable $erro) {

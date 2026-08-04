@@ -16,7 +16,8 @@ final class InscreverListaDeEsperaRequest extends HttpRequestData
         public readonly string $paisEstado,
         public readonly string $motivoInteresse,
         public readonly bool $aceitouPoliticaPrivacidade,
-        public readonly bool $aceitouTermoConsentimento
+        public readonly bool $aceitouTermoConsentimento,
+        public readonly ?string $origem
     ) {
     }
 
@@ -33,7 +34,8 @@ final class InscreverListaDeEsperaRequest extends HttpRequestData
             paisEstado: self::exigirString($dados, 'paisEstado'),
             motivoInteresse: self::exigirString($dados, 'motivoInteresse'),
             aceitouPoliticaPrivacidade: self::exigirAceite($dados, 'aceitouPoliticaPrivacidade'),
-            aceitouTermoConsentimento: self::exigirAceite($dados, 'aceitouTermoConsentimento')
+            aceitouTermoConsentimento: self::exigirAceite($dados, 'aceitouTermoConsentimento'),
+            origem: self::opcionalString($dados, 'origem')
         );
     }
 

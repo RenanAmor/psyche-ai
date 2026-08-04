@@ -87,7 +87,8 @@ final class ApplicationServiceProvider
         ?ClassificarFormacaoFreudianaHandler $classificarFormacaoFreudiana = null,
         ?StorageInterface $storage = null,
         ?TranscriptionInterface $transcricao = null,
-        ?EmailInterface $email = null
+        ?EmailInterface $email = null,
+        ?EmailInterface $emailEcopsy = null
     ): self {
         MigrationRunner::comMigrationsPadrao($pdo)->run();
 
@@ -106,6 +107,14 @@ final class ApplicationServiceProvider
         $storage ??= new LocalFilesystemStorage();
         $transcricao ??= new OpenAIWhisperTranscriptionService();
         $email ??= new SmtpEmailService();
+        $emailEcopsy ??= new SmtpEmailService(
+            host: getenv('SMTP_ECOPSY_HOST') ?: null,
+            porta: (int) (getenv('SMTP_ECOPSY_PORT') ?: 465),
+            usuario: getenv('SMTP_ECOPSY_USER') ?: null,
+            senha: getenv('SMTP_ECOPSY_PASSWORD') ?: null,
+            remetenteEmail: getenv('MAIL_ECOPSY_FROM_ADDRESS') ?: null,
+            remetenteNome: getenv('MAIL_ECOPSY_FROM_NAME') ?: 'ECO · PsycheAI'
+        );
         $respostaAutomatica ??= new RespostaSocraticaService(
             $sujeitoRepository,
             $sessaoRepository,
@@ -139,7 +148,12 @@ final class ApplicationServiceProvider
             ),
             $sujeitoRepository,
             new ParticipanteApplicationService($participanteRepository, $uuidGenerator),
-            new ListaDeEsperaApplicationService($listaDeEsperaRepository, $uuidGenerator, $email)
+            new ListaDeEsperaApplicationService(
+                $listaDeEsperaRepository,
+                $uuidGenerator,
+                $email,
+                emailEcopsy: $emailEcopsy
+            )
         );
     }
 

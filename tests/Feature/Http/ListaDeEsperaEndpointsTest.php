@@ -42,6 +42,17 @@ final class ListaDeEsperaEndpointsTest extends HttpTestCase
         self::assertNotSame('', $corpo['data']['criadoEm']);
     }
 
+    public function testPostComOrigemEcopsyRetorna201NormalmenteOrigemNaoAfetaOPayload(): void
+    {
+        $response = $this->despachar('POST', '/waitlist', array_merge($this->camposValidos(), ['origem' => 'ecopsy']));
+
+        $corpo = $this->decodificar($response);
+
+        self::assertSame(201, $response->status());
+        self::assertSame('interessado@psyche.ai', $corpo['data']['email']);
+        self::assertArrayNotHasKey('origem', $corpo['data']);
+    }
+
     public function testPostSemProfissaoNemInstituicaoRetorna201ComCamposNulos(): void
     {
         $campos = $this->camposValidos();

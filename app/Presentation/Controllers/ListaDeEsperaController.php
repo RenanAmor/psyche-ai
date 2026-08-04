@@ -39,7 +39,8 @@ final class ListaDeEsperaController extends Controller
             $dados->paisEstado,
             $dados->motivoInteresse,
             $dados->aceitouPoliticaPrivacidade,
-            $dados->aceitouTermoConsentimento
+            $dados->aceitouTermoConsentimento,
+            $dados->origem
         );
 
         return $this->criado(InscricaoListaDeEsperaResponse::fromDTO($dto)->toArray());
